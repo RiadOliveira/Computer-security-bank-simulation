@@ -1,6 +1,7 @@
 package dtos;
 
 import utils.ConsolePrinter;
+import utils.NumberStringGenerator;
 
 public class BankAccount {
   private final String agency;
@@ -16,6 +17,12 @@ public class BankAccount {
     this.agency = agency;
     this.accountNumber = accountNumber;
     this.clientData = clientData;
+  }
+
+  public BankAccount(ClientData clientData) {
+    this.clientData = clientData;
+    this.agency = NumberStringGenerator.generate(4);
+    this.accountNumber = NumberStringGenerator.generate(8);
   }
   
   public void print() {
