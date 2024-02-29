@@ -2,7 +2,7 @@ package dtos;
 
 import utils.ConsolePrinter;
 
-public class ClientData implements DTO {
+public class ClientData extends DTO {
   private final String name;
   private final String cpf;
   private final String address;
@@ -18,6 +18,7 @@ public class ClientData implements DTO {
     this.phoneNumber = phoneNumber;
   }
 
+  @Override
   public void print() {
     print(0);
   }

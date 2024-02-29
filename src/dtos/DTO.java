@@ -2,6 +2,6 @@ package dtos;
 
 import java.io.Serializable;
 
-public interface DTO extends Serializable {
-  public void print();
+public abstract class DTO implements Serializable {
+  public abstract void print();
 }

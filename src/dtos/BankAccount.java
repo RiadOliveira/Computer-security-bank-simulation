@@ -3,7 +3,7 @@ package dtos;
 import utils.ConsolePrinter;
 import utils.NumberStringGenerator;
 
-public class BankAccount implements DTO {
+public class BankAccount extends DTO {
   private final String agency;
   private final String accountNumber;
   private final ClientData clientData;
@@ -25,6 +25,7 @@ public class BankAccount implements DTO {
     this.accountNumber = NumberStringGenerator.generate(8);
   }
   
+  @Override
   public void print() {
     String propertySpaces = "  ";
 

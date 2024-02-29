@@ -6,8 +6,7 @@ import java.net.Socket;
 
 import dtos.DTO;
 import utils.ConsolePrinter;
-import utils.CryptoUtils;
-import utils.SerializationUtils;
+import utils.SecureDTOPacker;
 import utils.CryptoUtils.EncryptionAlgorithm;
 
 public abstract class AppThread implements Runnable {
@@ -57,34 +56,23 @@ public abstract class AppThread implements Runnable {
     if(outputStream != null) outputStream.close();
   }
 
-  protected void sendDTO(DTO dto, EncryptionAlgorithm encryptionAlgorithm) {
-    byte[] serializedBytes = SerializationUtils.serializeObject(dto);
-    byte[] encryptedBytes = CryptoUtils.encryptData(
-      encryptionAlgorithm, serializedBytes, AppProcess.getKey()
+  protected void sendDTO(
+    DTO dto, EncryptionAlgorithm encryptionAlgorithm
+  ) throws Exception {
+    String packedDTO = SecureDTOPacker.packDTO(
+      dto, AppProcess.getKey(), encryptionAlgorithm
     );
-    String encodedData = CryptoUtils.encodeBase64(encryptedBytes);
 
-    try {
-      outputStream.writeObject(encodedData);
-    } catch (Exception exception) {
-      ConsolePrinter.print("Erro ao enviar o DTO!");
-    }
+    outputStream.writeObject(packedDTO);
   }
 
-  @SuppressWarnings("unchecked")
-  protected<T> T receiveDTO(EncryptionAlgorithm encryptionAlgorithm) {
-    try {
-      String encodedData = (String) inputStream.readObject();
-
-      byte[] decodedBytes = CryptoUtils.decodeBase64(encodedData);
-      byte[] decryptedBytes = CryptoUtils.decryptData(
-        encryptionAlgorithm, decodedBytes, AppProcess.getKey()
-      );
-
-      return (T) SerializationUtils.deserializeObject(decryptedBytes);
-    } catch (Exception exception) {
-      ConsolePrinter.print("Erro ao receber o DTO!");
-      return null;
-    }
+  protected<T> T receiveDTO(
+    EncryptionAlgorithm encryptionAlgorithm
+  ) throws Exception {
+    String encodedData = (String) inputStream.readObject();
+    
+    return SecureDTOPacker.unpackDTO(
+      encodedData, AppProcess.getKey(), encryptionAlgorithm
+    );
   }
 }
