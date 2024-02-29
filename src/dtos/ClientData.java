@@ -1,10 +1,8 @@
 package dtos;
 
-import java.io.Serializable;
-
 import utils.ConsolePrinter;
 
-public class ClientData implements Serializable {
+public class ClientData implements DTO {
   private final String name;
   private final String cpf;
   private final String address;

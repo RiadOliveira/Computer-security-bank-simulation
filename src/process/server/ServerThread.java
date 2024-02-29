@@ -1,4 +1,4 @@
-package server;
+package process.server;
 
 import java.net.Socket;
 

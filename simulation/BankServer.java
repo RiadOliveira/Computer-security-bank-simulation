@@ -5,12 +5,14 @@ import java.util.List;
 
 import dtos.BankAccount;
 import dtos.ClientData;
-import server.ServerProcess;
+import process.server.ServerProcess;
 
 public class BankServer {
+  private static String secretKeyBase64 = "HZvOpm3s2pquuMULrHxAkw==";
+
   public static void main(String[] args) {
     ServerProcess server = new ServerProcess(
-      4444, getInitialDatabaseAccounts()
+      secretKeyBase64, 4444, getInitialDatabaseAccounts()
     );
     server.run();
   }

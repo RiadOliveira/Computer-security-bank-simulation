@@ -1,11 +1,9 @@
 package dtos;
 
-import java.io.Serializable;
-
 import utils.ConsolePrinter;
 import utils.NumberStringGenerator;
 
-public class BankAccount implements Serializable {
+public class BankAccount implements DTO {
   private final String agency;
   private final String accountNumber;
   private final ClientData clientData;

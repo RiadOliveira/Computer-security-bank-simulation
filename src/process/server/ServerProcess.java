@@ -1,4 +1,4 @@
-package server;
+package process.server;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -6,20 +6,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import dtos.BankAccount;
+import process.AppProcess;
 import utils.ConsolePrinter;
 
-public class ServerProcess {
+public class ServerProcess extends AppProcess {
   List<BankAccount> databaseAccounts;
   private final int port;
 
   public ServerProcess(
-    int port, List<BankAccount> databaseAccounts
+    String keyBase64, int port,
+    List<BankAccount> databaseAccounts
   ) {
+    super(keyBase64);
+
     this.port = port;
     this.databaseAccounts = databaseAccounts == null ?
       new ArrayList<>() : databaseAccounts;
   }
 
+  @Override
   public void run() {
     try (ServerSocket serverSocket = new ServerSocket(port)) {
       ConsolePrinter.println("Servidor iniciado!");
@@ -27,7 +32,7 @@ public class ServerProcess {
       while (true) {
         Socket clientSocket = serverSocket.accept();
         Thread serverThread = new Thread(
-                new ServerThread(clientSocket)
+          new ServerThread(clientSocket)
         );
         serverThread.start();
       }
