@@ -7,15 +7,18 @@ public class ClientData extends DTO {
   private final String cpf;
   private final String address;
   private final String phoneNumber;
+  private final String password;
 
   public ClientData(
     String name, String cpf,
-    String address, String phoneNumber
+    String address, String phoneNumber,
+    String password
   ) {
     this.name = name;
     this.cpf = cpf;
     this.address = address;
     this.phoneNumber = phoneNumber;
+    this.password = password;
   }
 
   @Override
@@ -32,6 +35,7 @@ public class ClientData extends DTO {
     ConsolePrinter.println(propertySpace + "CPF: " + cpf);
     ConsolePrinter.println(propertySpace + "Endereço: " + address);
     ConsolePrinter.println(propertySpace + "Telefone: " + phoneNumber);
+    ConsolePrinter.println(propertySpace + "Senha: " + password);
   }
 
   public String getName() {
@@ -48,5 +52,9 @@ public class ClientData extends DTO {
 
   public String getPhoneNumber() {
     return phoneNumber;
+  }
+
+  public String getPassword() {
+    return password;
   }
 }
