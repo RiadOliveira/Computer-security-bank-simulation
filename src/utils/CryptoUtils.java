@@ -23,53 +23,39 @@ public class CryptoUtils {
     return aesKeyGenerator.generateKey();
   }
 
-  public static String encryptAES(String content, SecretKey key) {
+  public static byte[] encryptAES(byte[] data, SecretKey key) {
     try {
       aesCipher.init(Cipher.ENCRYPT_MODE, key);
-
-      byte[] encryptedBytes = aesCipher.doFinal(content.getBytes());
-      return encodeBase64(encryptedBytes);
+      return aesCipher.doFinal(data);
     } catch (Exception exception) {
       ConsolePrinter.println("Falha ao cifrar com AES!");
       return null;
     }
   }
 
-  public static String decryptAES(String content, SecretKey key) {
+  public static byte[] decryptAES(byte[] data, SecretKey key) {
     try {
       aesCipher.init(Cipher.DECRYPT_MODE, key);
-
-      byte[] decryptedBytes = aesCipher.doFinal(decodeBase64(content));
-      return new String(decryptedBytes);
+      return aesCipher.doFinal(data);
     } catch (Exception exception) {
       ConsolePrinter.println("Falha ao decifrar com AES!");
       return null;
     }
   }
 
-  public static String encryptVernamMauborgne(
-    String content, SecretKey key
-  ) {
-    byte[] encryptedBytes = getVernamMauborgneUpdatedBytes(
-      content, key.toString()
-    );
-    return encodeBase64(encryptedBytes);
-  }
-
-  public static String decryptVernamMauborgne(
-    String content, SecretKey key
-  ) {
-    byte[] decryptedBytes = getVernamMauborgneUpdatedBytes(
-      decodeBase64(content), key.toString().getBytes()
-    );
-    return new String(decryptedBytes);
-  }
-
-  private static byte[] getVernamMauborgneUpdatedBytes(
-    String content, String key
+  public static byte[] encryptVernamMauborgne(
+    byte[] data, SecretKey key
   ) {
     return getVernamMauborgneUpdatedBytes(
-      content.getBytes(), key.getBytes()
+      data, key.toString().getBytes()
+    );
+  }
+
+  public static byte[] decryptVernamMauborgne(
+    byte[] data, SecretKey key
+  ) {
+    return getVernamMauborgneUpdatedBytes(
+      data, key.toString().getBytes()
     );
   }
 
@@ -86,13 +72,13 @@ public class CryptoUtils {
     return contentBytes;
   }
 
-  private static String encodeBase64(byte[] contentBytes) {
+  public static String encodeBase64(byte[] contentBytes) {
     return Base64.getEncoder().encodeToString(
       contentBytes
     );
   }
 
-  private static byte[] decodeBase64(String content) {
+  public static byte[] decodeBase64(String content) {
     return Base64.getDecoder().decode(content);
   }
 }

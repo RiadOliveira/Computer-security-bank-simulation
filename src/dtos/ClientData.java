@@ -1,8 +1,10 @@
 package dtos;
 
+import java.io.Serializable;
+
 import utils.ConsolePrinter;
 
-public class ClientData {
+public class ClientData implements Serializable {
   private final String name;
   private final String cpf;
   private final String address;
