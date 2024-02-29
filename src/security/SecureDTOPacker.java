@@ -1,44 +1,46 @@
-package utils;
+package security;
 
 import javax.crypto.SecretKey;
 
 import dtos.DTO;
 import error.AppException;
-import utils.CryptoUtils.EncryptionAlgorithm;
+import security.CryptoProcessor.EncryptionAlgorithm;
+import utils.BytesUtils;
+import utils.Serializer;
 
 public class SecureDTOPacker {
   public static String packDTO(
     DTO dto, SecretKey key,
     EncryptionAlgorithm encryptionAlgorithm
   ) throws Exception {
-    byte[] serializedDTO = SerializationUtils.serializeObject(dto);
-    byte[] hmac = CryptoUtils.generateHMAC(serializedDTO, key);
+    byte[] serializedDTO = Serializer.serializeObject(dto);
+    byte[] hmac = CryptoProcessor.generateHMAC(serializedDTO, key);
     byte[] dataWithHmac = BytesUtils.concatenateByteArrays(hmac, serializedDTO);
 
-    byte[] encryptedBytes = CryptoUtils.encryptData(
+    byte[] encryptedBytes = CryptoProcessor.encryptData(
       encryptionAlgorithm, dataWithHmac, key
     );
-    return CryptoUtils.encodeBase64(encryptedBytes);
+    return CryptoProcessor.encodeBase64(encryptedBytes);
   }
 
   public static<T> T unpackDTO(
     String encodedData, SecretKey key,
     EncryptionAlgorithm encryptionAlgorithm
   ) throws Exception {
-    byte[] decodedBytes = CryptoUtils.decodeBase64(encodedData);
-    byte[] decryptedBytes = CryptoUtils.decryptData(
+    byte[] decodedBytes = CryptoProcessor.decodeBase64(encodedData);
+    byte[] decryptedBytes = CryptoProcessor.decryptData(
       encryptionAlgorithm, decodedBytes, key
     );
 
     byte[] receivedHmac = BytesUtils.getByteSubArray(
-      decryptedBytes, 0, CryptoUtils.HMAC_BYTE_SIZE
+      decryptedBytes, 0, CryptoProcessor.HMAC_BYTE_SIZE
     );
     byte[] serializedDTO = BytesUtils.getByteSubArray(
-      decryptedBytes, CryptoUtils.HMAC_BYTE_SIZE, 
+      decryptedBytes, CryptoProcessor.HMAC_BYTE_SIZE, 
       decryptedBytes.length
     );
 
-    byte[] calculatedHmac = CryptoUtils.generateHMAC(
+    byte[] calculatedHmac = CryptoProcessor.generateHMAC(
       serializedDTO, key
     );
     boolean hmacsAreEqual = BytesUtils.byteArraysAreEqual(
@@ -51,6 +53,6 @@ public class SecureDTOPacker {
       );
     }
 
-    return SerializationUtils.deserializeObject(serializedDTO);
+    return Serializer.deserializeObject(serializedDTO);
   }
 }

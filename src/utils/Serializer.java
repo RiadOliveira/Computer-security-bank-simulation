@@ -5,7 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-public class SerializationUtils {
+public class Serializer {
   private static final ByteArrayOutputStream bytesOutputStream =
     new ByteArrayOutputStream();
   private static ObjectOutputStream objectOutputStream;

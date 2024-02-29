@@ -1,4 +1,4 @@
-package utils;
+package security;
 
 import java.util.Base64;
 
@@ -8,7 +8,9 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-public class CryptoUtils {
+import utils.ConsolePrinter;
+
+public class CryptoProcessor {
   public enum EncryptionAlgorithm {AES, VERNAM_MAUBORGNE};
 
   public static final int HMAC_BYTE_SIZE = 32;

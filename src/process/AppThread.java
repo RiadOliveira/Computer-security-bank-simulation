@@ -5,9 +5,9 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 import dtos.DTO;
+import security.SecureDTOPacker;
+import security.CryptoProcessor.EncryptionAlgorithm;
 import utils.ConsolePrinter;
-import utils.SecureDTOPacker;
-import utils.CryptoUtils.EncryptionAlgorithm;
 
 public abstract class AppThread implements Runnable {
   protected final Socket connectedSocket;
