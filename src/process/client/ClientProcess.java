@@ -11,19 +11,23 @@ public class ClientProcess extends AppProcess {
   public static final Scanner scanner = new Scanner(System.in);
   private static final int WAIT_TIME_TO_TRY_RECONNECTION = 3;
 
-  private final String serverIp;
-  private final int serverPort;
+  private static boolean isAttacker = false;
 
-  public ClientProcess(
-    String keyBase64, String serverIp, int serverPort
+  private static String serverIp;
+  private static int serverPort;
+
+  public static void init(
+    String keyBase64, String serverIp, int serverPort,
+    boolean isAttacker
   ) {
-    super(keyBase64);
-    this.serverIp = serverIp;
-    this.serverPort = serverPort;
+    initKey(keyBase64);
+
+    ClientProcess.serverIp = serverIp;
+    ClientProcess.serverPort = serverPort;
+    ClientProcess.isAttacker = isAttacker;
   }
 
-  @Override
-  public void run() {
+  public static void run() {
     ConsolePrinter.println("Cliente iniciado!");
 
     Socket serverSocket = connectToServerWithRetry();
@@ -35,12 +39,12 @@ public class ClientProcess extends AppProcess {
     try {
       clientThread.join();
       scanner.close();
-    } catch (Exception e) {
+    } catch (Exception exception) {
       ConsolePrinter.print("Erro interno do cliente!");
     }
   }
 
-  private Socket connectToServerWithRetry() {
+  private static Socket connectToServerWithRetry() {
     ConsolePrinter.println("Tentando conectar-se ao servidor...");
 
     Socket serverSocket = null;
@@ -64,7 +68,10 @@ public class ClientProcess extends AppProcess {
 
     try {
       TimeUnit.SECONDS.sleep(WAIT_TIME_TO_TRY_RECONNECTION);
-    } catch (Exception exception) {
-    }
+    } catch (Exception exception) {}
+  }
+
+  public static boolean isAttacker() {
+    return isAttacker;
   }
 }

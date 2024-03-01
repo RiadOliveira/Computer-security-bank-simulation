@@ -13,6 +13,9 @@ import utils.ConsolePrinter;
 public class CryptoProcessor {
   public enum EncryptionAlgorithm {AES, VERNAM_MAUBORGNE};
 
+  public static final EncryptionAlgorithm SELECTED_ENCRYPTION_ALGORITHM = 
+    EncryptionAlgorithm.AES;
+
   public static final int HMAC_BYTE_SIZE = 32;
   private static final String AES_INSTANCE_NAME = "AES/ECB/PKCS5Padding";
   private static final String HMAC_INSTANCE_NAME = "HmacSHA256";
@@ -42,10 +45,9 @@ public class CryptoProcessor {
   }
 
   public static byte[] encryptData(
-    EncryptionAlgorithm encryptionAlgorithm,
     byte[] data, SecretKey key
   ) throws Exception {
-    switch(encryptionAlgorithm) {
+    switch(SELECTED_ENCRYPTION_ALGORITHM) {
       case AES: return encryptAES(data, key);
       case VERNAM_MAUBORGNE: return encryptVernamMauborgne(data, key);
       default: return encryptAES(data, key);
@@ -53,10 +55,9 @@ public class CryptoProcessor {
   }
 
   public static byte[] decryptData(
-    EncryptionAlgorithm encryptionAlgorithm,
     byte[] data, SecretKey key
   ) throws Exception {
-    switch(encryptionAlgorithm) {
+    switch(SELECTED_ENCRYPTION_ALGORITHM) {
       case AES: return decryptAES(data, key);
       case VERNAM_MAUBORGNE: return decryptVernamMauborgne(data, key);
       default: return decryptAES(data, key);

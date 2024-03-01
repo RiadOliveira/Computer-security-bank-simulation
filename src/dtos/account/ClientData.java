@@ -8,7 +8,7 @@ public class ClientData extends DTO {
   protected final String cpf;
   protected final String address;
   protected final String phoneNumber;
-  protected final String password;
+  protected String password;
 
   public ClientData(
     String name, String cpf,
@@ -57,5 +57,9 @@ public class ClientData extends DTO {
 
   public String getPassword() {
     return password;
+  }
+
+  public void setPassword(String password) {
+    this.password = password;
   }
 }

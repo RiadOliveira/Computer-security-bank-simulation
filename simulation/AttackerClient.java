@@ -11,11 +11,9 @@ public class AttackerClient {
   public static void main(String[] args) {
     try {
       String serverIp = InetAddress.getLocalHost().getHostAddress();
-      ClientProcess client = new ClientProcess(
-        secretKeyBase64, serverIp, 4444
-      );
+      ClientProcess.init(secretKeyBase64, serverIp, 4444, true);
       
-      client.run();
+      ClientProcess.run();
     } catch (Exception exception) {
       ConsolePrinter.println("Erro ao iniciar o cliente!");
     }

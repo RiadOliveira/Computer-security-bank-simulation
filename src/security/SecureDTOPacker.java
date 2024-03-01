@@ -3,15 +3,13 @@ package security;
 import javax.crypto.SecretKey;
 
 import dtos.DTO;
-import error.AppException;
-import security.CryptoProcessor.EncryptionAlgorithm;
+import error.SecurityException;
 import utils.BytesUtils;
 import utils.Serializer;
 
 public class SecureDTOPacker {
   public static String packDTO(
-    DTO dto, SecretKey authKey, SecretKey encryptionKey,
-    EncryptionAlgorithm encryptionAlgorithm
+    DTO dto, SecretKey authKey, SecretKey encryptionKey
   ) throws Exception {
     byte[] serializedDTO = Serializer.serializeObject(dto);
 
@@ -20,19 +18,18 @@ public class SecureDTOPacker {
 
     byte[] dataWithHmac = BytesUtils.concatenateByteArrays(hmac, serializedDTO);
     byte[] encryptedBytes = CryptoProcessor.encryptData(
-      encryptionAlgorithm, dataWithHmac, encryptionKey
+      dataWithHmac, encryptionKey
     );
     
     return CryptoProcessor.encodeBase64(encryptedBytes);
   }
 
   public static<T> T unpackDTO(
-    String encodedData, SecretKey authKey,
-    SecretKey encryptionKey, EncryptionAlgorithm encryptionAlgorithm
+    String encodedData, SecretKey authKey, SecretKey encryptionKey
   ) throws Exception {
     byte[] decodedBytes = CryptoProcessor.decodeBase64(encodedData);
     byte[] decryptedBytes = CryptoProcessor.decryptData(
-      encryptionAlgorithm, decodedBytes, encryptionKey
+      decodedBytes, encryptionKey
     );
 
     byte[] receivedHmac = BytesUtils.getByteSubArray(
@@ -51,7 +48,7 @@ public class SecureDTOPacker {
       receivedHmac, calculatedHmac
     );
     if(!hmacsAreEqual) {
-      throw new AppException(
+      throw new SecurityException(
         "O HMAC calculado não corresponde ao recebido, " +
         "mensagem descartada!"
       );

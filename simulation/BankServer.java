@@ -12,10 +12,10 @@ public class BankServer {
   private static String secretKeyBase64 = "HZvOpm3s2pquuMULrHxAkw==";
 
   public static void main(String[] args) {
-    ServerProcess server = new ServerProcess(
+    ServerProcess.init(
       secretKeyBase64, 4444, getInitialDatabaseAccounts()
     );
-    server.run();
+    ServerProcess.run();
   }
 
   private static List<BankAccount> getInitialDatabaseAccounts() {
