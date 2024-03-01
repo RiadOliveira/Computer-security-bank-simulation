@@ -10,26 +10,29 @@ import utils.Serializer;
 
 public class SecureDTOPacker {
   public static String packDTO(
-    DTO dto, SecretKey key,
+    DTO dto, SecretKey authKey, SecretKey encryptionKey,
     EncryptionAlgorithm encryptionAlgorithm
   ) throws Exception {
     byte[] serializedDTO = Serializer.serializeObject(dto);
-    byte[] hmac = CryptoProcessor.generateHMAC(serializedDTO, key);
-    byte[] dataWithHmac = BytesUtils.concatenateByteArrays(hmac, serializedDTO);
 
+    SecretKey parsedAuthKey = authKey == null ? encryptionKey : authKey;
+    byte[] hmac = CryptoProcessor.generateHMAC(serializedDTO, parsedAuthKey);
+
+    byte[] dataWithHmac = BytesUtils.concatenateByteArrays(hmac, serializedDTO);
     byte[] encryptedBytes = CryptoProcessor.encryptData(
-      encryptionAlgorithm, dataWithHmac, key
+      encryptionAlgorithm, dataWithHmac, encryptionKey
     );
+    
     return CryptoProcessor.encodeBase64(encryptedBytes);
   }
 
   public static<T> T unpackDTO(
-    String encodedData, SecretKey key,
-    EncryptionAlgorithm encryptionAlgorithm
+    String encodedData, SecretKey authKey,
+    SecretKey encryptionKey, EncryptionAlgorithm encryptionAlgorithm
   ) throws Exception {
     byte[] decodedBytes = CryptoProcessor.decodeBase64(encodedData);
     byte[] decryptedBytes = CryptoProcessor.decryptData(
-      encryptionAlgorithm, decodedBytes, key
+      encryptionAlgorithm, decodedBytes, encryptionKey
     );
 
     byte[] receivedHmac = BytesUtils.getByteSubArray(
@@ -40,8 +43,9 @@ public class SecureDTOPacker {
       decryptedBytes.length
     );
 
+    SecretKey parsedAuthKey = authKey == null ? encryptionKey : authKey;
     byte[] calculatedHmac = CryptoProcessor.generateHMAC(
-      serializedDTO, key
+      serializedDTO, parsedAuthKey
     );
     boolean hmacsAreEqual = BytesUtils.byteArraysAreEqual(
       receivedHmac, calculatedHmac

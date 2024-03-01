@@ -1,9 +1,10 @@
-package dtos;
+package dtos.generic;
 
+import dtos.DTO;
 import utils.ConsolePrinter;
 
 public class MessageDTO extends DTO {
-  private final String message;
+  protected final String message;
 
   public MessageDTO(String message) {
     this.message = message;

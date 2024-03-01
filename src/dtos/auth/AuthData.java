@@ -1,11 +1,12 @@
-package dtos;
+package dtos.auth;
 
+import dtos.DTO;
 import utils.ConsolePrinter;
 
 public class AuthData extends DTO {
-  private final String agency;
-  private final String accountNumber;
-  private final String password;
+  protected final String agency;
+  protected final String accountNumber;
+  protected final String password;
 
   public AuthData(
     String agency, String accountNumber,

@@ -1,5 +1,6 @@
-package dtos;
+package dtos.generic;
 
+import dtos.DTO;
 import utils.ConsolePrinter;
 
 public class CommandDTO extends DTO {

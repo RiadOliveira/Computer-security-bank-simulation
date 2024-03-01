@@ -5,7 +5,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import dtos.BankAccount;
+import dtos.account.BankAccount;
 import process.AppProcess;
 import utils.ConsolePrinter;
 

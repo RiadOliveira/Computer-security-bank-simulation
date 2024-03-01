@@ -4,12 +4,16 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+import javax.crypto.SecretKey;
+
 import dtos.DTO;
 import security.SecureDTOPacker;
 import security.CryptoProcessor.EncryptionAlgorithm;
 import utils.ConsolePrinter;
 
 public abstract class AppThread implements Runnable {
+  protected SecretKey authKey = null;
+
   protected final Socket connectedSocket;
   protected final boolean isServerThread;
   
@@ -60,7 +64,8 @@ public abstract class AppThread implements Runnable {
     DTO dto, EncryptionAlgorithm encryptionAlgorithm
   ) throws Exception {
     String packedDTO = SecureDTOPacker.packDTO(
-      dto, AppProcess.getKey(), encryptionAlgorithm
+      dto, authKey,
+      AppProcess.getKey(), encryptionAlgorithm
     );
 
     outputStream.writeObject(packedDTO);
@@ -72,7 +77,8 @@ public abstract class AppThread implements Runnable {
     String encodedData = (String) inputStream.readObject();
     
     return SecureDTOPacker.unpackDTO(
-      encodedData, AppProcess.getKey(), encryptionAlgorithm
+      encodedData, authKey,
+      AppProcess.getKey(), encryptionAlgorithm
     );
   }
 }

@@ -1,4 +1,4 @@
-package dtos;
+package dtos.generic;
 
 public class ExceptionDTO extends MessageDTO {
   public ExceptionDTO(String message) {
