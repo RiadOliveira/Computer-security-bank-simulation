@@ -8,6 +8,7 @@ import dtos.auth.AuthData;
 import dtos.auth.AuthResponse;
 import dtos.generic.CommandDTO;
 import dtos.generic.ValueDTO;
+import dtos.operation.WireTransferDTO;
 import error.AppException;
 import process.AppCommand;
 import process.AppThread;
@@ -59,7 +60,7 @@ public class ClientThread extends AppThread {
   }
 
   @Override
-  protected void handleCreateAccount(DTO dto) throws Exception {
+  protected void handleCreateAccount(DTO _d) throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
       new String[]{"Nome", "CPF", "Endereço", "Telefone", "Senha"},
       ClientProcess.scanner
@@ -75,7 +76,7 @@ public class ClientThread extends AppThread {
   }
 
   @Override
-  protected void handleAuthenticate(DTO dto) throws Exception {
+  protected void handleAuthenticate(DTO _d) throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
       new String[]{"Agência", "Número da conta", "Senha"},
       ClientProcess.scanner
@@ -89,18 +90,18 @@ public class ClientThread extends AppThread {
   }
 
   @Override
-  protected void handleGetAccountData(DTO dto) throws Exception {
+  protected void handleGetAccountData(DTO _d) throws Exception {
     sendDTO(new CommandDTO(AppCommand.GET_ACCOUNT_DATA));
   }
 
   @Override
-  protected void handleWithdraw(DTO dto) throws Exception {
-    ConsolePrinter.print("Valor de saque: ");
-    double withdrawValue = Double.parseDouble(
-      ClientProcess.scanner.nextLine()
+  protected void handleWithdraw(DTO _d) throws Exception {
+    String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
+      new String[]{"Valor de saque"},
+      ClientProcess.scanner
     );
-    ConsolePrinter.println("");
 
+    double withdrawValue = Double.parseDouble(inputsReceived[0]);
     ValueDTO withdrawData = new ValueDTO(withdrawValue);
     withdrawData.setCommand(AppCommand.WITHDRAW);
 
@@ -108,13 +109,13 @@ public class ClientThread extends AppThread {
   }
 
   @Override
-  protected void handleDeposit(DTO dto) throws Exception {
-    ConsolePrinter.print("Valor de depósito: ");
-    double depositValue = Double.parseDouble(
-      ClientProcess.scanner.nextLine()
+  protected void handleDeposit(DTO _d) throws Exception {
+    String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
+      new String[]{"Valor de depósito"},
+      ClientProcess.scanner
     );
-    ConsolePrinter.println("");
 
+    double depositValue = Double.parseDouble(inputsReceived[0]);
     ValueDTO depositData = new ValueDTO(depositValue);
     depositData.setCommand(AppCommand.DEPOSIT);
 
@@ -122,23 +123,38 @@ public class ClientThread extends AppThread {
   }
 
   @Override
-  protected void handleWireTransfer(DTO dto) throws Exception {
+  protected void handleWireTransfer(DTO _d) throws Exception {
+    String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
+      new String[]{
+        "Agência alvo", "Número da conta alvo",
+        "Valor da transferência"
+      },
+      ClientProcess.scanner
+    );
+
+    double transferValue = Double.parseDouble(inputsReceived[2]);
+    WireTransferDTO wireTransferData = new WireTransferDTO(
+      transferValue, inputsReceived[0], inputsReceived[1]
+    );
+    wireTransferData.setCommand(AppCommand.WIRE_TRANSFER);
+
+    sendDTO(wireTransferData);
   }
 
   @Override
-  protected void handleGetBalance(DTO dto) throws Exception {
+  protected void handleGetBalance(DTO _d) throws Exception {
     sendDTO(new CommandDTO(AppCommand.GET_BALANCE));
   }
 
   @Override
-  protected void handleGetSavingsProjections(DTO dto) throws Exception {
+  protected void handleGetSavingsProjections(DTO _d) throws Exception {
   }
 
   @Override
-  protected void handleGetFixedIncomeProjections(DTO dto) throws Exception {
+  protected void handleGetFixedIncomeProjections(DTO _d) throws Exception {
   }
 
   @Override
-  protected void handleUpdateFixedIncome(DTO dto) throws Exception {
+  protected void handleUpdateFixedIncome(DTO _d) throws Exception {
   }
 }

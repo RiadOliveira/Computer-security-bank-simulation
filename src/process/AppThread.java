@@ -57,12 +57,11 @@ public abstract class AppThread extends CommandHandler implements Runnable {
     String packedDTO = SecureDTOPacker.packDTO(
       dto, authKey, AppProcess.getKey()
     );
+    outputStream.writeObject(packedDTO);
 
     ConsolePrinter.println("Dados enviados:");
     dto.print();
     ConsolePrinter.println("");
-
-    outputStream.writeObject(packedDTO);
   }
 
   @SuppressWarnings("unchecked")

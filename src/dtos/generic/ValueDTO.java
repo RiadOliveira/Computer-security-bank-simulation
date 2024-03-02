@@ -2,6 +2,7 @@ package dtos.generic;
 
 import dtos.DTO;
 import utils.ConsolePrinter;
+import utils.ValueFormatter;
 
 public class ValueDTO extends DTO {
   protected final double value;
@@ -12,7 +13,10 @@ public class ValueDTO extends DTO {
 
   @Override
   public void print() {
-    ConsolePrinter.println("Valor: " + value);
+    ConsolePrinter.println(
+      "Valor: " +
+      ValueFormatter.formatToBrazilianCurrency(value)
+    );
   }
 
   public double getValue() {

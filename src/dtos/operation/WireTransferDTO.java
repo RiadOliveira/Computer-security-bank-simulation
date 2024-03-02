@@ -8,7 +8,7 @@ public class WireTransferDTO extends ValueDTO {
   protected final String targetAccountNumber;
 
   public WireTransferDTO(
-    long value, String targetAgency,
+    double value, String targetAgency,
     String targetAccountNumber
   ) {
     super(value);

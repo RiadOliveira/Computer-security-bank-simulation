@@ -12,6 +12,7 @@ import dtos.auth.AuthResponse;
 import dtos.generic.ExceptionDTO;
 import dtos.generic.MessageDTO;
 import dtos.generic.ValueDTO;
+import dtos.operation.WireTransferDTO;
 import error.AppException;
 import error.SecureException;
 import process.AppCommand;
@@ -101,7 +102,7 @@ public class ServerThread extends AppThread {
       parsedDTO.getAgency(), parsedDTO.getAccountNumber()
     );
     if(findedAccount == null) {
-      throw new AppException("Dados de autenticação inválidos!");
+      throw new AppException("Conta especificada não encontrada!");
     }
 
     boolean correctPassword = PasswordHasher.passwordsAreEqual(
@@ -183,6 +184,61 @@ public class ServerThread extends AppThread {
 
   @Override
   protected void handleWireTransfer(DTO dto) throws Exception {
+    WireTransferDTO parsedDTO = ObjectConverter.convert(dto);
+
+    double transferValue = parsedDTO.getValue();
+    if(transferValue <= 0) {
+      throw new AppException(
+        "Valor de transferência inválido!"
+      );
+    }
+
+    double accountBalance = clientAccount.getBalance();
+    if(transferValue > accountBalance) {
+      throw new AppException(
+        "Valor de transferência maior que saldo disponível!"
+      );
+    }
+
+    String agencyToTransfer = parsedDTO.getTargetAgency();
+    String accountNumberToTransfer = parsedDTO.getTargetAccountNumber();
+
+    boolean equalAgency = agencyToTransfer.equals(clientAccount.getAgency());
+    boolean equalAccountNumber = accountNumberToTransfer.equals(
+      clientAccount.getAccountNumber()
+    );
+    if(equalAgency && equalAccountNumber) {
+      throw new AppException(
+        "Não é permitido fazer uma transferência para si mesmo!"
+      );
+    }
+
+    BankAccount findedAccountToTransfer = ServerProcess.
+      findAccountByAgencyAndNumber(
+        agencyToTransfer, accountNumberToTransfer
+      );
+    if(findedAccountToTransfer == null) {
+      throw new AppException(
+        "Conta de transferência não encontrada!"
+      );
+    }
+
+    clientAccount.updateBalance(-transferValue);
+    findedAccountToTransfer.updateBalance(transferValue);
+
+    String transferFormattedValue = ValueFormatter.
+      formatToBrazilianCurrency(transferValue);
+    String updatedBalanceFormattedValue = ValueFormatter.
+      formatToBrazilianCurrency(clientAccount.getBalance());
+
+    MessageDTO messageDTO = new MessageDTO(
+      "Valor de " + transferFormattedValue + 
+      " transferido com sucesso para " +
+      findedAccountToTransfer.getClientData().getName() +
+      ", seu saldo atual é de " + updatedBalanceFormattedValue +
+      '.'
+    );
+    sendDTO(messageDTO);
   }
 
   @Override
