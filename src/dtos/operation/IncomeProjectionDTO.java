@@ -1,13 +1,15 @@
 package dtos.operation;
 
 import dtos.generic.ValueDTO;
+import utils.ConsolePrinter;
+import utils.ValueFormatter;
 
 public class IncomeProjectionDTO extends ValueDTO {
-  protected final float yieldPercentage;
+  protected final double yieldPercentage;
   protected final ProjectionDTO[] projections;
 
   public IncomeProjectionDTO(
-    long value, float yieldPercentage,
+    double value, double yieldPercentage,
     int[] monthsForProjections
   ) {
     super(value);
@@ -23,12 +25,28 @@ public class IncomeProjectionDTO extends ValueDTO {
       );
 
       projections[ind] = new ProjectionDTO(
-        months, value * projectionMultiplier
+        value * projectionMultiplier, months
       );
     }
   }
 
-  public float getYieldPercentage() {
+  @Override
+  public void print() {
+    ConsolePrinter.println(
+      "Valor atual: " +
+      ValueFormatter.formatToBrazilianCurrency(value)
+    );
+    ConsolePrinter.println(
+      "Porcentagem de rendimeto: " +
+      yieldPercentage*100 + "%"
+    );
+
+    for(ProjectionDTO projection : projections) {
+      projection.print(2);
+    }
+  }
+
+  public double getYieldPercentage() {
     return yieldPercentage;
   }
 

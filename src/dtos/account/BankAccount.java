@@ -11,17 +11,17 @@ public class BankAccount extends DTO {
   protected final ClientData clientData;
 
   protected double balance = 0;
-  protected double fixedIncomeValue = 0;
+  protected double fixedIncome = 0;
 
   public BankAccount(
     String agency, String accountNumber,
-    double balance, double fixedIncomeValue,
+    double balance, double fixedIncome,
     ClientData clientData
   ) {
     this.agency = agency;
     this.accountNumber = accountNumber;
     this.balance = balance;
-    this.fixedIncomeValue = fixedIncomeValue;
+    this.fixedIncome = fixedIncome;
     this.clientData = clientData;
   }
 
@@ -55,7 +55,7 @@ public class BankAccount extends DTO {
     );
     ConsolePrinter.println(
       propertySpaces + "Renda fixa: " +
-      ValueFormatter.formatToBrazilianCurrency(fixedIncomeValue)
+      ValueFormatter.formatToBrazilianCurrency(fixedIncome)
     );
     clientData.print(2);
   }
@@ -80,12 +80,12 @@ public class BankAccount extends DTO {
     this.balance += updateValue;
   }
 
-  public double getFixedIncomeValue() {
-    return fixedIncomeValue;
+  public double getFixedIncome() {
+    return fixedIncome;
   }
 
-  public void updateFixedIncomeValue(double updateValue) {
-    this.fixedIncomeValue += updateValue;
+  public void updateFixedIncome(double updateValue) {
+    this.fixedIncome += updateValue;
     this.balance -= updateValue;
   }
 }

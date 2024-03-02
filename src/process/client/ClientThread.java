@@ -148,13 +148,25 @@ public class ClientThread extends AppThread {
 
   @Override
   protected void handleGetSavingsProjections(DTO _d) throws Exception {
+    sendDTO(new CommandDTO(AppCommand.GET_SAVINGS_PROJECTIONS));
   }
 
   @Override
   protected void handleGetFixedIncomeProjections(DTO _d) throws Exception {
+    sendDTO(new CommandDTO(AppCommand.GET_FIXED_INCOME_PROJECTIONS));
   }
 
   @Override
   protected void handleUpdateFixedIncome(DTO _d) throws Exception {
+    String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
+      new String[]{"Valor de atualização da renda fixa"},
+      ClientProcess.scanner
+    );
+
+    double fixedIncomeUpdateValue = Double.parseDouble(inputsReceived[0]);
+    ValueDTO fixedIncomeUpdateData = new ValueDTO(fixedIncomeUpdateValue);
+    fixedIncomeUpdateData.setCommand(AppCommand.UPDATE_FIXED_INCOME);
+
+    sendDTO(fixedIncomeUpdateData);
   }
 }

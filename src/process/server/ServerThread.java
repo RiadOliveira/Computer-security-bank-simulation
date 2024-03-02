@@ -12,6 +12,7 @@ import dtos.auth.AuthResponse;
 import dtos.generic.ExceptionDTO;
 import dtos.generic.MessageDTO;
 import dtos.generic.ValueDTO;
+import dtos.operation.IncomeProjectionDTO;
 import dtos.operation.WireTransferDTO;
 import error.AppException;
 import error.SecureException;
@@ -132,7 +133,7 @@ public class ServerThread extends AppThread {
     ValueDTO parsedDTO = ObjectConverter.convert(dto);
 
     double withdrawValue = parsedDTO.getValue();
-    if(withdrawValue <= 0) {
+    if(withdrawValue <= 0.0) {
       throw new AppException("Valor de saque inválido!");
     }
 
@@ -152,7 +153,7 @@ public class ServerThread extends AppThread {
 
     MessageDTO messageDTO = new MessageDTO(
       "Valor de " + withdrawFormattedValue +
-      " retirado com sucesso, seu saldo atual é de " +
+      " retirado com sucesso, seu saldo atual é " +
       updatedBalanceFormattedValue + '.'
     );
     sendDTO(messageDTO);
@@ -163,7 +164,7 @@ public class ServerThread extends AppThread {
     ValueDTO parsedDTO = ObjectConverter.convert(dto);
 
     double depositValue = parsedDTO.getValue();
-    if(depositValue <= 0) {
+    if(depositValue <= 0.0) {
       throw new AppException("Valor de depósito inválido!");
     }
 
@@ -176,7 +177,7 @@ public class ServerThread extends AppThread {
 
     MessageDTO messageDTO = new MessageDTO(
       "Valor de " + depositFormattedValue +
-      " depositado com sucesso, seu saldo atual é de " +
+      " depositado com sucesso, seu saldo atual é " +
       updatedBalanceFormattedValue + '.'
     );
     sendDTO(messageDTO);
@@ -187,7 +188,7 @@ public class ServerThread extends AppThread {
     WireTransferDTO parsedDTO = ObjectConverter.convert(dto);
 
     double transferValue = parsedDTO.getValue();
-    if(transferValue <= 0) {
+    if(transferValue <= 0.0) {
       throw new AppException(
         "Valor de transferência inválido!"
       );
@@ -235,7 +236,7 @@ public class ServerThread extends AppThread {
       "Valor de " + transferFormattedValue + 
       " transferido com sucesso para " +
       findedAccountToTransfer.getClientData().getName() +
-      ", seu saldo atual é de " + updatedBalanceFormattedValue +
+      ", seu saldo atual é " + updatedBalanceFormattedValue +
       '.'
     );
     sendDTO(messageDTO);
@@ -254,13 +255,68 @@ public class ServerThread extends AppThread {
 
   @Override
   protected void handleGetSavingsProjections(DTO dto) throws Exception {
+    IncomeProjectionDTO incomeProjectionDTO = new IncomeProjectionDTO(
+      clientAccount.getBalance(),
+      ServerProcess.SAVINGS_YIELD_PERCENTAGE,
+      ServerProcess.MONTHS_FOR_PROJECTIONS
+    );
+    sendDTO(incomeProjectionDTO);
   }
 
   @Override
   protected void handleGetFixedIncomeProjections(DTO dto) throws Exception {
+    IncomeProjectionDTO incomeProjectionDTO = new IncomeProjectionDTO(
+      clientAccount.getFixedIncome(),
+      ServerProcess.FIXED_INCOME_YIELD_PERCENTAGE,
+      ServerProcess.MONTHS_FOR_PROJECTIONS
+    );
+    sendDTO(incomeProjectionDTO);
   }
 
   @Override
   protected void handleUpdateFixedIncome(DTO dto) throws Exception {
+    ValueDTO parsedDTO = ObjectConverter.convert(dto);
+
+    double fixedIncomeUpdateValue = parsedDTO.getValue();
+    if(fixedIncomeUpdateValue == 0.0) {
+      throw new AppException(
+        "Valor de atualização de renda fixa inválido!"
+      );
+    }
+
+    double accountFixedIncome = clientAccount.getFixedIncome();
+    if(accountFixedIncome + fixedIncomeUpdateValue < 0.0) {
+      throw new AppException(
+        "Valor de atualização de renda fixa está retirando" +
+        " um valor maior que o disponível na renda fixa!"
+      );
+    }
+
+    double accountBalance = clientAccount.getBalance();
+    if(accountBalance - fixedIncomeUpdateValue < 0.0) {
+      throw new AppException(
+        "Valor de atualização de renda fixa está adicionando" +
+        " um valor maior que o disponível no saldo da conta!"
+      );
+    }
+
+    clientAccount.updateFixedIncome(fixedIncomeUpdateValue);
+
+    String fixedIncomeUpdateFormattedValue = ValueFormatter.
+      formatToBrazilianCurrency(fixedIncomeUpdateValue);
+    String updatedFixedIncomeFormattedValue = ValueFormatter.
+      formatToBrazilianCurrency(clientAccount.getFixedIncome());
+    String updatedBalanceFormattedValue = ValueFormatter.
+      formatToBrazilianCurrency(clientAccount.getBalance());
+
+    MessageDTO messageDTO = new MessageDTO(
+      "A renda fixa foi atualizada com o valor de " +
+      fixedIncomeUpdateFormattedValue +
+      ", sua renda fixa atual é " +
+      updatedFixedIncomeFormattedValue +
+      ", e seu saldo atual é " +
+      updatedBalanceFormattedValue + '.'
+    );
+    sendDTO(messageDTO);
   }
 }

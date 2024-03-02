@@ -10,6 +10,11 @@ import process.AppProcess;
 import utils.ConsolePrinter;
 
 public class ServerProcess extends AppProcess {
+  public static final double SAVINGS_YIELD_PERCENTAGE = 0.005;
+  public static final double FIXED_INCOME_YIELD_PERCENTAGE = 0.015;
+  public static final int[] MONTHS_FOR_PROJECTIONS = 
+    new int[]{3, 6, 12};
+
   private static List<BankAccount> databaseAccounts;
   private static int port;
 

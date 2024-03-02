@@ -1,12 +1,30 @@
 package dtos.operation;
 
-public class ProjectionDTO {
-  protected final int months;
-  protected final double value;
+import dtos.generic.ValueDTO;
+import utils.ConsolePrinter;
+import utils.ValueFormatter;
 
-  public ProjectionDTO(int months, double value) {
+public class ProjectionDTO extends ValueDTO {
+  protected final int months;
+
+  public ProjectionDTO(double value, int months) {
+    super(value);
     this.months = months;
-    this.value = value;
+  }
+
+  @Override
+  public void print() {
+    print(0);
+  }
+
+  public void print(int spacesBefore) {
+    String spaces = " ".repeat(spacesBefore);
+
+    ConsolePrinter.println(
+      spaces + "Projeção de " +
+      months + " meses: " +
+      ValueFormatter.formatToBrazilianCurrency(value)
+    );
   }
 
   public int getMonths() {
