@@ -33,7 +33,7 @@ public class IncomeProjectionDTO extends ValueDTO {
   @Override
   public void print() {
     ConsolePrinter.println(
-      "Valor atual: " +
+      "Valor aplicado: " +
       ValueFormatter.formatToBrazilianCurrency(value)
     );
     ConsolePrinter.println(

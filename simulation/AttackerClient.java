@@ -6,12 +6,13 @@ import process.client.ClientProcess;
 import utils.ConsolePrinter;
 
 public class AttackerClient {
-  private static String secretKeyBase64 = "rXfim1WFRurBw0i97TdIzQ==";
+  private static String validSecretKey = "HZvOpm3s2pquuMULrHxAkw==";
+  //private static String invalidSecretKey = "rXfim1WFRurBw0i97TdIzQ==";
 
   public static void main(String[] args) {
     try {
       String serverIp = InetAddress.getLocalHost().getHostAddress();
-      ClientProcess.init(secretKeyBase64, serverIp, 4444, true);
+      ClientProcess.init(validSecretKey, serverIp, 4444, true);
       
       ClientProcess.run();
     } catch (Exception exception) {

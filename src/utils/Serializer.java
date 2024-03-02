@@ -5,6 +5,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import dtos.DTO;
+
 public class Serializer {
   public static byte[] serializeObject(Object object) {
     try {
@@ -21,13 +23,12 @@ public class Serializer {
     }
   }
 
-  @SuppressWarnings("unchecked")
-  public static<T> T deserializeObject(byte[] serializedData) {
+  public static DTO deserializeObject(byte[] serializedData) {
     try {
       ByteArrayInputStream inputStream = new ByteArrayInputStream(serializedData);
       ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
       
-      return (T) objectInputStream.readObject();
+      return (DTO) objectInputStream.readObject();
     } catch (Exception exception) {
       ConsolePrinter.println("Falha ao deserializar objeto!");
       return null;

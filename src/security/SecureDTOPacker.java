@@ -10,9 +10,24 @@ import utils.Serializer;
 public class SecureDTOPacker {
   public static String packDTO(
     DTO dto, SecretKey authKey, SecretKey encryptionKey
+  ) throws SecureException {
+    try {
+      return handleDTOPacking(dto, authKey, encryptionKey);
+    } catch (Exception exception) {
+      if(exception instanceof SecureException) {
+        throw (SecureException) exception;
+      }
+      throw new SecureException(
+        "Falha ao garantir segurança no empacotamento dos dados!"
+      );
+    }
+  }
+
+  private static String handleDTOPacking(
+    DTO dto, SecretKey authKey, SecretKey encryptionKey
   ) throws Exception {
     byte[] serializedDTO = Serializer.serializeObject(dto);
-
+  
     SecretKey parsedAuthKey = authKey == null ? encryptionKey : authKey;
     byte[] hmac = CryptoProcessor.generateHMAC(serializedDTO, parsedAuthKey);
 
@@ -24,7 +39,22 @@ public class SecureDTOPacker {
     return CryptoProcessor.encodeBase64(encryptedBytes);
   }
 
-  public static<T> T unpackDTO(
+  public static DTO unpackDTO(
+    String encodedData, SecretKey authKey, SecretKey encryptionKey
+  ) throws SecureException {
+    try {
+      return handleDTOUnpacking(encodedData, authKey, encryptionKey);
+    } catch (Exception exception) {
+      if(exception instanceof SecureException) {
+        throw (SecureException) exception;
+      }
+      throw new SecureException(
+        "Falha ao garantir segurança no desempacotamento dos dados!"
+      );
+    }
+  }
+
+  public static DTO handleDTOUnpacking(
     String encodedData, SecretKey authKey, SecretKey encryptionKey
   ) throws Exception {
     byte[] decodedBytes = CryptoProcessor.decodeBase64(encodedData);

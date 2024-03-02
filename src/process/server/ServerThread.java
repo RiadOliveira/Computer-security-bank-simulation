@@ -1,5 +1,6 @@
 package process.server;
 
+import java.io.EOFException;
 import java.net.Socket;
 
 import javax.crypto.SecretKey;
@@ -33,13 +34,25 @@ public class ServerThread extends AppThread {
 
   @Override
   public void execute() {
-    try {
-      handleReceivedDTO(receiveDTO());
-      execute();
-    } catch (Exception exception) {
-      handleErrorDTOSending(exception);
-    } finally {
-      ConsolePrinter.println(""); 
+    boolean clientDisconnected = false;
+
+    while(!clientDisconnected) {
+      try {
+        handleReceivedDTO(receiveDTO());
+        execute();
+      } catch (Exception exception) {
+        clientDisconnected = exception instanceof EOFException;
+        if(clientDisconnected) {
+          ConsolePrinter.printlnError(
+            "Conexão com o cliente perdida, finalizando thread..."
+          );
+          return;
+        }
+
+        handleErrorDTOSending(exception);
+      } finally {
+        ConsolePrinter.println("");
+      }
     }
   }
 
@@ -61,7 +74,6 @@ public class ServerThread extends AppThread {
   
       ExceptionDTO exceptionDTO = new ExceptionDTO(errorMessage);
       sendDTO(exceptionDTO);
-      execute();
     } catch (Exception e) {
       ConsolePrinter.println("Falha ao se comunicar com o cliente!");
     }

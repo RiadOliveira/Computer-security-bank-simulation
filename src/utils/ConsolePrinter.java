@@ -5,6 +5,8 @@ import java.util.Scanner;
 import process.client.ClientProcess;
 
 public class ConsolePrinter {
+  public static final String ERROR_PREFIX = "[ERRO] ";
+  
   private static final String CLEAR_CONSOLE = "\033[H\033[2J";
   private static final String MOVE_TO_PREVIOUS_LINE = "\033[1A";
   private static final String CLEAR_CURRENT_LINE = "\033[2K";
@@ -30,6 +32,10 @@ public class ConsolePrinter {
 
   public static synchronized void println(Object content) {
     System.out.println(content);
+  }
+
+  public static synchronized void printlnError(Object content) {
+    println(ERROR_PREFIX + content);
   }
 
   public static synchronized void clearConsole() {

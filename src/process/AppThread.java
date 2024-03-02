@@ -64,8 +64,7 @@ public abstract class AppThread extends CommandHandler implements Runnable {
     ConsolePrinter.println("");
   }
 
-  @SuppressWarnings("unchecked")
-  protected<T> T receiveDTO() throws Exception {
+  protected DTO receiveDTO() throws Exception {
     String packedDTO = (String) inputStream.readObject();
     DTO dto = SecureDTOPacker.unpackDTO(
       packedDTO, authKey, AppProcess.getKey()
@@ -75,6 +74,6 @@ public abstract class AppThread extends CommandHandler implements Runnable {
     dto.print();
     ConsolePrinter.println("");
     
-    return (T) dto;
+    return dto;
   }
 }

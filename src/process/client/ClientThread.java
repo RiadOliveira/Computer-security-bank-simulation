@@ -1,5 +1,6 @@
 package process.client;
 
+import java.io.EOFException;
 import java.net.Socket;
 
 import dtos.DTO;
@@ -12,41 +13,60 @@ import dtos.operation.WireTransferDTO;
 import error.AppException;
 import process.AppCommand;
 import process.AppThread;
+import security.CryptoProcessor;
 import utils.ConsolePrinter;
 
 public class ClientThread extends AppThread {
-  
-
   public ClientThread(Socket serverSocket) {
     super(serverSocket, false);
   }
 
   @Override
   public void execute() {
-    try {
-      ConsolePrinter.printClientCommandPanel();
-      int commandIndex = Integer.parseInt(
-        ClientProcess.scanner.nextLine()
-      ) - 1;
-      ConsolePrinter.println("");
-
-      AppCommand[] allCommands = AppCommand.values();
-      boolean clearConsoleCommand = commandIndex == allCommands.length;
-
-      if(clearConsoleCommand) ConsolePrinter.clearConsole();
-      else handleAppCommandInput(allCommands[commandIndex]);
-    } catch (Exception exception) {
-      ConsolePrinter.println("");
-      ConsolePrinter.println(
-        exception instanceof AppException ?
-        exception.getMessage() : "Comando inserido inválido!"
-      );
-      ConsolePrinter.println("");
-      ConsolePrinter.displayAndWaitForEnterPressing(ClientProcess.scanner);
-    } finally {
-      ConsolePrinter.println("");
-      execute();
+    boolean serverDisconnected = false;
+    
+    while(!serverDisconnected) {
+      try {
+        handleExecution();
+      } catch (Exception exception) {
+        serverDisconnected = exception instanceof EOFException;
+        if(serverDisconnected) {
+          ConsolePrinter.printlnError(
+            "Conexão com o servidor perdida, finalizando cliente..."
+          );
+          return;
+        }
+  
+        handleExecutionException(exception);
+      } finally {
+        ConsolePrinter.println("");
+      }
     }
+  }
+  
+  private void handleExecution() throws Exception {
+    ConsolePrinter.printClientCommandPanel();
+    int commandIndex = Integer.parseInt(
+      ClientProcess.scanner.nextLine()
+    ) - 1;
+    ConsolePrinter.println("");
+
+    AppCommand[] allCommands = AppCommand.values();
+    boolean clearConsoleCommand = commandIndex == allCommands.length;
+
+    if(clearConsoleCommand) ConsolePrinter.clearConsole();
+    else handleAppCommandInput(allCommands[commandIndex]);
+  }
+
+  private void handleExecutionException(Exception exception) {
+    boolean isAppException = exception instanceof AppException;
+
+    if(!isAppException) ConsolePrinter.println("");
+    ConsolePrinter.printlnError(
+      isAppException ? exception.getMessage() : "Comando inserido inválido!"
+    );
+    ConsolePrinter.println("");
+    ConsolePrinter.displayAndWaitForEnterPressing(ClientProcess.scanner);
   }
 
   private void handleAppCommandInput(AppCommand command) throws Exception {
@@ -54,7 +74,11 @@ public class ClientThread extends AppThread {
     DTO receivedDTO = receiveDTO();
 
     boolean authenticated = receivedDTO instanceof AuthResponse;
-    if(authenticated) authKey = ((AuthResponse) receivedDTO).getAuthKey();
+    if(authenticated) {
+      authKey = ClientProcess.isAttacker() ? 
+        CryptoProcessor.generateKey() :
+        ((AuthResponse) receivedDTO).getAuthKey();
+    }
     
     ConsolePrinter.displayAndWaitForEnterPressing(ClientProcess.scanner);
   }
