@@ -3,6 +3,7 @@ package dtos.account;
 import dtos.DTO;
 import utils.ConsolePrinter;
 import utils.NumberStringGenerator;
+import utils.ValueFormatter;
 
 public class BankAccount extends DTO {
   protected final String agency;
@@ -11,6 +12,18 @@ public class BankAccount extends DTO {
 
   protected double balance = 0;
   protected double fixedIncomeValue = 0;
+
+  public BankAccount(
+    String agency, String accountNumber,
+    double balance, double fixedIncomeValue,
+    ClientData clientData
+  ) {
+    this.agency = agency;
+    this.accountNumber = accountNumber;
+    this.balance = balance;
+    this.fixedIncomeValue = fixedIncomeValue;
+    this.clientData = clientData;
+  }
 
   public BankAccount(
     String agency, String accountNumber,
@@ -36,9 +49,13 @@ public class BankAccount extends DTO {
     ConsolePrinter.println(
       propertySpaces + "Número da conta: " + accountNumber
     );
-    ConsolePrinter.println(propertySpaces + "Saldo: " + balance);
     ConsolePrinter.println(
-      propertySpaces + "Renda fixa: " + fixedIncomeValue
+      propertySpaces + "Saldo: " +
+      ValueFormatter.formatToBrazilianCurrency(balance)
+    );
+    ConsolePrinter.println(
+      propertySpaces + "Renda fixa: " +
+      ValueFormatter.formatToBrazilianCurrency(fixedIncomeValue)
     );
     clientData.print(2);
   }

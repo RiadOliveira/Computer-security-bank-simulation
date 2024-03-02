@@ -10,6 +10,8 @@ import dtos.account.ClientData;
 import dtos.auth.AuthData;
 import dtos.auth.AuthResponse;
 import dtos.generic.ExceptionDTO;
+import dtos.generic.MessageDTO;
+import dtos.generic.ValueDTO;
 import error.AppException;
 import error.SecureException;
 import process.AppCommand;
@@ -18,6 +20,7 @@ import security.CryptoProcessor;
 import utils.ConsolePrinter;
 import utils.ObjectConverter;
 import utils.PasswordHasher;
+import utils.ValueFormatter;
 
 public class ServerThread extends AppThread {
   protected BankAccount clientAccount = null;
@@ -120,12 +123,38 @@ public class ServerThread extends AppThread {
 
   @Override
   protected void handleGetAccountData(DTO dto) throws Exception {
-    ObjectConverter.convert(dto);
     sendDTO(clientAccount);
   }
 
   @Override
   protected void handleWithdraw(DTO dto) throws Exception {
+    ValueDTO parsedDTO = ObjectConverter.convert(dto);
+
+    double withdrawValue = parsedDTO.getValue();
+    if(withdrawValue <= 0) {
+      throw new AppException("Valor de saque inválido!");
+    }
+
+    double accountBalance = clientAccount.getBalance();
+    if(withdrawValue > accountBalance) {
+      throw new AppException(
+        "Valor de saque maior que saldo disponível!"
+      );
+    }
+
+    clientAccount.updateBalance(-withdrawValue);
+
+    String withdrawFormattedValue = ValueFormatter.
+      formatToBrazilianCurrency(withdrawValue);
+    String updatedBalanceFormattedValue = ValueFormatter.
+      formatToBrazilianCurrency(clientAccount.getBalance());
+
+    MessageDTO messageDTO = new MessageDTO(
+      "Valor de " + withdrawFormattedValue +
+      " retirado com sucesso, seu saldo atual é de " +
+      updatedBalanceFormattedValue + '.'
+    );
+    sendDTO(messageDTO);
   }
 
   @Override

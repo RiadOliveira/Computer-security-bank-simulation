@@ -7,6 +7,7 @@ import dtos.account.ClientData;
 import dtos.auth.AuthData;
 import dtos.auth.AuthResponse;
 import dtos.generic.CommandDTO;
+import dtos.generic.ValueDTO;
 import error.AppException;
 import process.AppCommand;
 import process.AppThread;
@@ -34,11 +35,13 @@ public class ClientThread extends AppThread {
       if(clearConsoleCommand) ConsolePrinter.clearConsole();
       else handleAppCommandInput(allCommands[commandIndex]);
     } catch (Exception exception) {
-      exception.printStackTrace();
+      ConsolePrinter.println("");
       ConsolePrinter.println(
         exception instanceof AppException ?
         exception.getMessage() : "Comando inserido inválido!"
       );
+      ConsolePrinter.println("");
+      ConsolePrinter.displayAndWaitForEnterPressing(ClientProcess.scanner);
     } finally {
       ConsolePrinter.println("");
       execute();
@@ -92,6 +95,16 @@ public class ClientThread extends AppThread {
 
   @Override
   protected void handleWithdraw(DTO dto) throws Exception {
+    ConsolePrinter.print("Valor de saque: ");
+    double withdrawValue = Double.parseDouble(
+      ClientProcess.scanner.nextLine()
+    );
+    ConsolePrinter.println("");
+
+    ValueDTO withdrawData = new ValueDTO(withdrawValue);
+    withdrawData.setCommand(AppCommand.WITHDRAW);
+
+    sendDTO(withdrawData);
   }
 
   @Override

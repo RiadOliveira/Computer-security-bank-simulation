@@ -22,24 +22,24 @@ public class BankServer {
     List<BankAccount> initialDatabaseAccounts = new ArrayList<>();
 
     initialDatabaseAccounts.add(
-      new BankAccount("0011", "00001111", new ClientData(
-        "First person", "000.000.111-11", 
+      new BankAccount("1122", "11112222", 5000.0, 400.0, new ClientData(
+        "First person", "111.111.222-22", 
         "Address of first person",
-        "(00)9.0000-1111", PasswordHasher.hashAndEncode("00001111")
+        "(11)9.1111-2222", PasswordHasher.hashAndEncode("11112222")
       ))
     );
     initialDatabaseAccounts.add(
-      new BankAccount("0123", "01234567", new ClientData(
-        "Second person", "012.345.678-99", 
+      new BankAccount("1234", "12345678", 9400.0, 850.0, new ClientData(
+        "Second person", "123.456.789-00", 
         "Address of second person",
-        "(01)9.2345-6789", PasswordHasher.hashAndEncode("01234567")
+        "(12)9.3456-7890", PasswordHasher.hashAndEncode("12345678")
       ))
     );
     initialDatabaseAccounts.add(
-      new BankAccount("3210", "76543210", new ClientData(
+      new BankAccount("4321", "87654321", 2000.0, 258.0, new ClientData(
         "Third person", "987.654.321-00",
         "Address of third person",
-        "(98)9.7654-3210", PasswordHasher.hashAndEncode("76543210")
+        "(98)9.7654-3210", PasswordHasher.hashAndEncode("87654321")
       ))
     );
 
