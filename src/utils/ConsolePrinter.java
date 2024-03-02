@@ -2,8 +2,13 @@ package utils;
 
 import java.util.Scanner;
 
+import process.client.ClientProcess;
+
 public class ConsolePrinter {
-  private static final String clearConsoleString = "\033[H\033[2J";
+  private static final String CLEAR_CONSOLE = "\033[H\033[2J";
+  private static final String MOVE_TO_PREVIOUS_LINE = "\033[1A";
+  private static final String CLEAR_CURRENT_LINE = "\033[2K";
+
   private static final String CLIENT_COMMAND_PANEL =
     "Escolha um dos comandos abaixo:\n" +
     "  1. Criar conta\n" + "  2. Autenticar-se\n" +
@@ -14,6 +19,11 @@ public class ConsolePrinter {
     "  10. Atualizar investimento fixo\n" +
     "  11. Limpar console\n";
 
+  private static final String PRESS_ENTER_TO_CONTINUE_MESSAGE = 
+    "Pressione Enter para continuar...";
+  private static final String OVERWRITE_PRESS_ENTER = 
+    MOVE_TO_PREVIOUS_LINE + CLEAR_CURRENT_LINE + MOVE_TO_PREVIOUS_LINE;
+
   public static synchronized void print(Object content) {
     System.out.print(content);
   }
@@ -23,7 +33,7 @@ public class ConsolePrinter {
   }
 
   public static synchronized void clearConsole() {
-    System.out.print(clearConsoleString);  
+    print(CLEAR_CONSOLE);  
     System.out.flush();
   }
 
@@ -36,7 +46,6 @@ public class ConsolePrinter {
     String[] inputNames, Scanner scanner
   ) {
     String[] inputsReceived = new String[inputNames.length];
-    println("");
 
     for(int ind=0 ; ind<inputNames.length ; ind++) {
       print(inputNames[ind] + ": ");
@@ -45,5 +54,13 @@ public class ConsolePrinter {
 
     println("");
     return inputsReceived;
+  }
+
+  public static synchronized void displayAndWaitForEnterPressing(
+    Scanner scanner
+  ) {
+    print(PRESS_ENTER_TO_CONTINUE_MESSAGE);
+    ClientProcess.scanner.nextLine();
+    print(OVERWRITE_PRESS_ENTER);
   }
 }

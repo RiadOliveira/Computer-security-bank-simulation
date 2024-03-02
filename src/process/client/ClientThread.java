@@ -6,12 +6,15 @@ import dtos.DTO;
 import dtos.account.ClientData;
 import dtos.auth.AuthData;
 import dtos.auth.AuthResponse;
+import dtos.generic.CommandDTO;
 import error.AppException;
 import process.AppCommand;
 import process.AppThread;
 import utils.ConsolePrinter;
 
 public class ClientThread extends AppThread {
+  
+
   public ClientThread(Socket serverSocket) {
     super(serverSocket, false);
   }
@@ -23,6 +26,7 @@ public class ClientThread extends AppThread {
       int commandIndex = Integer.parseInt(
         ClientProcess.scanner.nextLine()
       ) - 1;
+      ConsolePrinter.println("");
 
       AppCommand[] allCommands = AppCommand.values();
       boolean clearConsoleCommand = commandIndex == allCommands.length;
@@ -48,8 +52,7 @@ public class ClientThread extends AppThread {
     boolean authenticated = receivedDTO instanceof AuthResponse;
     if(authenticated) authKey = ((AuthResponse) receivedDTO).getAuthKey();
     
-    ConsolePrinter.print("\nPressione Enter para continuar...");
-    ClientProcess.scanner.nextLine();
+    ConsolePrinter.displayAndWaitForEnterPressing(ClientProcess.scanner);
   }
 
   @Override
@@ -84,6 +87,7 @@ public class ClientThread extends AppThread {
 
   @Override
   protected void handleGetAccountData(DTO dto) throws Exception {
+    sendDTO(new CommandDTO(AppCommand.GET_ACCOUNT_DATA));
   }
 
   @Override

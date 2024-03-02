@@ -11,6 +11,7 @@ import dtos.auth.AuthData;
 import dtos.auth.AuthResponse;
 import dtos.generic.ExceptionDTO;
 import error.AppException;
+import error.SecureException;
 import process.AppCommand;
 import process.AppThread;
 import security.CryptoProcessor;
@@ -40,7 +41,7 @@ public class ServerThread extends AppThread {
   private void handleReceivedDTO(DTO receivedDTO) throws Exception {
     AppCommand command = receivedDTO.getCommand();
     if(commandRequiresAuth(command) && authKey == null) {
-      throw new SecurityException(
+      throw new SecureException(
         "O usuário precisa estar autenticado para executar esta ação!"
       );
     }
@@ -112,11 +113,15 @@ public class ServerThread extends AppThread {
       generatedKey, findedAccount.getClientData()
     );
     sendDTO(authResponse);
+    
     authKey = generatedKey;
+    clientAccount = findedAccount;
   }
 
   @Override
   protected void handleGetAccountData(DTO dto) throws Exception {
+    ObjectConverter.convert(dto);
+    sendDTO(clientAccount);
   }
 
   @Override

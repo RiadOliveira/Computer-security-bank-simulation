@@ -3,7 +3,7 @@ package security;
 import javax.crypto.SecretKey;
 
 import dtos.DTO;
-import error.SecurityException;
+import error.SecureException;
 import utils.BytesUtils;
 import utils.Serializer;
 
@@ -48,7 +48,7 @@ public class SecureDTOPacker {
       receivedHmac, calculatedHmac
     );
     if(!hmacsAreEqual) {
-      throw new SecurityException(
+      throw new SecureException(
         "O HMAC calculado não corresponde ao recebido, " +
         "mensagem descartada!"
       );
