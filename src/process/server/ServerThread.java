@@ -22,14 +22,13 @@ public class ServerThread extends AppThread {
 
   @Override
   public void execute() {
-    ConsolePrinter.println("Aguardando novas mensagens...");
-
     try {
       handleReceivedDTO(receiveDTO());
+      execute();
     } catch (Exception exception) {
       handleErrorDTOSending(exception);
     } finally {
-      execute();
+      ConsolePrinter.println(""); 
     }
   }
 
@@ -51,11 +50,9 @@ public class ServerThread extends AppThread {
   
       ExceptionDTO exceptionDTO = new ExceptionDTO(errorMessage);
       sendDTO(exceptionDTO);
+      execute();
     } catch (Exception e) {
-      ConsolePrinter.println(
-        "Falha ao enviar DTO de erro, tentando novamente..."
-      );
-      handleErrorDTOSending(exception);
+      ConsolePrinter.println("Falha ao se comunicar com o cliente!");
     }
   }
 

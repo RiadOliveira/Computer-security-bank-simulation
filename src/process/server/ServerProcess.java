@@ -26,7 +26,7 @@ public class ServerProcess extends AppProcess {
 
   public static void run() {
     try (ServerSocket serverSocket = new ServerSocket(port)) {
-      ConsolePrinter.println("Servidor iniciado!");
+      ConsolePrinter.println("Servidor iniciado!\n");
   
       while (true) {
         Socket clientSocket = serverSocket.accept();
@@ -35,7 +35,7 @@ public class ServerProcess extends AppProcess {
         );
 
         ConsolePrinter.println(
-          "Servidor conectou-se a um novo cliente!"
+          "Servidor conectou-se a um novo cliente!\n"
         );
         serverThread.start();
       }

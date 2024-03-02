@@ -31,7 +31,6 @@ public abstract class AppThread extends CommandHandler implements Runnable {
     try {
       initObjectStreams();
       execute();
-      closeObjectStreams();
     } catch (Exception exception) {
       ConsolePrinter.println("Erro interno do processo!");
     }
@@ -54,24 +53,29 @@ public abstract class AppThread extends CommandHandler implements Runnable {
     }
   }
 
-  protected void closeObjectStreams() throws Exception {
-    if(inputStream != null) inputStream.close();
-    if(outputStream != null) outputStream.close();
-  }
-
   protected void sendDTO(DTO dto) throws Exception {
     String packedDTO = SecureDTOPacker.packDTO(
       dto, authKey, AppProcess.getKey()
     );
 
+    ConsolePrinter.println("Dados enviados:");
+    dto.print();
+    ConsolePrinter.println("");
+
     outputStream.writeObject(packedDTO);
   }
 
+  @SuppressWarnings("unchecked")
   protected<T> T receiveDTO() throws Exception {
-    String encodedData = (String) inputStream.readObject();
-    
-    return SecureDTOPacker.unpackDTO(
-      encodedData, authKey, AppProcess.getKey()
+    String packedDTO = (String) inputStream.readObject();
+    DTO dto = SecureDTOPacker.unpackDTO(
+      packedDTO, authKey, AppProcess.getKey()
     );
+
+    ConsolePrinter.println("Dados recebidos:");
+    dto.print();
+    ConsolePrinter.println("");
+    
+    return (T) dto;
   }
 }

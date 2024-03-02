@@ -6,26 +6,15 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 public class Serializer {
-  private static final ByteArrayOutputStream bytesOutputStream =
-    new ByteArrayOutputStream();
-  private static ObjectOutputStream objectOutputStream;
-
-  static {
-    try {
-      objectOutputStream = new ObjectOutputStream(
-        bytesOutputStream
-      );
-    } catch (Exception exception) {
-      ConsolePrinter.println("Falha ao iniciar serializador!");
-    }
-  }
-
   public static byte[] serializeObject(Object object) {
     try {
-      objectOutputStream.writeObject(object);
-      byte[] serializedData = bytesOutputStream.toByteArray();
+      ByteArrayOutputStream bytesOutputStream = new ByteArrayOutputStream();
+      ObjectOutputStream objectOutputStream = new ObjectOutputStream(
+        bytesOutputStream
+      );
 
-      return serializedData;
+      objectOutputStream.writeObject(object);
+      return bytesOutputStream.toByteArray();
     } catch (Exception exception) {
       ConsolePrinter.println("Falha ao serializar objeto!");
       return null;
