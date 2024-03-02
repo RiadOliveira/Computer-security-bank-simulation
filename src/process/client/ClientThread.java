@@ -4,6 +4,8 @@ import java.net.Socket;
 
 import dtos.DTO;
 import dtos.account.ClientData;
+import dtos.auth.AuthData;
+import dtos.auth.AuthResponse;
 import error.AppException;
 import process.AppCommand;
 import process.AppThread;
@@ -18,8 +20,9 @@ public class ClientThread extends AppThread {
   public void execute() {
     try {
       ConsolePrinter.printClientCommandPanel();
-      int commandIndex = ClientProcess.scanner.nextInt() - 1;
-      ClientProcess.scanner.nextLine();
+      int commandIndex = Integer.parseInt(
+        ClientProcess.scanner.nextLine()
+      ) - 1;
 
       AppCommand[] allCommands = AppCommand.values();
       boolean clearConsoleCommand = commandIndex == allCommands.length;
@@ -27,6 +30,7 @@ public class ClientThread extends AppThread {
       if(clearConsoleCommand) ConsolePrinter.clearConsole();
       else handleAppCommandInput(allCommands[commandIndex]);
     } catch (Exception exception) {
+      exception.printStackTrace();
       ConsolePrinter.println(
         exception instanceof AppException ?
         exception.getMessage() : "Comando inserido inválido!"
@@ -39,7 +43,10 @@ public class ClientThread extends AppThread {
 
   private void handleAppCommandInput(AppCommand command) throws Exception {
     commandHandlers.get(command).accept(null);
-    receiveDTO();
+    DTO receivedDTO = receiveDTO();
+
+    boolean authenticated = receivedDTO instanceof AuthResponse;
+    if(authenticated) authKey = ((AuthResponse) receivedDTO).getAuthKey();
     
     ConsolePrinter.print("\nPressione Enter para continuar...");
     ClientProcess.scanner.nextLine();
@@ -63,6 +70,16 @@ public class ClientThread extends AppThread {
 
   @Override
   protected void handleAuthenticate(DTO dto) throws Exception {
+    String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
+      new String[]{"Agência", "Número da conta", "Senha"},
+      ClientProcess.scanner
+    );
+
+    AuthData authData = new AuthData(
+      inputsReceived[0], inputsReceived[1], inputsReceived[2]
+    );
+    authData.setCommand(AppCommand.AUTHENTICATE);
+    sendDTO(authData);
   }
 
   @Override

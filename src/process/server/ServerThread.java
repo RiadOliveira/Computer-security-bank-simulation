@@ -2,13 +2,18 @@ package process.server;
 
 import java.net.Socket;
 
+import javax.crypto.SecretKey;
+
 import dtos.DTO;
 import dtos.account.BankAccount;
 import dtos.account.ClientData;
+import dtos.auth.AuthData;
+import dtos.auth.AuthResponse;
 import dtos.generic.ExceptionDTO;
 import error.AppException;
 import process.AppCommand;
 import process.AppThread;
+import security.CryptoProcessor;
 import utils.ConsolePrinter;
 import utils.ObjectConverter;
 import utils.PasswordHasher;
@@ -86,6 +91,28 @@ public class ServerThread extends AppThread {
 
   @Override
   protected void handleAuthenticate(DTO dto) throws Exception {
+    AuthData parsedDTO = ObjectConverter.convert(dto);
+
+    BankAccount findedAccount = ServerProcess.findAccountByAgencyAndNumber(
+      parsedDTO.getAgency(), parsedDTO.getAccountNumber()
+    );
+    if(findedAccount == null) {
+      throw new AppException("Dados de autenticação inválidos!");
+    }
+
+    boolean correctPassword = PasswordHasher.passwordsAreEqual(
+      findedAccount.getClientData().getPassword(), parsedDTO.getPassword()
+    );
+    if(!correctPassword) {
+      throw new AppException("Dados de autenticação inválidos");
+    }
+
+    SecretKey generatedKey = CryptoProcessor.generateKey();
+    AuthResponse authResponse = new AuthResponse(
+      generatedKey, findedAccount.getClientData()
+    );
+    sendDTO(authResponse);
+    authKey = generatedKey;
   }
 
   @Override

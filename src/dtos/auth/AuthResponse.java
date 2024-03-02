@@ -4,6 +4,7 @@ import javax.crypto.SecretKey;
 
 import dtos.DTO;
 import dtos.account.ClientData;
+import security.CryptoProcessor;
 import utils.ConsolePrinter;
 
 public class AuthResponse extends DTO {
@@ -19,7 +20,11 @@ public class AuthResponse extends DTO {
 
   @Override
   public void print() {
-    ConsolePrinter.println("AuthKey: " + authKey.toString());
+    String parsedKey = CryptoProcessor.encodeBase64(
+      authKey.getEncoded()
+    );
+
+    ConsolePrinter.println("AuthKey: " + parsedKey);
     clientData.print();
   }
 
