@@ -28,7 +28,7 @@ public class ClientProcess extends AppProcess {
   }
 
   public static void run() {
-    ConsolePrinter.println("Cliente iniciado!");
+    ConsolePrinter.println("Cliente iniciado!\n");
 
     Socket serverSocket = connectToServerWithRetry();
     Thread clientThread = new Thread(

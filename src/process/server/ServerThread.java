@@ -39,19 +39,16 @@ public class ServerThread extends AppThread {
     while(!clientDisconnected) {
       try {
         handleReceivedDTO(receiveDTO());
-        execute();
       } catch (Exception exception) {
         clientDisconnected = exception instanceof EOFException;
         if(clientDisconnected) {
           ConsolePrinter.printlnError(
-            "Conexão com o cliente perdida, finalizando thread..."
+            "Conexão com o cliente perdida, finalizando thread...\n"
           );
           return;
         }
 
         handleErrorDTOSending(exception);
-      } finally {
-        ConsolePrinter.println("");
       }
     }
   }

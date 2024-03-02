@@ -17,8 +17,8 @@ public class ConsolePrinter {
     "  3. Obter dados da conta\n" + "  4. Sacar\n" +
     "  5. Depositar\n" + "  6. Transferência bancária\n" +
     "  7. Obter saldo\n" + "  8. Obter projeções da poupança\n" +
-    "  9. Obter projeções do investimento fixo\n" +
-    "  10. Atualizar investimento fixo\n" +
+    "  9. Obter projeções da renda fixa\n" +
+    "  10. Atualizar renda fixa\n" +
     "  11. Limpar console\n";
 
   private static final String PRESS_ENTER_TO_CONTINUE_MESSAGE = 
