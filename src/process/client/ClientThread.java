@@ -109,6 +109,16 @@ public class ClientThread extends AppThread {
 
   @Override
   protected void handleDeposit(DTO dto) throws Exception {
+    ConsolePrinter.print("Valor de depósito: ");
+    double depositValue = Double.parseDouble(
+      ClientProcess.scanner.nextLine()
+    );
+    ConsolePrinter.println("");
+
+    ValueDTO depositData = new ValueDTO(depositValue);
+    depositData.setCommand(AppCommand.DEPOSIT);
+
+    sendDTO(depositData);
   }
 
   @Override
@@ -117,6 +127,7 @@ public class ClientThread extends AppThread {
 
   @Override
   protected void handleGetBalance(DTO dto) throws Exception {
+    sendDTO(new CommandDTO(AppCommand.GET_BALANCE));
   }
 
   @Override

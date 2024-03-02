@@ -159,6 +159,26 @@ public class ServerThread extends AppThread {
 
   @Override
   protected void handleDeposit(DTO dto) throws Exception {
+    ValueDTO parsedDTO = ObjectConverter.convert(dto);
+
+    double depositValue = parsedDTO.getValue();
+    if(depositValue <= 0) {
+      throw new AppException("Valor de depósito inválido!");
+    }
+
+    clientAccount.updateBalance(depositValue);
+
+    String depositFormattedValue = ValueFormatter.
+      formatToBrazilianCurrency(depositValue);
+    String updatedBalanceFormattedValue = ValueFormatter.
+      formatToBrazilianCurrency(clientAccount.getBalance());
+
+    MessageDTO messageDTO = new MessageDTO(
+      "Valor de " + depositFormattedValue +
+      " depositado com sucesso, seu saldo atual é de " +
+      updatedBalanceFormattedValue + '.'
+    );
+    sendDTO(messageDTO);
   }
 
   @Override
@@ -167,6 +187,13 @@ public class ServerThread extends AppThread {
 
   @Override
   protected void handleGetBalance(DTO dto) throws Exception {
+    String balanceFormattedValue = ValueFormatter.
+      formatToBrazilianCurrency(clientAccount.getBalance());
+
+    MessageDTO messageDTO = new MessageDTO(
+      "Seu saldo atual é de " + balanceFormattedValue + '.'
+    );
+    sendDTO(messageDTO);
   }
 
   @Override
