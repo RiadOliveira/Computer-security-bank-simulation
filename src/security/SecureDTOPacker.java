@@ -54,7 +54,7 @@ public class SecureDTOPacker {
     }
   }
 
-  public static DTO handleDTOUnpacking(
+  private static DTO handleDTOUnpacking(
     String encodedData, SecretKey authKey, SecretKey encryptionKey
   ) throws Exception {
     byte[] decodedBytes = CryptoProcessor.decodeBase64(encodedData);
