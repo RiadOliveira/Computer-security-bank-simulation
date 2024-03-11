@@ -2,8 +2,6 @@ package utils;
 
 import java.util.Scanner;
 
-import process.client.ClientProcess;
-
 public class ConsolePrinter {
   public static final String ERROR_PREFIX = "[ERRO] ";
   
@@ -66,7 +64,7 @@ public class ConsolePrinter {
     Scanner scanner
   ) {
     print(PRESS_ENTER_TO_CONTINUE_MESSAGE);
-    ClientProcess.scanner.nextLine();
+    scanner.nextLine();
     print(OVERWRITE_PRESS_ENTER);
   }
 }
