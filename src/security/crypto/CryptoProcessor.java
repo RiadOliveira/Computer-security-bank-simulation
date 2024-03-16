@@ -8,9 +8,9 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import security.crypto.rsa.RSAKey;
+import security.crypto.rsa.RSAKeyPair;
 import security.crypto.rsa.RSAProcessor;
-import security.crypto.rsa.key.RSAKey;
-import security.crypto.rsa.key.RSAKeyPair;
 import utils.ConsolePrinter;
 
 public class CryptoProcessor {

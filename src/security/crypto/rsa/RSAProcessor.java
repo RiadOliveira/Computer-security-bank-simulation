@@ -1,8 +1,6 @@
 package security.crypto.rsa;
 
-import security.crypto.rsa.key.RSAKey;
-import security.crypto.rsa.key.RSAKeyPair;
-import security.crypto.rsa.key.RSAKeyPairGenerator;
+import java.math.BigInteger;
 
 public class RSAProcessor {
   public static RSAKeyPair generateKey() {
@@ -12,6 +10,11 @@ public class RSAProcessor {
   public static byte[] handleEncryption(
     byte[] data, RSAKey key
   ) {
-    return null;
+    BigInteger parsedData = new BigInteger(1, data);
+    BigInteger resultData = parsedData.modPow(
+      key.getExponent(), key.getModulus()
+    );
+
+    return resultData.toByteArray();
   }
 }
