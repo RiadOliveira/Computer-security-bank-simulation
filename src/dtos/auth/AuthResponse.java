@@ -4,7 +4,7 @@ import javax.crypto.SecretKey;
 
 import dtos.DTO;
 import dtos.account.ClientData;
-import security.CryptoProcessor;
+import security.crypto.CryptoProcessor;
 import utils.ConsolePrinter;
 
 public class AuthResponse extends DTO {

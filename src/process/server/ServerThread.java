@@ -19,7 +19,7 @@ import error.AppException;
 import error.SecureException;
 import process.AppCommand;
 import process.AppThread;
-import security.CryptoProcessor;
+import security.crypto.CryptoProcessor;
 import utils.ConsolePrinter;
 import utils.ObjectConverter;
 import utils.PasswordHasher;

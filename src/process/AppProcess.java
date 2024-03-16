@@ -2,7 +2,7 @@ package process;
 
 import javax.crypto.SecretKey;
 
-import security.CryptoProcessor;
+import security.crypto.CryptoProcessor;
 
 public abstract class AppProcess {
   protected static SecretKey key;

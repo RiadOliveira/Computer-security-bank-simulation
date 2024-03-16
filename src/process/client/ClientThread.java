@@ -13,7 +13,7 @@ import dtos.operation.WireTransferDTO;
 import error.AppException;
 import process.AppCommand;
 import process.AppThread;
-import security.CryptoProcessor;
+import security.crypto.CryptoProcessor;
 import utils.ConsolePrinter;
 
 public class ClientThread extends AppThread {

@@ -2,7 +2,7 @@ package utils;
 
 import java.security.MessageDigest;
 
-import security.CryptoProcessor;
+import security.crypto.CryptoProcessor;
 
 public class PasswordHasher {
   private static final String SHA3_INSTANCE_NAME = "SHA3-256";

@@ -4,6 +4,7 @@ import javax.crypto.SecretKey;
 
 import dtos.DTO;
 import error.SecureException;
+import security.crypto.CryptoProcessor;
 import utils.BytesUtils;
 import utils.Serializer;
 
@@ -32,7 +33,7 @@ public class SecureDTOPacker {
     byte[] hmac = CryptoProcessor.generateHMAC(serializedDTO, parsedAuthKey);
 
     byte[] dataWithHmac = BytesUtils.concatenateByteArrays(hmac, serializedDTO);
-    byte[] encryptedBytes = CryptoProcessor.encryptData(
+    byte[] encryptedBytes = CryptoProcessor.encryptSymmetrically(
       dataWithHmac, encryptionKey
     );
     
@@ -58,7 +59,7 @@ public class SecureDTOPacker {
     String encodedData, SecretKey authKey, SecretKey encryptionKey
   ) throws Exception {
     byte[] decodedBytes = CryptoProcessor.decodeBase64(encodedData);
-    byte[] decryptedBytes = CryptoProcessor.decryptData(
+    byte[] decryptedBytes = CryptoProcessor.decryptSymmetrically(
       decodedBytes, encryptionKey
     );
 
