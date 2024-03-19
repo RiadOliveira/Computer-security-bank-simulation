@@ -4,39 +4,74 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import javax.crypto.SecretKey;
-
 import dtos.DTO;
-import security.SecureDTOPacker;
+import security.ObjectPacker;
+import security.crypto.AsymmetricKey;
+import security.crypto.ComponentSymmetricKeys;
 import utils.ConsolePrinter;
 
 public abstract class AppThread extends CommandHandler implements Runnable {
-  protected SecretKey authKey = null;
-
   protected final Socket connectedSocket;
   protected final boolean isServerThread;
   
   protected ObjectInputStream inputStream;
   protected ObjectOutputStream outputStream;
 
+  protected ComponentSymmetricKeys symmetricKeys;
+  protected AsymmetricKey connectedComponentPublicKey;
+
   public AppThread(Socket connectedSocket, boolean isServerThread) {
     this.connectedSocket = connectedSocket;
     this.isServerThread = isServerThread;
+    this.symmetricKeys = new ComponentSymmetricKeys();
   }
   
-  protected abstract void execute();
+  public abstract void execute();
 
   @Override
   public void run() {
     try {
       initObjectStreams();
+      handleRecognitionCommunication();
       execute();
     } catch (Exception exception) {
       ConsolePrinter.println("Erro interno do processo!");
     }
   }
 
-  protected void initObjectStreams() throws Exception {
+  protected void sendSecureDTO(DTO dto) throws Exception {
+    String packedDTO = ObjectPacker.packObject(
+      dto, symmetricKeys,
+      AppProcess.getPrivateKey()
+    );
+    outputStream.writeObject(packedDTO);
+
+    printTransmissionDTO(dto, true);
+  }
+
+  protected DTO receiveSecureDTO() throws Exception {
+    String packedDTO = (String) inputStream.readObject();
+    DTO dto = ObjectPacker.unpackObject(
+      packedDTO, symmetricKeys,
+      connectedComponentPublicKey
+    );
+
+    printTransmissionDTO(dto, false);
+    return dto;
+  }
+
+  private void printTransmissionDTO(
+    DTO dto, boolean isBeingSent
+  ) {
+    ConsolePrinter.println(
+      "Dados " +
+      (isBeingSent ? "enviados" : "recebidos") + ":")
+    ;
+    dto.print();
+    ConsolePrinter.println("");
+  }
+
+  private void initObjectStreams() throws Exception {
     boolean inputStreamIsNull = inputStream == null;
     boolean outputStreamIsNull = outputStream == null;
     if(!inputStreamIsNull && !outputStreamIsNull) return;
@@ -53,27 +88,55 @@ public abstract class AppThread extends CommandHandler implements Runnable {
     }
   }
 
-  protected void sendDTO(DTO dto) throws Exception {
-    String packedDTO = SecureDTOPacker.packDTO(
-      dto, authKey, AppProcess.getKey()
-    );
-    outputStream.writeObject(packedDTO);
+  private void handleRecognitionCommunication() throws Exception {
+    if(isServerThread) {
+      sendPublicKey();
+      receivePublicKey();
+      generateAndSendSymmetricKeys();
+    } else {
+      receivePublicKey();
+      sendPublicKey();
+      receiveSymmetricKeys();
+    }
 
-    ConsolePrinter.println("Dados enviados:");
-    dto.print();
     ConsolePrinter.println("");
   }
 
-  protected DTO receiveDTO() throws Exception {
-    String packedDTO = (String) inputStream.readObject();
-    DTO dto = SecureDTOPacker.unpackDTO(
-      packedDTO, authKey, AppProcess.getKey()
+  private void sendPublicKey() throws Exception {
+    String encodedKey = ObjectPacker.encodeObject(
+      AppProcess.getPublicKey()
     );
+    outputStream.writeObject(encodedKey);
+    ConsolePrinter.println("Chave pública própria enviada.");
+  }
 
-    ConsolePrinter.println("Dados recebidos:");
-    dto.print();
-    ConsolePrinter.println("");
-    
-    return dto;
+  private void receivePublicKey() throws Exception {
+    String encodedKey = (String) inputStream.readObject();
+    connectedComponentPublicKey = ObjectPacker.decodeObject(
+      encodedKey
+    );
+    ConsolePrinter.println(
+      "Chave pública do componente conectado recebida."
+    );
+  }
+
+  private void generateAndSendSymmetricKeys() throws Exception {
+    symmetricKeys = new ComponentSymmetricKeys();
+
+    String packedKeys = ObjectPacker.packSymmetricKeys(
+      symmetricKeys, connectedComponentPublicKey
+    );
+    outputStream.writeObject(packedKeys);
+    ConsolePrinter.println("Chaves simétricas geradas enviadas.");
+  }
+
+  private void receiveSymmetricKeys() throws Exception {
+    String packedKeys = (String) inputStream.readObject();
+    symmetricKeys = ObjectPacker.unpackSymmetricKeys(
+      packedKeys, AppProcess.getPrivateKey()
+    );
+    ConsolePrinter.println(
+      "Chaves simétricas do componente conectado recebidas."
+    );
   }
 }

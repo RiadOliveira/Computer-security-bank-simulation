@@ -14,4 +14,8 @@ public class MessageDTO extends DTO {
   public void print() {
     ConsolePrinter.println(message);
   }
+
+  public String getMessage() {
+    return message;
+  }
 }

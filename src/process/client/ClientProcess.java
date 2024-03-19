@@ -17,10 +17,9 @@ public class ClientProcess extends AppProcess {
   private static int serverPort;
 
   public static void init(
-    String keyBase64, String serverIp, int serverPort,
-    boolean isAttacker
+    String serverIp, int serverPort, boolean isAttacker
   ) {
-    initKey(keyBase64);
+    initAsymmetricKeyPair();
 
     ClientProcess.serverIp = serverIp;
     ClientProcess.serverPort = serverPort;

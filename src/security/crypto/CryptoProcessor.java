@@ -1,5 +1,6 @@
 package security.crypto;
 
+import java.math.BigInteger;
 import java.util.Base64;
 
 import javax.crypto.Cipher;
@@ -8,13 +9,10 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-import security.crypto.rsa.RSAKey;
-import security.crypto.rsa.RSAKeyPair;
-import security.crypto.rsa.RSAProcessor;
 import utils.ConsolePrinter;
 
 public class CryptoProcessor {
-  public static final int HMAC_BYTE_SIZE = 32;
+  public static final int ENCRYPTED_HMAC_BYTE_SIZE = 256;
   private static final String AES_INSTANCE_NAME = "AES/ECB/PKCS5Padding";
   private static final String HMAC_INSTANCE_NAME = "HmacSHA256";
 
@@ -37,8 +35,8 @@ public class CryptoProcessor {
     return aesKeyGenerator.generateKey();
   }
 
-  public static RSAKeyPair generateAsymmetricKeys() {
-    return RSAProcessor.generateKey();
+  public static AsymmetricKeyPair generateAsymmetricKeyPair() {
+    return AsymmetricKeyPairGenerator.generate();
   }
 
   public static SecretKey getKeyFromBase64String(String keyBase64) {
@@ -47,9 +45,14 @@ public class CryptoProcessor {
   }
 
   public static byte[] handleAsymmetricEncryption(
-    byte[] data, RSAKey key
+    byte[] data, AsymmetricKey key
   ) {
-    return RSAProcessor.handleEncryption(data, key);
+    BigInteger parsedData = new BigInteger(1, data);
+    BigInteger resultData = parsedData.modPow(
+      key.getExponent(), key.getModulus()
+    );
+
+    return resultData.toByteArray();
   }
 
   public static byte[] encryptSymmetrically(

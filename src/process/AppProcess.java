@@ -1,17 +1,21 @@
 package process;
 
-import javax.crypto.SecretKey;
-
+import security.crypto.AsymmetricKey;
+import security.crypto.AsymmetricKeyPair;
 import security.crypto.CryptoProcessor;
 
 public abstract class AppProcess {
-  protected static SecretKey key;
+  protected static AsymmetricKeyPair asymmetricKeyPair;
 
-  protected static void initKey(String keyBase64) {
-    AppProcess.key = CryptoProcessor.getKeyFromBase64String(keyBase64);
+  protected static void initAsymmetricKeyPair() {
+    asymmetricKeyPair = CryptoProcessor.generateAsymmetricKeyPair();
   }
 
-  public static SecretKey getKey() {
-    return key;
+  public static AsymmetricKey getPublicKey() {
+    return asymmetricKeyPair.getPublicKey();
+  }
+
+  public static AsymmetricKey getPrivateKey() {
+    return asymmetricKeyPair.getPrivateKey();
   }
 }

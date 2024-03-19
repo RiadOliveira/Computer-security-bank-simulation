@@ -1,16 +1,16 @@
-package security.crypto.rsa;
+package security.crypto;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
-public class RSAKeyPairGenerator {
+public class AsymmetricKeyPairGenerator {
   private static final SecureRandom secureRandom = new SecureRandom();
 
-  private static final int PRIME_BIT_LENGTH = 2048;
+  private static final int PRIME_BIT_LENGTH = 1024;
   private static final BigInteger INITIAL_PUBLIC_EXPONENT_VALUE = 
     BigInteger.valueOf(65537l);
   
-  public static RSAKeyPair generate() {
+  public static AsymmetricKeyPair generate() {
     BigInteger firstPrime = generatePrime();
     BigInteger secondPrime = generatePrime();
 
@@ -21,7 +21,7 @@ public class RSAKeyPairGenerator {
     BigInteger publicExponent = getPublicExponent(totient);
     BigInteger privateExponent = publicExponent.modInverse(totient);
     
-    return new RSAKeyPair(publicExponent, privateExponent, modulus);
+    return new AsymmetricKeyPair(publicExponent, privateExponent, modulus);
   }
 
   private static BigInteger generatePrime() {

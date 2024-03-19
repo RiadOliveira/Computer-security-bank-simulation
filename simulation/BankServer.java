@@ -9,12 +9,8 @@ import process.server.ServerProcess;
 import utils.PasswordHasher;
 
 public class BankServer {
-  private static String secretKeyBase64 = "HZvOpm3s2pquuMULrHxAkw==";
-
   public static void main(String[] args) {
-    ServerProcess.init(
-      secretKeyBase64, 4444, getInitialDatabaseAccounts()
-    );
+    ServerProcess.init(4444, getInitialDatabaseAccounts());
     ServerProcess.run();
   }
 

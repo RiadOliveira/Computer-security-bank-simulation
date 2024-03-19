@@ -19,10 +19,9 @@ public class ServerProcess extends AppProcess {
   private static int port;
 
   public static void init(
-    String keyBase64, int port,
-    List<BankAccount> databaseAccounts
+    int port, List<BankAccount> databaseAccounts
   ) {
-    initKey(keyBase64);
+    initAsymmetricKeyPair();
 
     ServerProcess.port = port;
     ServerProcess.databaseAccounts = databaseAccounts == null ?

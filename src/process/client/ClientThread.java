@@ -6,14 +6,12 @@ import java.net.Socket;
 import dtos.DTO;
 import dtos.account.ClientData;
 import dtos.auth.AuthData;
-import dtos.auth.AuthResponse;
 import dtos.generic.CommandDTO;
 import dtos.generic.ValueDTO;
 import dtos.operation.WireTransferDTO;
 import error.AppException;
 import process.AppCommand;
 import process.AppThread;
-import security.crypto.CryptoProcessor;
 import utils.ConsolePrinter;
 
 public class ClientThread extends AppThread {
@@ -43,7 +41,7 @@ public class ClientThread extends AppThread {
       }
     }
   }
-  
+
   private void handleExecution() throws Exception {
     ConsolePrinter.printClientCommandPanel();
     int commandIndex = Integer.parseInt(
@@ -71,15 +69,7 @@ public class ClientThread extends AppThread {
 
   private void handleAppCommandInput(AppCommand command) throws Exception {
     commandHandlers.get(command).accept(null);
-    DTO receivedDTO = receiveDTO();
-
-    boolean authenticated = receivedDTO instanceof AuthResponse;
-    if(authenticated) {
-      authKey = ClientProcess.isAttacker() ? 
-        CryptoProcessor.generateKey() :
-        ((AuthResponse) receivedDTO).getAuthKey();
-    }
-    
+    receiveSecureDTO();
     ConsolePrinter.displayAndWaitForEnterPressing(ClientProcess.scanner);
   }
 
@@ -96,7 +86,7 @@ public class ClientThread extends AppThread {
       inputsReceived[4]
     );
     clientData.setCommand(AppCommand.CREATE_ACCOUNT);
-    sendDTO(clientData);
+    sendSecureDTO(clientData);
   }
 
   @Override
@@ -110,12 +100,12 @@ public class ClientThread extends AppThread {
       inputsReceived[0], inputsReceived[1], inputsReceived[2]
     );
     authData.setCommand(AppCommand.AUTHENTICATE);
-    sendDTO(authData);
+    sendSecureDTO(authData);
   }
 
   @Override
   protected void handleGetAccountData(DTO _d) throws Exception {
-    sendDTO(new CommandDTO(AppCommand.GET_ACCOUNT_DATA));
+    sendSecureDTO(new CommandDTO(AppCommand.GET_ACCOUNT_DATA));
   }
 
   @Override
@@ -129,7 +119,7 @@ public class ClientThread extends AppThread {
     ValueDTO withdrawData = new ValueDTO(withdrawValue);
     withdrawData.setCommand(AppCommand.WITHDRAW);
 
-    sendDTO(withdrawData);
+    sendSecureDTO(withdrawData);
   }
 
   @Override
@@ -143,7 +133,7 @@ public class ClientThread extends AppThread {
     ValueDTO depositData = new ValueDTO(depositValue);
     depositData.setCommand(AppCommand.DEPOSIT);
 
-    sendDTO(depositData);
+    sendSecureDTO(depositData);
   }
 
   @Override
@@ -162,22 +152,22 @@ public class ClientThread extends AppThread {
     );
     wireTransferData.setCommand(AppCommand.WIRE_TRANSFER);
 
-    sendDTO(wireTransferData);
+    sendSecureDTO(wireTransferData);
   }
 
   @Override
   protected void handleGetBalance(DTO _d) throws Exception {
-    sendDTO(new CommandDTO(AppCommand.GET_BALANCE));
+    sendSecureDTO(new CommandDTO(AppCommand.GET_BALANCE));
   }
 
   @Override
   protected void handleGetSavingsProjections(DTO _d) throws Exception {
-    sendDTO(new CommandDTO(AppCommand.GET_SAVINGS_PROJECTIONS));
+    sendSecureDTO(new CommandDTO(AppCommand.GET_SAVINGS_PROJECTIONS));
   }
 
   @Override
   protected void handleGetFixedIncomeProjections(DTO _d) throws Exception {
-    sendDTO(new CommandDTO(AppCommand.GET_FIXED_INCOME_PROJECTIONS));
+    sendSecureDTO(new CommandDTO(AppCommand.GET_FIXED_INCOME_PROJECTIONS));
   }
 
   @Override
@@ -191,6 +181,6 @@ public class ClientThread extends AppThread {
     ValueDTO fixedIncomeUpdateData = new ValueDTO(fixedIncomeUpdateValue);
     fixedIncomeUpdateData.setCommand(AppCommand.UPDATE_FIXED_INCOME);
 
-    sendDTO(fixedIncomeUpdateData);
+    sendSecureDTO(fixedIncomeUpdateData);
   }
 }

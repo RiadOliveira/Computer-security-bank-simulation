@@ -6,12 +6,10 @@ import process.client.ClientProcess;
 import utils.ConsolePrinter;
 
 public class LegitimateClient {
-  private static String secretKeyBase64 = "HZvOpm3s2pquuMULrHxAkw==";
-  
   public static void main(String[] args) {
     try {
       String serverIp = InetAddress.getLocalHost().getHostAddress();
-      ClientProcess.init(secretKeyBase64, serverIp, 4444, false);
+      ClientProcess.init(serverIp, 4444, false);
       
       ClientProcess.run();
     } catch (Exception exception) {

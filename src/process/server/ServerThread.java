@@ -38,7 +38,7 @@ public class ServerThread extends AppThread {
 
     while(!clientDisconnected) {
       try {
-        handleReceivedDTO(receiveDTO());
+        handleReceivedDTO(receiveSecureDTO());
       } catch (Exception exception) {
         clientDisconnected = exception instanceof EOFException;
         if(clientDisconnected) {
@@ -55,7 +55,7 @@ public class ServerThread extends AppThread {
 
   private void handleReceivedDTO(DTO receivedDTO) throws Exception {
     AppCommand command = receivedDTO.getCommand();
-    if(commandRequiresAuth(command) && authKey == null) {
+    if(commandRequiresAuth(command) && clientAccount == null) {
       throw new SecureException(
         "O usuário precisa estar autenticado para executar esta ação!"
       );
@@ -70,7 +70,7 @@ public class ServerThread extends AppThread {
         exception.getMessage() : "Falha ao realizar operação!";
   
       ExceptionDTO exceptionDTO = new ExceptionDTO(errorMessage);
-      sendDTO(exceptionDTO);
+      sendSecureDTO(exceptionDTO);
     } catch (Exception e) {
       ConsolePrinter.println("Falha ao se comunicar com o cliente!");
     }
@@ -101,7 +101,7 @@ public class ServerThread extends AppThread {
 
     BankAccount newAccount = new BankAccount(parsedDTO);
     ServerProcess.addDatabaseAccount(newAccount);
-    sendDTO(newAccount);
+    sendSecureDTO(newAccount);
   }
 
   @Override
@@ -126,15 +126,14 @@ public class ServerThread extends AppThread {
     AuthResponse authResponse = new AuthResponse(
       generatedKey, findedAccount.getClientData()
     );
-    sendDTO(authResponse);
+    sendSecureDTO(authResponse);
     
-    authKey = generatedKey;
     clientAccount = findedAccount;
   }
 
   @Override
   protected void handleGetAccountData(DTO dto) throws Exception {
-    sendDTO(clientAccount);
+    sendSecureDTO(clientAccount);
   }
 
   @Override
@@ -165,7 +164,7 @@ public class ServerThread extends AppThread {
       " retirado com sucesso, seu saldo atual é " +
       updatedBalanceFormattedValue + '.'
     );
-    sendDTO(messageDTO);
+    sendSecureDTO(messageDTO);
   }
 
   @Override
@@ -189,7 +188,7 @@ public class ServerThread extends AppThread {
       " depositado com sucesso, seu saldo atual é " +
       updatedBalanceFormattedValue + '.'
     );
-    sendDTO(messageDTO);
+    sendSecureDTO(messageDTO);
   }
 
   @Override
@@ -248,7 +247,7 @@ public class ServerThread extends AppThread {
       ", seu saldo atual é " + updatedBalanceFormattedValue +
       '.'
     );
-    sendDTO(messageDTO);
+    sendSecureDTO(messageDTO);
   }
 
   @Override
@@ -259,7 +258,7 @@ public class ServerThread extends AppThread {
     MessageDTO messageDTO = new MessageDTO(
       "Seu saldo atual é de " + balanceFormattedValue + '.'
     );
-    sendDTO(messageDTO);
+    sendSecureDTO(messageDTO);
   }
 
   @Override
@@ -269,7 +268,7 @@ public class ServerThread extends AppThread {
       ServerProcess.SAVINGS_YIELD_PERCENTAGE,
       ServerProcess.MONTHS_FOR_PROJECTIONS
     );
-    sendDTO(incomeProjectionDTO);
+    sendSecureDTO(incomeProjectionDTO);
   }
 
   @Override
@@ -279,7 +278,7 @@ public class ServerThread extends AppThread {
       ServerProcess.FIXED_INCOME_YIELD_PERCENTAGE,
       ServerProcess.MONTHS_FOR_PROJECTIONS
     );
-    sendDTO(incomeProjectionDTO);
+    sendSecureDTO(incomeProjectionDTO);
   }
 
   @Override
@@ -326,6 +325,6 @@ public class ServerThread extends AppThread {
       ", e seu saldo atual é " +
       updatedBalanceFormattedValue + '.'
     );
-    sendDTO(messageDTO);
+    sendSecureDTO(messageDTO);
   }
 }
