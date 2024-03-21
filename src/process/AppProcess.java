@@ -11,6 +11,10 @@ public abstract class AppProcess {
     asymmetricKeyPair = CryptoProcessor.generateAsymmetricKeyPair();
   }
 
+  public static AsymmetricKeyPair getAsymmetricKeyPair() {
+    return asymmetricKeyPair;
+  }
+
   public static AsymmetricKey getPublicKey() {
     return asymmetricKeyPair.getPublicKey();
   }

@@ -5,25 +5,27 @@ import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 import process.AppProcess;
+import process.ClientAttackType;
 import utils.ConsolePrinter;
 
 public class ClientProcess extends AppProcess {
   public static final Scanner scanner = new Scanner(System.in);
   private static final int WAIT_TIME_TO_TRY_RECONNECTION = 3;
 
-  private static boolean isAttacker = false;
+  private static ClientAttackType attackType;
 
   private static String serverIp;
   private static int serverPort;
 
   public static void init(
-    String serverIp, int serverPort, boolean isAttacker
+    String serverIp, int serverPort,
+    ClientAttackType attackType
   ) {
     initAsymmetricKeyPair();
 
     ClientProcess.serverIp = serverIp;
     ClientProcess.serverPort = serverPort;
-    ClientProcess.isAttacker = isAttacker;
+    ClientProcess.attackType = attackType;
   }
 
   public static void run() {
@@ -70,7 +72,23 @@ public class ClientProcess extends AppProcess {
     } catch (Exception exception) {}
   }
 
-  public static boolean isAttacker() {
-    return isAttacker;
+  public static Scanner getScanner() {
+    return scanner;
+  }
+
+  public static int getWaitTimeToTryReconnection() {
+    return WAIT_TIME_TO_TRY_RECONNECTION;
+  }
+
+  public static ClientAttackType getAttackType() {
+    return attackType;
+  }
+
+  public static String getServerIp() {
+    return serverIp;
+  }
+
+  public static int getServerPort() {
+    return serverPort;
   }
 }

@@ -3,6 +3,8 @@ package process.client;
 import java.io.EOFException;
 import java.net.Socket;
 
+import javax.crypto.SecretKey;
+
 import dtos.DTO;
 import dtos.account.ClientData;
 import dtos.auth.AuthData;
@@ -11,7 +13,12 @@ import dtos.generic.ValueDTO;
 import dtos.operation.WireTransferDTO;
 import error.AppException;
 import process.AppCommand;
+import process.AppProcess;
 import process.AppThread;
+import process.ClientAttackType;
+import security.crypto.AsymmetricKeyPair;
+import security.crypto.AsymmetricKeyPairGenerator;
+import security.crypto.CryptoProcessor;
 import utils.ConsolePrinter;
 
 public class ClientThread extends AppThread {
@@ -21,6 +28,7 @@ public class ClientThread extends AppThread {
 
   @Override
   public void execute() {
+    handleAttackerKeysChanging();
     boolean serverDisconnected = false;
     
     while(!serverDisconnected) {
@@ -39,6 +47,38 @@ public class ClientThread extends AppThread {
       } finally {
         ConsolePrinter.println("");
       }
+    }
+  }
+
+  private void handleAttackerKeysChanging() {
+    ClientAttackType attackType = ClientProcess.getAttackType();
+    boolean notAttacker = attackType.equals(ClientAttackType.NONE);
+    if(notAttacker) return;
+
+    SecretKey attackerSymmetricKey = CryptoProcessor.generateKey();
+    AsymmetricKeyPair attackerAsymmetricKeyPair = 
+      AsymmetricKeyPairGenerator.generate();
+
+    switch(attackType) {
+      case ENCRYPTION_KEY: {
+        symmetricKeys.setEncryptionKey(attackerSymmetricKey);
+        break;
+      }
+      case HASH_KEY: {
+        symmetricKeys.setHashKey(attackerSymmetricKey);
+        break;
+      }
+      case CONNECTED_PUBLIC_KEY: {
+        connectedComponentPublicKey = attackerAsymmetricKeyPair.getPublicKey();
+        break;
+      }
+      case PERSONAL_PRIVATE_KEY: {
+        AppProcess.getAsymmetricKeyPair().setPrivateKey(
+          attackerAsymmetricKeyPair.getPrivateKey()
+        );
+        break;
+      }
+      default: break;
     }
   }
 

@@ -5,7 +5,7 @@ import java.io.Serializable;
 import javax.crypto.SecretKey;
 
 public class ComponentSymmetricKeys implements Serializable {
-  private final SecretKey encryptionKey, hashKey;
+  private SecretKey encryptionKey, hashKey;
 
   public ComponentSymmetricKeys() {
     this.encryptionKey = CryptoProcessor.generateKey();
@@ -38,5 +38,13 @@ public class ComponentSymmetricKeys implements Serializable {
 
   public SecretKey getHashKey() {
     return hashKey;
+  }
+
+  public void setEncryptionKey(SecretKey encryptionKey) {
+    this.encryptionKey = encryptionKey;
+  }
+
+  public void setHashKey(SecretKey hashKey) {
+    this.hashKey = hashKey;
   }
 }
