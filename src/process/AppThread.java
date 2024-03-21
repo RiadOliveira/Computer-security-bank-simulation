@@ -127,7 +127,10 @@ public abstract class AppThread extends CommandHandler implements Runnable {
       symmetricKeys, connectedComponentPublicKey
     );
     outputStream.writeObject(packedKeys);
-    ConsolePrinter.println("Chaves simétricas geradas enviadas.");
+
+    ConsolePrinter.println(
+      "Chaves simétricas próprias de criptografia e hash enviadas."
+    );
   }
 
   private void receiveSymmetricKeys() throws Exception {
@@ -135,8 +138,10 @@ public abstract class AppThread extends CommandHandler implements Runnable {
     symmetricKeys = ObjectPacker.unpackSymmetricKeys(
       packedKeys, AppProcess.getPrivateKey()
     );
+
     ConsolePrinter.println(
-      "Chaves simétricas do componente conectado recebidas."
+      "Chaves simétricas de criptografia e hash " +
+      "do componente conectado recebidas."
     );
   }
 }

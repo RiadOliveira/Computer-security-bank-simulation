@@ -9,10 +9,13 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import utils.BytesUtils;
 import utils.ConsolePrinter;
 
 public class CryptoProcessor {
+  public static final int AES_KEY_BYTE_SIZE = 16;
   public static final int ENCRYPTED_HMAC_BYTE_SIZE = 256;
+
   private static final String AES_INSTANCE_NAME = "AES/ECB/PKCS5Padding";
   private static final String HMAC_INSTANCE_NAME = "HmacSHA256";
 
@@ -39,20 +42,28 @@ public class CryptoProcessor {
     return AsymmetricKeyPairGenerator.generate();
   }
 
-  public static SecretKey getKeyFromBase64String(String keyBase64) {
-    byte[] decodedBytes = decodeBase64(keyBase64);
-    return new SecretKeySpec(decodedBytes, "AES");
+  public static SecretKey getKeyFromBytes(byte[] keyBytes) {
+    return new SecretKeySpec(keyBytes, "AES");
   }
 
-  public static byte[] handleAsymmetricEncryption(
-    byte[] data, AsymmetricKey key
-  ) {
-    BigInteger parsedData = new BigInteger(1, data);
-    BigInteger resultData = parsedData.modPow(
-      key.getExponent(), key.getModulus()
-    );
+  public static byte[] handleAsymmetricEncryption(byte[] data, AsymmetricKey key) {
+    byte[] parsedData = getParsedDataForAsymmetricEncryption(data);
+    
+    BigInteger resultValue = new BigInteger(parsedData).
+      modPow(key.getExponent(), key.getModulus());
+    byte[] resultBytes = resultValue.toByteArray();
 
-    return resultData.toByteArray();
+    if(resultBytes[0] != 0) return resultBytes;
+    return BytesUtils.getByteSubArray(resultBytes, 1, resultBytes.length);
+  }
+
+  private static byte[] getParsedDataForAsymmetricEncryption(byte[] data) {
+    boolean needsNegativeHandling = data[0] < 0;
+    if(!needsNegativeHandling) return data;
+
+    byte[] parsedData = new byte[data.length + 1];
+    System.arraycopy(data, 0, parsedData, 1, data.length);
+    return parsedData;
   }
 
   public static byte[] encryptSymmetrically(

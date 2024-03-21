@@ -1,7 +1,5 @@
 package utils;
 
-import java.util.Arrays;
-
 public class BytesUtils {
   public static byte[] concatenateByteArrays(
     byte[] first, byte[] second
@@ -19,19 +17,11 @@ public class BytesUtils {
   public static byte[] getByteSubArray(
     byte[] data, int start, int end
   ) {
-    start = Math.abs(start);
-    end = Math.abs(end);
+    int length = end - start;
+    byte[] subArray = new byte[length];
 
-    if(start > end) {
-      int temp = start;
-      start = end;
-      end = temp;
-    }
-
-    if (start >= data.length || end > data.length) {
-      throw new IllegalArgumentException("Índices de início/fim inválidos!");
-    }
-    return Arrays.copyOfRange(data, start, end);
+    System.arraycopy(data, start, subArray, 0, length);
+    return subArray;
   }
 
   public static boolean byteArraysAreEqual(byte[] first, byte[] second) {

@@ -24,11 +24,16 @@ public class ObjectPacker {
     ComponentSymmetricKeys symmetricKeys,
     AsymmetricKey connectedComponentPublicKey
   ) {
-    byte[] serializedKeys = Serializer.serializeObject(symmetricKeys);
-    byte[] encryptedKeys = CryptoProcessor.handleAsymmetricEncryption(
+    byte[] encryptionKeyBytes = symmetricKeys.getEncryptionKey().getEncoded();
+    byte[] hashKeyBytes = symmetricKeys.getHashKey().getEncoded();
+    byte[] serializedKeys = BytesUtils.concatenateByteArrays(
+      encryptionKeyBytes, hashKeyBytes
+    );
+
+    byte[] encryptedKey = CryptoProcessor.handleAsymmetricEncryption(
       serializedKeys, connectedComponentPublicKey
     );
-    return CryptoProcessor.encodeBase64(encryptedKeys);
+    return CryptoProcessor.encodeBase64(encryptedKey);
   }
 
   public static ComponentSymmetricKeys unpackSymmetricKeys(
@@ -38,7 +43,32 @@ public class ObjectPacker {
     byte[] decryptedBytes = CryptoProcessor.handleAsymmetricEncryption(
       decodedBytes, privateKey
     );
-    return Serializer.deserializeObject(decryptedBytes);
+
+    SecretKey encryptionKey = extractEncryptionKeyForKeysUnpacking(
+      decryptedBytes
+    );
+    SecretKey hashKey = extractHashKeyForKeysUnpacking(decryptedBytes);
+
+    return new ComponentSymmetricKeys(encryptionKey, hashKey);
+  }
+
+  private static SecretKey extractEncryptionKeyForKeysUnpacking(
+    byte[] decryptedBytes
+  ) {
+    byte[] encryptionKeyBytes = BytesUtils.getByteSubArray(
+      decryptedBytes, 0, CryptoProcessor.AES_KEY_BYTE_SIZE
+    );
+    return CryptoProcessor.getKeyFromBytes(encryptionKeyBytes);
+  }
+
+  private static SecretKey extractHashKeyForKeysUnpacking(
+    byte[] decryptedBytes
+  ) {
+    byte[] hashKeyBytes = BytesUtils.getByteSubArray(
+      decryptedBytes, CryptoProcessor.AES_KEY_BYTE_SIZE,
+      decryptedBytes.length
+    );
+    return CryptoProcessor.getKeyFromBytes(hashKeyBytes);
   }
   
   public static<T> String packObject(
@@ -78,10 +108,10 @@ public class ObjectPacker {
   }
 
   private static byte[] generateAsymmetricallyEncryptedHmac(
-    byte[] serializedObject, SecretKey authKey,
+    byte[] serializedObject, SecretKey hashKey,
     AsymmetricKey asymmetricKey
   ) throws Exception {
-    byte[] hmac = CryptoProcessor.generateHMAC(serializedObject, authKey);
+    byte[] hmac = CryptoProcessor.generateHMAC(serializedObject, hashKey);
     return CryptoProcessor.handleAsymmetricEncryption(
       hmac, asymmetricKey
     );
@@ -111,10 +141,10 @@ public class ObjectPacker {
   ) throws Exception {
     byte[] decodedBytes = CryptoProcessor.decodeBase64(packedObject);
 
-    byte[] receivedHmac = extractHmacFromDecodedBytes(
+    byte[] receivedHmac = extractHmacForObjectUnpacking(
       decodedBytes, publicKey
     );
-    byte[] serializedObject = extractSerializedObjectFromDecodedBytes(
+    byte[] serializedObject = extractSerializedObjectForObjectUnpacking(
       decodedBytes, symmetricKeys.getEncryptionKey()
     );
     
@@ -124,19 +154,18 @@ public class ObjectPacker {
     return Serializer.deserializeObject(serializedObject);
   }
 
-  private static byte[] extractHmacFromDecodedBytes(
+  private static byte[] extractHmacForObjectUnpacking(
     byte[] decodedBytes, AsymmetricKey publicKey
   ) {
     byte[] asymmetricallyEncryptedHmac = BytesUtils.getByteSubArray(
       decodedBytes, 0, CryptoProcessor.ENCRYPTED_HMAC_BYTE_SIZE
     );
-
     return CryptoProcessor.handleAsymmetricEncryption(
       asymmetricallyEncryptedHmac, publicKey
     );
   }
 
-  private static byte[] extractSerializedObjectFromDecodedBytes(
+  private static byte[] extractSerializedObjectForObjectUnpacking(
     byte[] decodedBytes, SecretKey encryptionKey
   ) throws Exception {
     byte[] symmetricallyEncryptedObject = BytesUtils.getByteSubArray(
