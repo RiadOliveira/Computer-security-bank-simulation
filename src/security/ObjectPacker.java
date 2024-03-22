@@ -95,16 +95,16 @@ public class ObjectPacker {
   ) throws Exception {
     byte[] serializedObject = Serializer.serializeObject(object);
 
-    byte[] encryptedDTO = CryptoProcessor.encryptSymmetrically(
+    byte[] encryptedObject = CryptoProcessor.encryptSymmetrically(
       serializedObject, symmetricKeys.getEncryptionKey()
     );
     byte[] encryptedHmac = generateAsymmetricallyEncryptedHmac(
       serializedObject, symmetricKeys.getHashKey(), privateKey
     );
 
-    byte[] encryptedDTOWithHmac = BytesUtils.
-      concatenateByteArrays(encryptedHmac, encryptedDTO);
-    return CryptoProcessor.encodeBase64(encryptedDTOWithHmac);
+    byte[] encryptedObjectWithHmac = BytesUtils.
+      concatenateByteArrays(encryptedHmac, encryptedObject);
+    return CryptoProcessor.encodeBase64(encryptedObjectWithHmac);
   }
 
   private static byte[] generateAsymmetricallyEncryptedHmac(
