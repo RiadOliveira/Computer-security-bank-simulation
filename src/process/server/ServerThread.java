@@ -3,13 +3,10 @@ package process.server;
 import java.io.EOFException;
 import java.net.Socket;
 
-import javax.crypto.SecretKey;
-
 import dtos.DTO;
+import dtos.account.AuthData;
 import dtos.account.BankAccount;
 import dtos.account.ClientData;
-import dtos.auth.AuthData;
-import dtos.auth.AuthResponse;
 import dtos.generic.ExceptionDTO;
 import dtos.generic.MessageDTO;
 import dtos.generic.ValueDTO;
@@ -19,7 +16,6 @@ import error.AppException;
 import error.SecureException;
 import process.AppCommand;
 import process.AppThread;
-import security.crypto.CryptoProcessor;
 import utils.ConsolePrinter;
 import utils.ObjectConverter;
 import utils.PasswordHasher;
@@ -122,12 +118,7 @@ public class ServerThread extends AppThread {
       throw new AppException("Dados de autenticação inválidos");
     }
 
-    SecretKey generatedKey = CryptoProcessor.generateKey();
-    AuthResponse authResponse = new AuthResponse(
-      generatedKey, findedAccount.getClientData()
-    );
-    sendSecureDTO(authResponse);
-    
+    sendSecureDTO(findedAccount.getClientData());
     clientAccount = findedAccount;
   }
 

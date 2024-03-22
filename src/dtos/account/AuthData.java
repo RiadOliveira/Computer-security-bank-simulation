@@ -1,4 +1,4 @@
-package dtos.auth;
+package dtos.account;
 
 import dtos.DTO;
 import utils.ConsolePrinter;

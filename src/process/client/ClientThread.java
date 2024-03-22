@@ -6,8 +6,8 @@ import java.net.Socket;
 import javax.crypto.SecretKey;
 
 import dtos.DTO;
+import dtos.account.AuthData;
 import dtos.account.ClientData;
-import dtos.auth.AuthData;
 import dtos.generic.CommandDTO;
 import dtos.generic.ValueDTO;
 import dtos.operation.WireTransferDTO;
