@@ -58,9 +58,6 @@ public class CryptoProcessor {
   }
 
   private static byte[] getParsedDataForAsymmetricEncryption(byte[] data) {
-    boolean needsNegativeHandling = data[0] < 0;
-    if(!needsNegativeHandling) return data;
-
     byte[] parsedData = new byte[data.length + 1];
     System.arraycopy(data, 0, parsedData, 1, data.length);
     return parsedData;
