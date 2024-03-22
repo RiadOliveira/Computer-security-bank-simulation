@@ -109,11 +109,11 @@ public class ObjectPacker {
 
   private static byte[] generateAsymmetricallyEncryptedHmac(
     byte[] serializedObject, SecretKey hashKey,
-    AsymmetricKey asymmetricKey
+    AsymmetricKey privateKey
   ) throws Exception {
     byte[] hmac = CryptoProcessor.generateHMAC(serializedObject, hashKey);
     return CryptoProcessor.handleAsymmetricEncryption(
-      hmac, asymmetricKey
+      hmac, privateKey
     );
   }
 
