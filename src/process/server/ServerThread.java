@@ -13,7 +13,7 @@ import dtos.generic.ValueDTO;
 import dtos.operation.IncomeProjectionDTO;
 import dtos.operation.WireTransferDTO;
 import error.AppException;
-import error.SecureException;
+import error.SecurityException;
 import process.AppCommand;
 import process.AppThread;
 import utils.ConsolePrinter;
@@ -52,7 +52,7 @@ public class ServerThread extends AppThread {
   private void handleReceivedDTO(DTO receivedDTO) throws Exception {
     AppCommand command = receivedDTO.getCommand();
     if(commandRequiresAuth(command) && clientAccount == null) {
-      throw new SecureException(
+      throw new SecurityException(
         "O usuário precisa estar autenticado para executar esta ação!"
       );
     }

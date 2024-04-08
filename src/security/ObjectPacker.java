@@ -2,7 +2,7 @@ package security;
 
 import javax.crypto.SecretKey;
 
-import error.SecureException;
+import error.SecurityException;
 import security.crypto.AsymmetricKey;
 import security.crypto.ComponentSymmetricKeys;
 import security.crypto.CryptoProcessor;
@@ -74,16 +74,16 @@ public class ObjectPacker {
   public static<T> String packObject(
     T object, ComponentSymmetricKeys symmetricKeys,
     AsymmetricKey privateKey
-  ) throws SecureException {
+  ) throws SecurityException {
     try {
       return handleObjectPacking(
         object, symmetricKeys, privateKey
       );
     } catch (Exception exception) {
-      if(exception instanceof SecureException) {
-        throw (SecureException) exception;
+      if(exception instanceof SecurityException) {
+        throw (SecurityException) exception;
       }
-      throw new SecureException(
+      throw new SecurityException(
         "Falha ao garantir segurança no empacotamento dos dados!"
       );
     }
@@ -120,16 +120,16 @@ public class ObjectPacker {
   public static<T> T unpackObject(
     String packedObject, ComponentSymmetricKeys symmetricKeys,
     AsymmetricKey publicKey
-  ) throws SecureException {
+  ) throws SecurityException {
     try {
       return handleObjectUnpacking(
         packedObject, symmetricKeys, publicKey
       );
     } catch (Exception exception) {
-      if(exception instanceof SecureException) {
-        throw (SecureException) exception;
+      if(exception instanceof SecurityException) {
+        throw (SecurityException) exception;
       }
-      throw new SecureException(
+      throw new SecurityException(
         "Falha ao garantir segurança no desempacotamento dos dados!"
       );
     }
@@ -190,7 +190,7 @@ public class ObjectPacker {
     );
 
     if(!hmacsAreEqual) {
-      throw new SecureException(
+      throw new SecurityException(
         "O HMAC calculado não corresponde " +
         "ao recebido, mensagem descartada!"
       );
