@@ -15,13 +15,13 @@ import dtos.operation.WireTransferDTO;
 import error.AppException;
 import error.SecurityException;
 import process.AppCommand;
-import process.AppThread;
+import process.SocketThread;
 import utils.ConsolePrinter;
 import utils.ObjectConverter;
 import utils.PasswordHasher;
 import utils.ValueFormatter;
 
-public class ServerThread extends AppThread {
+public class ServerThread extends SocketThread {
   protected BankAccount clientAccount = null;
   
   public ServerThread(Socket clientSocket) {

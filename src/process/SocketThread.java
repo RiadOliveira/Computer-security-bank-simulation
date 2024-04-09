@@ -3,6 +3,7 @@ package process;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.Map;
 
 import dtos.DTO;
 import security.ObjectPacker;
@@ -10,8 +11,8 @@ import security.crypto.AsymmetricKey;
 import security.crypto.ComponentSymmetricKeys;
 import utils.ConsolePrinter;
 
-public abstract class AppThread extends CommandHandler implements Runnable {
-  protected final Socket connectedSocket;
+public abstract class SocketThread implements Runnable {
+  private final Map<SocketComponent, Socket> connectedSockets;
   protected final boolean isServerThread;
   
   protected ObjectInputStream inputStream;
@@ -20,10 +21,12 @@ public abstract class AppThread extends CommandHandler implements Runnable {
   protected ComponentSymmetricKeys symmetricKeys;
   protected AsymmetricKey connectedComponentPublicKey;
 
-  public AppThread(Socket connectedSocket, boolean isServerThread) {
-    this.connectedSocket = connectedSocket;
+  public SocketThread(
+    Map<SocketComponent, Socket> connectedSockets,
+    boolean isServerThread
+  ) {
+    this.connectedSockets = connectedSockets;
     this.isServerThread = isServerThread;
-    this.symmetricKeys = new ComponentSymmetricKeys();
   }
   
   public abstract void execute();

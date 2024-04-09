@@ -14,14 +14,14 @@ import dtos.operation.WireTransferDTO;
 import error.AppException;
 import process.AppCommand;
 import process.AppProcess;
-import process.AppThread;
+import process.SocketThread;
 import process.ClientAttackType;
 import security.crypto.AsymmetricKeyPair;
 import security.crypto.AsymmetricKeyPairGenerator;
 import security.crypto.CryptoProcessor;
 import utils.ConsolePrinter;
 
-public class ClientThread extends AppThread {
+public class ClientThread extends SocketThread {
   public ClientThread(Socket serverSocket) {
     super(serverSocket, false);
   }
