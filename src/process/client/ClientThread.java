@@ -108,13 +108,15 @@ public class ClientThread extends AppThread {
   }
 
   private void handleAppCommandInput(AppCommand command) throws Exception {
-    commandHandlers.get(command).accept(null);
+    DTO dtoToSend = commandHandlers.get(command).accept(null);
+    sendSecureDTO(dtoToSend);
+
     receiveSecureDTO();
     ConsolePrinter.displayAndWaitForEnterPressing(ClientProcess.scanner);
   }
 
   @Override
-  protected void handleCreateAccount(DTO _d) throws Exception {
+  protected DTO handleCreateAccount(DTO _d) throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
       new String[]{"Nome", "CPF", "Endereço", "Telefone", "Senha"},
       ClientProcess.scanner
@@ -126,11 +128,11 @@ public class ClientThread extends AppThread {
       inputsReceived[4]
     );
     clientData.setCommand(AppCommand.CREATE_ACCOUNT);
-    sendSecureDTO(clientData);
+    return clientData;
   }
 
   @Override
-  protected void handleAuthenticate(DTO _d) throws Exception {
+  protected DTO handleAuthenticate(DTO _d) throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
       new String[]{"Agência", "Número da conta", "Senha"},
       ClientProcess.scanner
@@ -140,16 +142,16 @@ public class ClientThread extends AppThread {
       inputsReceived[0], inputsReceived[1], inputsReceived[2]
     );
     authData.setCommand(AppCommand.AUTHENTICATE);
-    sendSecureDTO(authData);
+    return authData;
   }
 
   @Override
-  protected void handleGetAccountData(DTO _d) throws Exception {
-    sendSecureDTO(new CommandDTO(AppCommand.GET_ACCOUNT_DATA));
+  protected DTO handleGetAccountData(DTO _d) throws Exception {
+    return new CommandDTO(AppCommand.GET_ACCOUNT_DATA);
   }
 
   @Override
-  protected void handleWithdraw(DTO _d) throws Exception {
+  protected DTO handleWithdraw(DTO _d) throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
       new String[]{"Valor de saque"},
       ClientProcess.scanner
@@ -159,11 +161,11 @@ public class ClientThread extends AppThread {
     ValueDTO withdrawData = new ValueDTO(withdrawValue);
     withdrawData.setCommand(AppCommand.WITHDRAW);
 
-    sendSecureDTO(withdrawData);
+    return withdrawData;
   }
 
   @Override
-  protected void handleDeposit(DTO _d) throws Exception {
+  protected DTO handleDeposit(DTO _d) throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
       new String[]{"Valor de depósito"},
       ClientProcess.scanner
@@ -173,11 +175,11 @@ public class ClientThread extends AppThread {
     ValueDTO depositData = new ValueDTO(depositValue);
     depositData.setCommand(AppCommand.DEPOSIT);
 
-    sendSecureDTO(depositData);
+    return depositData;
   }
 
   @Override
-  protected void handleWireTransfer(DTO _d) throws Exception {
+  protected DTO handleWireTransfer(DTO _d) throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
       new String[]{
         "Agência alvo", "Número da conta alvo",
@@ -192,26 +194,26 @@ public class ClientThread extends AppThread {
     );
     wireTransferData.setCommand(AppCommand.WIRE_TRANSFER);
 
-    sendSecureDTO(wireTransferData);
+    return wireTransferData;
   }
 
   @Override
-  protected void handleGetBalance(DTO _d) throws Exception {
-    sendSecureDTO(new CommandDTO(AppCommand.GET_BALANCE));
+  protected DTO handleGetBalance(DTO _d) throws Exception {
+    return new CommandDTO(AppCommand.GET_BALANCE);
   }
 
   @Override
-  protected void handleGetSavingsProjections(DTO _d) throws Exception {
-    sendSecureDTO(new CommandDTO(AppCommand.GET_SAVINGS_PROJECTIONS));
+  protected DTO handleGetSavingsProjections(DTO _d) throws Exception {
+    return new CommandDTO(AppCommand.GET_SAVINGS_PROJECTIONS);
   }
 
   @Override
-  protected void handleGetFixedIncomeProjections(DTO _d) throws Exception {
-    sendSecureDTO(new CommandDTO(AppCommand.GET_FIXED_INCOME_PROJECTIONS));
+  protected DTO handleGetFixedIncomeProjections(DTO _d) throws Exception {
+    return new CommandDTO(AppCommand.GET_FIXED_INCOME_PROJECTIONS);
   }
 
   @Override
-  protected void handleUpdateFixedIncome(DTO _d) throws Exception {
+  protected DTO handleUpdateFixedIncome(DTO _d) throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
       new String[]{"Valor de atualização da renda fixa"},
       ClientProcess.scanner
@@ -221,6 +223,6 @@ public class ClientThread extends AppThread {
     ValueDTO fixedIncomeUpdateData = new ValueDTO(fixedIncomeUpdateValue);
     fixedIncomeUpdateData.setCommand(AppCommand.UPDATE_FIXED_INCOME);
 
-    sendSecureDTO(fixedIncomeUpdateData);
+    return fixedIncomeUpdateData;
   }
 }

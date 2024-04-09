@@ -7,7 +7,7 @@ import dtos.DTO;
 public abstract class CommandHandler {
   @FunctionalInterface
   public interface ThrowingConsumer<T, E extends Exception> {
-    void accept(T t) throws E;
+    DTO accept(T t) throws E;
   }
 
   protected HashMap<
@@ -49,14 +49,14 @@ public abstract class CommandHandler {
     );
   }
 
-  protected abstract void handleCreateAccount(DTO dto) throws Exception;
-  protected abstract void handleAuthenticate(DTO dto) throws Exception;
-  protected abstract void handleGetAccountData(DTO dto) throws Exception;
-  protected abstract void handleWithdraw(DTO dto) throws Exception;
-  protected abstract void handleDeposit(DTO dto) throws Exception;
-  protected abstract void handleWireTransfer(DTO dto) throws Exception;
-  protected abstract void handleGetBalance(DTO dto) throws Exception;
-  protected abstract void handleGetSavingsProjections(DTO dto) throws Exception;
-  protected abstract void handleGetFixedIncomeProjections(DTO dto) throws Exception;
-  protected abstract void handleUpdateFixedIncome(DTO dto) throws Exception;
+  protected abstract DTO handleCreateAccount(DTO dto) throws Exception;
+  protected abstract DTO handleAuthenticate(DTO dto) throws Exception;
+  protected abstract DTO handleGetAccountData(DTO dto) throws Exception;
+  protected abstract DTO handleWithdraw(DTO dto) throws Exception;
+  protected abstract DTO handleDeposit(DTO dto) throws Exception;
+  protected abstract DTO handleWireTransfer(DTO dto) throws Exception;
+  protected abstract DTO handleGetBalance(DTO dto) throws Exception;
+  protected abstract DTO handleGetSavingsProjections(DTO dto) throws Exception;
+  protected abstract DTO handleGetFixedIncomeProjections(DTO dto) throws Exception;
+  protected abstract DTO handleUpdateFixedIncome(DTO dto) throws Exception;
 }

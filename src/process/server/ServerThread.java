@@ -57,7 +57,8 @@ public class ServerThread extends AppThread {
       );
     }
 
-    commandHandlers.get(command).accept(receivedDTO);
+    DTO dtoToSend = commandHandlers.get(command).accept(receivedDTO);
+    sendSecureDTO(dtoToSend);
   }
 
   private void handleErrorDTOSending(Exception exception) {
@@ -80,7 +81,7 @@ public class ServerThread extends AppThread {
   }
 
   @Override
-  protected void handleCreateAccount(DTO dto) throws Exception {
+  protected DTO handleCreateAccount(DTO dto) throws Exception {
     ClientData parsedDTO = ObjectConverter.convert(dto);
 
     boolean cpfAlreadyExists = ServerProcess.existsAccountWithCpf(
@@ -97,11 +98,11 @@ public class ServerThread extends AppThread {
 
     BankAccount newAccount = new BankAccount(parsedDTO);
     ServerProcess.addDatabaseAccount(newAccount);
-    sendSecureDTO(newAccount);
+    return newAccount;
   }
 
   @Override
-  protected void handleAuthenticate(DTO dto) throws Exception {
+  protected DTO handleAuthenticate(DTO dto) throws Exception {
     AuthData parsedDTO = ObjectConverter.convert(dto);
 
     BankAccount findedAccount = ServerProcess.findAccountByAgencyAndNumber(
@@ -118,17 +119,17 @@ public class ServerThread extends AppThread {
       throw new AppException("Dados de autenticação inválidos");
     }
 
-    sendSecureDTO(findedAccount.getClientData());
     clientAccount = findedAccount;
+    return clientAccount.getClientData();
   }
 
   @Override
-  protected void handleGetAccountData(DTO dto) throws Exception {
-    sendSecureDTO(clientAccount);
+  protected DTO handleGetAccountData(DTO dto) throws Exception {
+    return clientAccount;
   }
 
   @Override
-  protected void handleWithdraw(DTO dto) throws Exception {
+  protected DTO handleWithdraw(DTO dto) throws Exception {
     ValueDTO parsedDTO = ObjectConverter.convert(dto);
 
     double withdrawValue = parsedDTO.getValue();
@@ -150,16 +151,15 @@ public class ServerThread extends AppThread {
     String updatedBalanceFormattedValue = ValueFormatter.
       formatToBrazilianCurrency(clientAccount.getBalance());
 
-    MessageDTO messageDTO = new MessageDTO(
+    return new MessageDTO(
       "Valor de " + withdrawFormattedValue +
       " retirado com sucesso, seu saldo atual é " +
       updatedBalanceFormattedValue + '.'
     );
-    sendSecureDTO(messageDTO);
   }
 
   @Override
-  protected void handleDeposit(DTO dto) throws Exception {
+  protected DTO handleDeposit(DTO dto) throws Exception {
     ValueDTO parsedDTO = ObjectConverter.convert(dto);
 
     double depositValue = parsedDTO.getValue();
@@ -174,16 +174,15 @@ public class ServerThread extends AppThread {
     String updatedBalanceFormattedValue = ValueFormatter.
       formatToBrazilianCurrency(clientAccount.getBalance());
 
-    MessageDTO messageDTO = new MessageDTO(
+    return new MessageDTO(
       "Valor de " + depositFormattedValue +
       " depositado com sucesso, seu saldo atual é " +
       updatedBalanceFormattedValue + '.'
     );
-    sendSecureDTO(messageDTO);
   }
 
   @Override
-  protected void handleWireTransfer(DTO dto) throws Exception {
+  protected DTO handleWireTransfer(DTO dto) throws Exception {
     WireTransferDTO parsedDTO = ObjectConverter.convert(dto);
 
     double transferValue = parsedDTO.getValue();
@@ -231,49 +230,45 @@ public class ServerThread extends AppThread {
     String updatedBalanceFormattedValue = ValueFormatter.
       formatToBrazilianCurrency(clientAccount.getBalance());
 
-    MessageDTO messageDTO = new MessageDTO(
+    return new MessageDTO(
       "Valor de " + transferFormattedValue + 
       " transferido com sucesso para " +
       findedAccountToTransfer.getClientData().getName() +
       ", seu saldo atual é " + updatedBalanceFormattedValue +
       '.'
     );
-    sendSecureDTO(messageDTO);
   }
 
   @Override
-  protected void handleGetBalance(DTO dto) throws Exception {
+  protected DTO handleGetBalance(DTO dto) throws Exception {
     String balanceFormattedValue = ValueFormatter.
       formatToBrazilianCurrency(clientAccount.getBalance());
 
-    MessageDTO messageDTO = new MessageDTO(
+    return new MessageDTO(
       "Seu saldo atual é de " + balanceFormattedValue + '.'
     );
-    sendSecureDTO(messageDTO);
   }
 
   @Override
-  protected void handleGetSavingsProjections(DTO dto) throws Exception {
-    IncomeProjectionDTO incomeProjectionDTO = new IncomeProjectionDTO(
+  protected DTO handleGetSavingsProjections(DTO dto) throws Exception {
+    return new IncomeProjectionDTO(
       clientAccount.getBalance(),
       ServerProcess.SAVINGS_YIELD_PERCENTAGE,
       ServerProcess.MONTHS_FOR_PROJECTIONS
     );
-    sendSecureDTO(incomeProjectionDTO);
   }
 
   @Override
-  protected void handleGetFixedIncomeProjections(DTO dto) throws Exception {
-    IncomeProjectionDTO incomeProjectionDTO = new IncomeProjectionDTO(
+  protected DTO handleGetFixedIncomeProjections(DTO dto) throws Exception {
+    return new IncomeProjectionDTO(
       clientAccount.getFixedIncome(),
       ServerProcess.FIXED_INCOME_YIELD_PERCENTAGE,
       ServerProcess.MONTHS_FOR_PROJECTIONS
     );
-    sendSecureDTO(incomeProjectionDTO);
   }
 
   @Override
-  protected void handleUpdateFixedIncome(DTO dto) throws Exception {
+  protected DTO handleUpdateFixedIncome(DTO dto) throws Exception {
     ValueDTO parsedDTO = ObjectConverter.convert(dto);
 
     double fixedIncomeUpdateValue = parsedDTO.getValue();
@@ -308,7 +303,7 @@ public class ServerThread extends AppThread {
     String updatedBalanceFormattedValue = ValueFormatter.
       formatToBrazilianCurrency(clientAccount.getBalance());
 
-    MessageDTO messageDTO = new MessageDTO(
+    return new MessageDTO(
       "A renda fixa foi atualizada com o valor de " +
       fixedIncomeUpdateFormattedValue +
       ", sua renda fixa atual é " +
@@ -316,6 +311,5 @@ public class ServerThread extends AppThread {
       ", e seu saldo atual é " +
       updatedBalanceFormattedValue + '.'
     );
-    sendSecureDTO(messageDTO);
   }
 }
