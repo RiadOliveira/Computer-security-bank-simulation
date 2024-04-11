@@ -50,11 +50,14 @@ public class SocketServer extends SocketProcess {
     }
   }
 
-  private void handleClientConnection(
-    Socket clientSocket
-  ) throws Exception {
+  private void handleClientConnection(Socket clientSocket) throws Exception {
+    String clientAddress = clientSocket.getInetAddress().getHostAddress();
+
     if(!validClientConnection(clientSocket)) {
-      ConsolePrinter.printlnError("Cliente socket não está na whitelist!");
+      ConsolePrinter.printlnError(
+        "Cliente socket " + clientAddress +
+        " não está na whitelist!"
+      );
       return;
     }
 
@@ -66,7 +69,8 @@ public class SocketServer extends SocketProcess {
     );
     
     ConsolePrinter.println(
-      "Servidor socket conectou-se a um novo cliente socket!\n"
+      "Servidor socket conectou-se com sucesso ao cliente socket " +
+      clientAddress
     );
     serverThread.start();
   }

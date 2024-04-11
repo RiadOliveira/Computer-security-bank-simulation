@@ -1,5 +1,6 @@
 package socket;
 
+import java.io.EOFException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.List;
@@ -23,7 +24,8 @@ public abstract class SocketThread implements Runnable {
     this.socketClientComponent = socketClientComponent;
   }
   
-  public abstract void execute();
+  protected abstract void execute() throws Exception;
+  protected abstract void handleExecutionException(Exception exception);
 
   @Override
   public void run() {
@@ -31,7 +33,7 @@ public abstract class SocketThread implements Runnable {
       SocketsInitializer.initializeConnectedSockets(
         connectedSockets, socketClientComponent
       );
-      execute();
+      handleExecution();
     } catch (Exception exception) {
       ConsolePrinter.println("Erro interno da thread!");
     }
@@ -106,5 +108,22 @@ public abstract class SocketThread implements Runnable {
     ;
     dto.print();
     ConsolePrinter.println("");
+  }
+
+  private void handleExecution() {
+    boolean socketDisconnected = false;
+
+    while(!socketDisconnected) {
+      try {
+        execute();
+      } catch(Exception exception) {
+        socketDisconnected = exception instanceof EOFException;
+
+        if(!socketDisconnected) handleExecutionException(exception);
+        else ConsolePrinter.printlnError(
+          "Conexão com o socket perdida, finalizando thread...\n"
+        );
+      }
+    }
   }
 }

@@ -30,7 +30,10 @@ public class ConnectionUtils {
   }
 
   public static Socket connectToSocketServerWithRetry(String ip, int port) {
-    ConsolePrinter.println("Tentando conectar-se ao servidor socket...");
+    String serverAddress = ip + ":" + port;
+    ConsolePrinter.println(
+      "Tentando conectar-se ao servidor socket: " + serverAddress
+    );
 
     Socket socket = null;
     while (socket == null) {
@@ -41,7 +44,9 @@ public class ConnectionUtils {
       }
     }
 
-    ConsolePrinter.println("Servidor socket conectado com sucesso!\n");
+    ConsolePrinter.println(
+      "Servidor socket " + serverAddress + " conectado com sucesso!\n"
+    );
     return socket;
   }
 

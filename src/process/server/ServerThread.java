@@ -16,6 +16,7 @@ import error.AppException;
 import error.SecurityException;
 import process.AppCommand;
 import socket.SocketThread;
+import socket.components.SocketComponent;
 import utils.ConsolePrinter;
 import utils.ObjectConverter;
 import utils.PasswordHasher;
@@ -23,30 +24,10 @@ import utils.ValueFormatter;
 
 public class ServerThread extends SocketThread {
   protected BankAccount clientAccount = null;
-  
-  public ServerThread(Socket clientSocket) {
-    super(clientSocket, true);
-  }
 
   @Override
-  public void execute() {
-    boolean clientDisconnected = false;
-
-    while(!clientDisconnected) {
-      try {
-        handleReceivedDTO(receiveSecureDTO());
-      } catch (Exception exception) {
-        clientDisconnected = exception instanceof EOFException;
-        if(clientDisconnected) {
-          ConsolePrinter.printlnError(
-            "Conexão com o cliente perdida, finalizando thread...\n"
-          );
-          return;
-        }
-
-        handleErrorDTOSending(exception);
-      }
-    }
+  protected void execute() throws Exception {
+    handleReceivedDTO(receiveSecureDTO(SocketComponent.STORE_SERVICE));
   }
 
   private void handleReceivedDTO(DTO receivedDTO) throws Exception {
@@ -58,16 +39,16 @@ public class ServerThread extends SocketThread {
     }
 
     DTO dtoToSend = commandHandlers.get(command).accept(receivedDTO);
-    sendSecureDTO(dtoToSend);
+    sendSecureDTO(dtoToSend, SocketComponent.STORE_SERVICE);
   }
 
-  private void handleErrorDTOSending(Exception exception) {
+  protected void handleExecutionException(Exception exception) {
     try {
       String errorMessage = exception instanceof AppException ?
         exception.getMessage() : "Falha ao realizar operação!";
   
       ExceptionDTO exceptionDTO = new ExceptionDTO(errorMessage);
-      sendSecureDTO(exceptionDTO);
+      sendSecureDTO(exceptionDTO, SocketComponent.STORE_SERVICE);
     } catch (Exception e) {
       ConsolePrinter.println("Falha ao se comunicar com o cliente!");
     }
