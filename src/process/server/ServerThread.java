@@ -15,7 +15,7 @@ import dtos.operation.WireTransferDTO;
 import error.AppException;
 import error.SecurityException;
 import process.AppCommand;
-import process.SocketThread;
+import socket.SocketThread;
 import utils.ConsolePrinter;
 import utils.ObjectConverter;
 import utils.PasswordHasher;

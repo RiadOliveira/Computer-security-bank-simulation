@@ -1,4 +1,6 @@
-package process;
+package socket.data;
+
+import socket.components.SocketComponent;
 
 public class SocketConnectionData {
   private final SocketComponent component;

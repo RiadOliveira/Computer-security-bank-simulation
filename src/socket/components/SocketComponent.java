@@ -1,4 +1,4 @@
-package process;
+package socket.components;
 
 public enum SocketComponent {
   CLIENT, GATEWAY, FIREWALL,
