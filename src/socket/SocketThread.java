@@ -7,13 +7,12 @@ import java.util.List;
 import java.util.Map;
 
 import dtos.DTO;
-import process.CommandHandler;
 import security.ObjectPacker;
 import socket.components.SocketComponent;
 import socket.data.SocketData;
 import utils.ConsolePrinter;
 
-public abstract class SocketThread extends CommandHandler implements Runnable {
+public abstract class SocketThread implements Runnable {
   private final Map<SocketComponent, List<SocketData>> connectedSockets;
   private final SocketComponent socketClientComponent;
   
