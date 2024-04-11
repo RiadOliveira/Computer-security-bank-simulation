@@ -28,22 +28,22 @@ public class ClientProcess extends AppProcess {
     ClientProcess.attackType = attackType;
   }
 
-  public static void run() {
-    ConsolePrinter.println("Cliente iniciado!\n");
+  // public static void run() {
+  //   ConsolePrinter.println("Cliente iniciado!\n");
 
-    Socket serverSocket = connectToServerWithRetry();
-    Thread clientThread = new Thread(
-      new ClientThread(serverSocket)
-    );
-    clientThread.start();
+  //   Socket serverSocket = connectToServerWithRetry();
+  //   Thread clientThread = new Thread(
+  //     new ClientThread(serverSocket)
+  //   );
+  //   clientThread.start();
 
-    try {
-      clientThread.join();
-      scanner.close();
-    } catch (Exception exception) {
-      ConsolePrinter.print("Erro interno do cliente!");
-    }
-  }
+  //   try {
+  //     clientThread.join();
+  //     scanner.close();
+  //   } catch (Exception exception) {
+  //     ConsolePrinter.print("Erro interno do cliente!");
+  //   }
+  // }
 
   private static Socket connectToServerWithRetry() {
     ConsolePrinter.println("Tentando conectar-se ao servidor...");

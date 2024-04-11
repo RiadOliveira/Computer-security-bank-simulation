@@ -6,12 +6,26 @@ import java.util.List;
 import dtos.account.BankAccount;
 import dtos.account.ClientData;
 import process.server.ServerProcess;
+import process.server.ServerThread;
+import socket.components.SocketComponent;
+import socket.components.SocketServer;
+import socket.data.SocketConnectionData;
+import socket.data.SocketServerData;
 import utils.PasswordHasher;
 
 public class BankServer {
   public static void main(String[] args) {
     ServerProcess.init(4444, getInitialDatabaseAccounts());
-    ServerProcess.run();
+    //ServerProcess.run();
+
+    SocketServerData serverData = new SocketServerData(
+      4000, SocketComponent.CLIENT, new String[]{},
+      new SocketConnectionData[]{}
+    );
+    SocketServer bankServer = new SocketServer(
+      ServerThread.class, serverData
+    );
+    bankServer.run();
   }
 
   private static List<BankAccount> getInitialDatabaseAccounts() {

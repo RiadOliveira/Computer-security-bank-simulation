@@ -3,7 +3,6 @@ package socket.components;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,7 +20,7 @@ public class SocketServer extends SocketProcess {
   private final SocketServerData data;
 
   public SocketServer(
-    Class<SocketThread> socketThreadClass,
+    Class<? extends SocketThread> socketThreadClass,
     SocketServerData data
   ) {
     super(socketThreadClass);
@@ -92,7 +91,8 @@ public class SocketServer extends SocketProcess {
   ) throws Exception {
     Map<SocketComponent, List<SocketData>> connectedSockets = new HashMap<>();
     connectedSockets.put(
-      data.getClientComponent(), Arrays.asList(new SocketData(clientSocket))
+      data.getClientComponent(),
+      new ArrayList<>(List.of(new SocketData(clientSocket)))
     );
 
     var serversToConnect = data.getServersToConnect();
@@ -123,7 +123,9 @@ public class SocketServer extends SocketProcess {
       List<SocketData> componentSocketsData = connectedSockets.get(component);
 
       if(componentSocketsData != null) componentSocketsData.add(socketData);
-      else connectedSockets.put(component, Arrays.asList(socketData));
+      else connectedSockets.put(
+        component, new ArrayList<>(List.of(socketData))
+      );
     }
   }
 }

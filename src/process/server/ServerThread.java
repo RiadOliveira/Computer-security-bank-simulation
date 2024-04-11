@@ -2,6 +2,8 @@ package process.server;
 
 import java.io.EOFException;
 import java.net.Socket;
+import java.util.List;
+import java.util.Map;
 
 import dtos.DTO;
 import dtos.account.AuthData;
@@ -17,6 +19,7 @@ import error.SecurityException;
 import process.AppCommand;
 import socket.SocketThread;
 import socket.components.SocketComponent;
+import socket.data.SocketData;
 import utils.ConsolePrinter;
 import utils.ObjectConverter;
 import utils.PasswordHasher;
@@ -25,9 +28,16 @@ import utils.ValueFormatter;
 public class ServerThread extends SocketThread {
   protected BankAccount clientAccount = null;
 
+  public ServerThread(
+    Map<SocketComponent, List<SocketData>> connectedSockets,
+    SocketComponent socketClientComponent
+  ) {
+    super(connectedSockets, socketClientComponent);
+  }
+
   @Override
   protected void execute() throws Exception {
-    handleReceivedDTO(receiveSecureDTO(SocketComponent.STORE_SERVICE));
+    handleReceivedDTO(receiveSecureDTO(SocketComponent.CLIENT));
   }
 
   private void handleReceivedDTO(DTO receivedDTO) throws Exception {
@@ -39,7 +49,7 @@ public class ServerThread extends SocketThread {
     }
 
     DTO dtoToSend = commandHandlers.get(command).accept(receivedDTO);
-    sendSecureDTO(dtoToSend, SocketComponent.STORE_SERVICE);
+    sendSecureDTO(SocketComponent.CLIENT, dtoToSend);
   }
 
   protected void handleExecutionException(Exception exception) {
@@ -48,7 +58,7 @@ public class ServerThread extends SocketThread {
         exception.getMessage() : "Falha ao realizar operação!";
   
       ExceptionDTO exceptionDTO = new ExceptionDTO(errorMessage);
-      sendSecureDTO(exceptionDTO, SocketComponent.STORE_SERVICE);
+      sendSecureDTO(SocketComponent.CLIENT, exceptionDTO);
     } catch (Exception e) {
       ConsolePrinter.println("Falha ao se comunicar com o cliente!");
     }

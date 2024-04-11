@@ -11,7 +11,6 @@ import security.crypto.AsymmetricKey;
 import security.crypto.ComponentSymmetricKeys;
 import socket.components.SocketComponent;
 import socket.data.SocketData;
-import socket.data.SocketKeys;
 import utils.ConsolePrinter;
 
 public class SocketsInitializer {
@@ -22,31 +21,26 @@ public class SocketsInitializer {
     for (var entry : connectedSockets.entrySet()) {
       SocketComponent component = entry.getKey();
       List<SocketData> socketsData = entry.getValue();
-      boolean isServerSocket = !component.equals(socketClientComponent);
+      boolean isServerForThisComponent = component.equals(socketClientComponent);
 
-      initializeComponentSockets(component, socketsData, isServerSocket);
+      initializeComponentSockets(component, socketsData, isServerForThisComponent);
     }
   }
 
   private static void initializeComponentSockets(
     SocketComponent component, List<SocketData> socketsData,
-    boolean isServerSocket
+    boolean isServerForThisComponent
   ) throws Exception {
     for (int ind=0 ; ind<socketsData.size() ; ind++) {
       SocketData data = socketsData.get(ind);
-      initObjectStreams(data, isServerSocket);
 
-      SocketKeys keys = SocketProcess.getConnectedSocketKeys(component, ind);
-      if(keys == null) {
-        SocketKeys keysObject = new SocketKeys();
-        SocketProcess.addSocketComponentKeys(component, keysObject);
-        handleKeysExchange(keysObject, data, isServerSocket);
-      }
+      initObjectStreams(data, isServerForThisComponent);
+      handleKeysExchange(data, isServerForThisComponent);
     }
   }
 
   private static void initObjectStreams(
-    SocketData socketData, boolean isServerSocket
+    SocketData socketData, boolean isServerForThisComponent
   ) throws Exception {
     ObjectInputStream inputStream = socketData.getInputStream();
     ObjectOutputStream outputStream = socketData.getOutputStream();
@@ -59,30 +53,37 @@ public class SocketsInitializer {
     if(!outputStreamIsNull) outputStream.close();
 
     Socket socket = socketData.getSocket();
-    if(isServerSocket) {
-      socketData.setInputStream(new ObjectInputStream(socket.getInputStream()));
-      socketData.setOutputStream(new ObjectOutputStream(socket.getOutputStream()));
+    if(isServerForThisComponent) {
+      socketData.setInputStream(
+        new ObjectInputStream(socket.getInputStream())
+      );
+      socketData.setOutputStream(
+        new ObjectOutputStream(socket.getOutputStream())
+      );
     } else {
-      socketData.setOutputStream(new ObjectOutputStream(socket.getOutputStream()));
-      socketData.setInputStream(new ObjectInputStream(socket.getInputStream()));
+      socketData.setOutputStream(
+        new ObjectOutputStream(socket.getOutputStream())
+      );
+      socketData.setInputStream(
+        new ObjectInputStream(socket.getInputStream())
+      );
     }
   }
 
   private static void handleKeysExchange(
-    SocketKeys keysObject, SocketData socketData,
-    boolean isServerSocket
+    SocketData socketData, boolean isServerSocket
   ) throws Exception {
     ObjectInputStream inputStream = socketData.getInputStream();
     ObjectOutputStream outputStream = socketData.getOutputStream();
 
     if(isServerSocket) {
       sendPublicKey(outputStream);
-      receivePublicKey(keysObject, inputStream);
-      setAndSendSymmetricKeys(keysObject, outputStream);
+      receivePublicKey(socketData, inputStream);
+      setAndSendSymmetricKeys(socketData, outputStream);
     } else {
-      receivePublicKey(keysObject, inputStream);
+      receivePublicKey(socketData, inputStream);
       sendPublicKey(outputStream);
-      receiveSymmetricKeys(keysObject, inputStream);
+      receiveSymmetricKeys(socketData, inputStream);
     }
 
     ConsolePrinter.println("");
@@ -99,7 +100,7 @@ public class SocketsInitializer {
   }
 
   private static void receivePublicKey(
-    SocketKeys keysObject, ObjectInputStream socketInputStream
+    SocketData socketData, ObjectInputStream socketInputStream
   ) throws Exception {
     String encodedKey = (String) socketInputStream.readObject();
     AsymmetricKey publicKey = ObjectPacker.decodeObject(
@@ -109,16 +110,16 @@ public class SocketsInitializer {
     ConsolePrinter.println(
       "Chave pública do componente conectado recebida."
     );
-    keysObject.setPublicKey(publicKey);
+    socketData.setPublicKey(publicKey);
   }
 
   private static void setAndSendSymmetricKeys(
-    SocketKeys keysObject, ObjectOutputStream outputStream
+    SocketData socketData, ObjectOutputStream outputStream
   ) throws Exception {
-    keysObject.setSymmetricKeys(new ComponentSymmetricKeys());
+    socketData.setSymmetricKeys(new ComponentSymmetricKeys());
 
     String packedKeys = ObjectPacker.packSymmetricKeys(
-      keysObject.getSymmetricKeys(), keysObject.getPublicKey()
+      socketData.getSymmetricKeys(), socketData.getPublicKey()
     );
     outputStream.writeObject(packedKeys);
 
@@ -128,7 +129,7 @@ public class SocketsInitializer {
   }
 
   private static void receiveSymmetricKeys(
-    SocketKeys keysObject, ObjectInputStream inputStream
+    SocketData socketData, ObjectInputStream inputStream
   ) throws Exception {
     String packedKeys = (String) inputStream.readObject();
     ComponentSymmetricKeys symmetricKeys = ObjectPacker.unpackSymmetricKeys(
@@ -139,6 +140,6 @@ public class SocketsInitializer {
       "Chaves simétricas de criptografia e hash " +
       "do componente conectado recebidas."
     );
-    keysObject.setSymmetricKeys(symmetricKeys);
+    socketData.setSymmetricKeys(symmetricKeys);
   }
 }

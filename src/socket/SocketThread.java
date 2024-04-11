@@ -7,12 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 import dtos.DTO;
+import process.CommandHandler;
 import security.ObjectPacker;
 import socket.components.SocketComponent;
 import socket.data.SocketData;
 import utils.ConsolePrinter;
 
-public abstract class SocketThread implements Runnable {
+public abstract class SocketThread extends CommandHandler implements Runnable {
   private final Map<SocketComponent, List<SocketData>> connectedSockets;
   private final SocketComponent socketClientComponent;
   
@@ -39,24 +40,39 @@ public abstract class SocketThread implements Runnable {
     }
   }
 
-  protected void sendSecureDTO(
-    DTO dto, SocketComponent component
-  ) throws Exception {
-    sendSecureDTO(dto, component, 0);
+  private void handleExecution() {
+    boolean socketDisconnected = false;
+
+    while(!socketDisconnected) {
+      try {
+        execute();
+      } catch(Exception exception) {
+        socketDisconnected = exception instanceof EOFException;
+
+        if(!socketDisconnected) handleExecutionException(exception);
+        else ConsolePrinter.printlnError(
+          "Conexão com o socket perdida, finalizando thread...\n"
+        );
+      }
+    }
   }
 
   protected void sendSecureDTO(
-    DTO dto, SocketComponent component, int socketIndex
+    SocketComponent component, DTO dto
+  ) throws Exception {
+    sendSecureDTO(component, 0, dto);
+  }
+
+  protected void sendSecureDTO(
+    SocketComponent component, int socketIndex, DTO dto
   ) throws Exception {
     ObjectOutputStream outputStream = getSocketData(
       component, socketIndex
     ).getOutputStream();
-    var socketKeys = SocketProcess.getConnectedSocketKeys(
-      component, socketIndex
-    );
+    var socketData = getConnectedSocketData(component, socketIndex);
 
     String packedDTO = ObjectPacker.packObject(
-      dto, socketKeys.getSymmetricKeys(),
+      dto, socketData.getSymmetricKeys(),
       SocketProcess.getPrivateKey()
     );
     outputStream.writeObject(packedDTO);
@@ -67,7 +83,7 @@ public abstract class SocketThread implements Runnable {
   protected DTO receiveSecureDTO(
     SocketComponent component
   ) throws Exception {
-    return receiveSecureDTO(component);
+    return receiveSecureDTO(component, 0);
   }
 
   protected DTO receiveSecureDTO(
@@ -76,14 +92,12 @@ public abstract class SocketThread implements Runnable {
     ObjectInputStream inputStream = getSocketData(
       component, socketIndex
     ).getInputStream();
-    var socketKeys = SocketProcess.getConnectedSocketKeys(
-      component, socketIndex
-    );
+    var socketData = getConnectedSocketData(component, socketIndex);
 
     String packedDTO = (String) inputStream.readObject();
     DTO dto = ObjectPacker.unpackObject(
-      packedDTO, socketKeys.getSymmetricKeys(),
-      socketKeys.getPublicKey()
+      packedDTO, socketData.getSymmetricKeys(),
+      socketData.getPublicKey()
     );
 
     printTransmissionDTO(dto, false);
@@ -110,20 +124,12 @@ public abstract class SocketThread implements Runnable {
     ConsolePrinter.println("");
   }
 
-  private void handleExecution() {
-    boolean socketDisconnected = false;
+  private SocketData getConnectedSocketData(
+    SocketComponent component, int socketIndex
+  ) {
+    var componentSockets = connectedSockets.get(component);
+    if(componentSockets == null) return null;
 
-    while(!socketDisconnected) {
-      try {
-        execute();
-      } catch(Exception exception) {
-        socketDisconnected = exception instanceof EOFException;
-
-        if(!socketDisconnected) handleExecutionException(exception);
-        else ConsolePrinter.printlnError(
-          "Conexão com o socket perdida, finalizando thread...\n"
-        );
-      }
-    }
+    return componentSockets.get(socketIndex);
   }
 }

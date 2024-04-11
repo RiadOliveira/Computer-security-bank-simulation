@@ -1,7 +1,7 @@
 package socket.components;
 
 import java.net.Socket;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +17,7 @@ public class SocketClient extends SocketProcess {
   private final SocketConnectionData serverToConnect;
 
   public SocketClient(
-    Class<SocketThread> socketThreadClass,
+    Class<? extends SocketThread> socketThreadClass,
     SocketConnectionData serverToConnect
   ) {
     super(socketThreadClass);
@@ -52,7 +52,7 @@ public class SocketClient extends SocketProcess {
     Map<SocketComponent, List<SocketData>> connectedSockets = new HashMap<>();
     connectedSockets.put(
       serverToConnect.getComponent(),
-      Arrays.asList(new SocketData(serverSocket))
+      new ArrayList<>(List.of(new SocketData(serverSocket)))
     );
 
     return connectedSockets;

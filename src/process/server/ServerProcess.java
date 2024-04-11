@@ -28,25 +28,25 @@ public class ServerProcess extends AppProcess {
       new ArrayList<>() : databaseAccounts;
   }
 
-  public static void run() {
-    try (ServerSocket serverSocket = new ServerSocket(port)) {
-      ConsolePrinter.println("Servidor iniciado!\n");
+  // public static void run() {
+  //   try (ServerSocket serverSocket = new ServerSocket(port)) {
+  //     ConsolePrinter.println("Servidor iniciado!\n");
   
-      while (true) {
-        Socket clientSocket = serverSocket.accept();
-        Thread serverThread = new Thread(
-          new ServerThread(clientSocket)
-        );
+  //     while (true) {
+  //       Socket clientSocket = serverSocket.accept();
+  //       Thread serverThread = new Thread(
+  //         new ServerThread(clientSocket)
+  //       );
 
-        ConsolePrinter.println(
-          "Servidor conectou-se a um novo cliente!\n"
-        );
-        serverThread.start();
-      }
-    } catch (Exception exception) {
-      ConsolePrinter.println("Erro interno do servidor!");
-    }
-  }
+  //       ConsolePrinter.println(
+  //         "Servidor conectou-se a um novo cliente!\n"
+  //       );
+  //       serverThread.start();
+  //     }
+  //   } catch (Exception exception) {
+  //     ConsolePrinter.println("Erro interno do servidor!");
+  //   }
+  // }
 
   public static void addDatabaseAccount(BankAccount newAccount) {
     databaseAccounts.add(newAccount);

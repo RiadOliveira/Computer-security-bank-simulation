@@ -15,7 +15,7 @@ public class AttackerClient {
         ClientAttackType.ENCRYPTION_KEY
       );
       
-      ClientProcess.run();
+      //ClientProcess.run();
     } catch (Exception exception) {
       ConsolePrinter.println("Erro ao iniciar o cliente!");
     }

@@ -2,6 +2,8 @@ package process.client;
 
 import java.io.EOFException;
 import java.net.Socket;
+import java.util.List;
+import java.util.Map;
 
 import javax.crypto.SecretKey;
 
@@ -19,70 +21,20 @@ import security.crypto.AsymmetricKeyPair;
 import security.crypto.AsymmetricKeyPairGenerator;
 import security.crypto.CryptoProcessor;
 import socket.SocketThread;
+import socket.components.SocketComponent;
+import socket.data.SocketData;
 import utils.ConsolePrinter;
 
 public class ClientThread extends SocketThread {
-  public ClientThread(Socket serverSocket) {
-    super(serverSocket, false);
+  public ClientThread(
+    Map<SocketComponent, List<SocketData>> connectedSockets,
+    SocketComponent socketClientComponent
+  ) {
+    super(connectedSockets, socketClientComponent);
   }
 
   @Override
-  public void execute() {
-    handleAttackerKeysChanging();
-    boolean serverDisconnected = false;
-    
-    while(!serverDisconnected) {
-      try {
-        handleExecution();
-      } catch (Exception exception) {
-        serverDisconnected = exception instanceof EOFException;
-        if(serverDisconnected) {
-          ConsolePrinter.printlnError(
-            "Conexão com o servidor perdida, finalizando cliente..."
-          );
-          return;
-        }
-  
-        handleExecutionException(exception);
-      } finally {
-        ConsolePrinter.println("");
-      }
-    }
-  }
-
-  private void handleAttackerKeysChanging() {
-    ClientAttackType attackType = ClientProcess.getAttackType();
-    boolean notAttacker = attackType.equals(ClientAttackType.NONE);
-    if(notAttacker) return;
-
-    SecretKey attackerSymmetricKey = CryptoProcessor.generateKey();
-    AsymmetricKeyPair attackerAsymmetricKeyPair = 
-      AsymmetricKeyPairGenerator.generate();
-
-    switch(attackType) {
-      case ENCRYPTION_KEY: {
-        symmetricKeys.setEncryptionKey(attackerSymmetricKey);
-        break;
-      }
-      case HASH_KEY: {
-        symmetricKeys.setHashKey(attackerSymmetricKey);
-        break;
-      }
-      case CONNECTED_PUBLIC_KEY: {
-        connectedComponentPublicKey = attackerAsymmetricKeyPair.getPublicKey();
-        break;
-      }
-      case PERSONAL_PRIVATE_KEY: {
-        AppProcess.getAsymmetricKeyPair().setPrivateKey(
-          attackerAsymmetricKeyPair.getPrivateKey()
-        );
-        break;
-      }
-      default: break;
-    }
-  }
-
-  private void handleExecution() throws Exception {
+  public void execute() throws Exception {
     ConsolePrinter.printClientCommandPanel();
     int commandIndex = Integer.parseInt(
       ClientProcess.scanner.nextLine()
@@ -96,7 +48,7 @@ public class ClientThread extends SocketThread {
     else handleAppCommandInput(allCommands[commandIndex]);
   }
 
-  private void handleExecutionException(Exception exception) {
+  protected void handleExecutionException(Exception exception) {
     boolean isAppException = exception instanceof AppException;
 
     if(!isAppException) ConsolePrinter.println("");
@@ -109,10 +61,11 @@ public class ClientThread extends SocketThread {
 
   private void handleAppCommandInput(AppCommand command) throws Exception {
     DTO dtoToSend = commandHandlers.get(command).accept(null);
-    sendSecureDTO(dtoToSend);
+    sendSecureDTO(SocketComponent.STORE_SERVICE, dtoToSend);
 
-    receiveSecureDTO();
+    receiveSecureDTO(SocketComponent.STORE_SERVICE);
     ConsolePrinter.displayAndWaitForEnterPressing(ClientProcess.scanner);
+    ConsolePrinter.println("");
   }
 
   @Override
