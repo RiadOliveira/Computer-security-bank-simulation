@@ -12,13 +12,13 @@ import socket.SocketThread;
 import socket.components.SocketComponent;
 import socket.data.SocketData;
 
-public abstract class BaseClientThread extends SocketThread {
+public abstract class BaseClient extends SocketThread {
   protected static final Scanner scanner = new Scanner(System.in);
   protected final Map<
     AppCommand, ThrowingRunnable<DTO, Exception>
   > commandHandlers = new HashMap<>();
 
-  public BaseClientThread(
+  public BaseClient(
     Map<SocketComponent, List<SocketData>> connectedSockets,
     SocketComponent socketClientComponent
   ) {

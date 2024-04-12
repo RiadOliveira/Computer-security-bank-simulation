@@ -15,8 +15,8 @@ import socket.components.SocketComponent;
 import socket.data.SocketData;
 import utils.ConsolePrinter;
 
-public class ClientThread extends BaseClientThread {
-  public ClientThread(
+public class Client extends BaseClient {
+  public Client(
     Map<SocketComponent, List<SocketData>> connectedSockets,
     SocketComponent socketClientComponent
   ) {
