@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.util.List;
 import java.util.Map;
 
+import dtos.AppCommand;
 import dtos.DTO;
 import dtos.account.AuthData;
 import dtos.account.BankAccount;
@@ -16,7 +17,6 @@ import dtos.operation.IncomeProjectionDTO;
 import dtos.operation.WireTransferDTO;
 import error.AppException;
 import error.SecurityException;
-import process.AppCommand;
 import socket.SocketThread;
 import socket.components.SocketComponent;
 import socket.data.SocketData;

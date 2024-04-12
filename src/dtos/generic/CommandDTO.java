@@ -1,7 +1,7 @@
 package dtos.generic;
 
+import dtos.AppCommand;
 import dtos.DTO;
-import process.AppCommand;
 import utils.ConsolePrinter;
 
 public class CommandDTO extends DTO {

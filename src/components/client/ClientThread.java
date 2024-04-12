@@ -1,11 +1,7 @@
-package process.client;
+package components.client;
 
-import java.io.EOFException;
-import java.net.Socket;
 import java.util.List;
 import java.util.Map;
-
-import javax.crypto.SecretKey;
 
 import dtos.AppCommand;
 import dtos.DTO;
@@ -15,17 +11,11 @@ import dtos.generic.CommandDTO;
 import dtos.generic.ValueDTO;
 import dtos.operation.WireTransferDTO;
 import error.AppException;
-import process.AppProcess;
-import process.ClientAttackType;
-import security.crypto.AsymmetricKeyPair;
-import security.crypto.AsymmetricKeyPairGenerator;
-import security.crypto.CryptoProcessor;
-import socket.SocketThread;
 import socket.components.SocketComponent;
 import socket.data.SocketData;
 import utils.ConsolePrinter;
 
-public class ClientThread extends SocketThread {
+public class ClientThread extends BaseClientThread {
   public ClientThread(
     Map<SocketComponent, List<SocketData>> connectedSockets,
     SocketComponent socketClientComponent
@@ -36,9 +26,7 @@ public class ClientThread extends SocketThread {
   @Override
   public void execute() throws Exception {
     ConsolePrinter.printClientCommandPanel();
-    int commandIndex = Integer.parseInt(
-      ClientProcess.scanner.nextLine()
-    ) - 1;
+    int commandIndex = Integer.parseInt(scanner.nextLine()) - 1;
     ConsolePrinter.println("");
 
     AppCommand[] allCommands = AppCommand.values();
@@ -56,23 +44,23 @@ public class ClientThread extends SocketThread {
       isAppException ? exception.getMessage() : "Comando inserido inválido!"
     );
     ConsolePrinter.println("");
-    ConsolePrinter.displayAndWaitForEnterPressing(ClientProcess.scanner);
+    ConsolePrinter.displayAndWaitForEnterPressing(scanner);
   }
 
   private void handleAppCommandInput(AppCommand command) throws Exception {
-    DTO dtoToSend = commandHandlers.get(command).accept(null);
-    sendSecureDTO(SocketComponent.STORE_SERVICE, dtoToSend);
+    DTO dtoToSend = commandHandlers.get(command).run();
+    sendSecureDTO(SocketComponent.GATEWAY, dtoToSend);
 
-    receiveSecureDTO(SocketComponent.STORE_SERVICE);
-    ConsolePrinter.displayAndWaitForEnterPressing(ClientProcess.scanner);
+    receiveSecureDTO(SocketComponent.GATEWAY);
+    ConsolePrinter.displayAndWaitForEnterPressing(scanner);
     ConsolePrinter.println("");
   }
 
   @Override
-  protected DTO handleCreateAccount(DTO _d) throws Exception {
+  protected DTO handleCreateAccount() throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
       new String[]{"Nome", "CPF", "Endereço", "Telefone", "Senha"},
-      ClientProcess.scanner
+      scanner
     );
 
     ClientData clientData = new ClientData(
@@ -85,10 +73,10 @@ public class ClientThread extends SocketThread {
   }
 
   @Override
-  protected DTO handleAuthenticate(DTO _d) throws Exception {
+  protected DTO handleAuthenticate() throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
       new String[]{"Agência", "Número da conta", "Senha"},
-      ClientProcess.scanner
+      scanner
     );
 
     AuthData authData = new AuthData(
@@ -99,15 +87,14 @@ public class ClientThread extends SocketThread {
   }
 
   @Override
-  protected DTO handleGetAccountData(DTO _d) throws Exception {
+  protected DTO handleGetAccountData() throws Exception {
     return new CommandDTO(AppCommand.GET_ACCOUNT_DATA);
   }
 
   @Override
-  protected DTO handleWithdraw(DTO _d) throws Exception {
+  protected DTO handleWithdraw() throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
-      new String[]{"Valor de saque"},
-      ClientProcess.scanner
+      new String[]{"Valor de saque"}, scanner
     );
 
     double withdrawValue = Double.parseDouble(inputsReceived[0]);
@@ -118,10 +105,9 @@ public class ClientThread extends SocketThread {
   }
 
   @Override
-  protected DTO handleDeposit(DTO _d) throws Exception {
+  protected DTO handleDeposit() throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
-      new String[]{"Valor de depósito"},
-      ClientProcess.scanner
+      new String[]{"Valor de depósito"}, scanner
     );
 
     double depositValue = Double.parseDouble(inputsReceived[0]);
@@ -132,13 +118,12 @@ public class ClientThread extends SocketThread {
   }
 
   @Override
-  protected DTO handleWireTransfer(DTO _d) throws Exception {
+  protected DTO handleWireTransfer() throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
       new String[]{
         "Agência alvo", "Número da conta alvo",
         "Valor da transferência"
-      },
-      ClientProcess.scanner
+      }, scanner
     );
 
     double transferValue = Double.parseDouble(inputsReceived[2]);
@@ -151,25 +136,25 @@ public class ClientThread extends SocketThread {
   }
 
   @Override
-  protected DTO handleGetBalance(DTO _d) throws Exception {
+  protected DTO handleGetBalance() throws Exception {
     return new CommandDTO(AppCommand.GET_BALANCE);
   }
 
   @Override
-  protected DTO handleGetSavingsProjections(DTO _d) throws Exception {
+  protected DTO handleGetSavingsProjections() throws Exception {
     return new CommandDTO(AppCommand.GET_SAVINGS_PROJECTIONS);
   }
 
   @Override
-  protected DTO handleGetFixedIncomeProjections(DTO _d) throws Exception {
+  protected DTO handleGetFixedIncomeProjections() throws Exception {
     return new CommandDTO(AppCommand.GET_FIXED_INCOME_PROJECTIONS);
   }
 
   @Override
-  protected DTO handleUpdateFixedIncome(DTO _d) throws Exception {
+  protected DTO handleUpdateFixedIncome() throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
       new String[]{"Valor de atualização da renda fixa"},
-      ClientProcess.scanner
+      scanner
     );
 
     double fixedIncomeUpdateValue = Double.parseDouble(inputsReceived[0]);

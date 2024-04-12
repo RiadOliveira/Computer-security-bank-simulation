@@ -2,8 +2,6 @@ package dtos;
 
 import java.io.Serializable;
 
-import process.AppCommand;
-
 public abstract class DTO implements Serializable {
   protected AppCommand command = null;
 

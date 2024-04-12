@@ -1,4 +1,4 @@
-package process;
+package dtos;
 
 public enum AppCommand {
   CREATE_ACCOUNT, AUTHENTICATE, GET_ACCOUNT_DATA,

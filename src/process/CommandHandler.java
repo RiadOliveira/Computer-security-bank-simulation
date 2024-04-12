@@ -2,6 +2,7 @@ package process;
 
 import java.util.HashMap;
 
+import dtos.AppCommand;
 import dtos.DTO;
 
 public abstract class CommandHandler {
