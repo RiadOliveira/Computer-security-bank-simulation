@@ -28,7 +28,7 @@ public class FirewallSimulator {
     );
 
     for(int ind=0 ; ind<bankServiceInstances ; ind++) {
-      serversToConnect[ind] = new SocketConnectionData(
+      serversToConnect[ind+1] = new SocketConnectionData(
         SocketComponent.BANK_SERVICE,
         ConnectionUtils.getComponentAddress(SocketComponent.BANK_SERVICE),
         ConnectionUtils.getComponentServerPort(

@@ -31,13 +31,15 @@ public class ConnectionUtils {
       SocketComponent component = allComponents[ind];
 
       int portToConnectToServers = (ind+1) * INITIAL_PORT;
-      var socketConnectionData = new SocketConnectionData(
-        component, LOCAL_HOST, portToConnectToServers
-      );
+      int serverPort = portToConnectToServers + 1;
 
+      var socketConnectionData = new SocketConnectionData(
+        component, LOCAL_HOST, serverPort
+      );
       var connectionData = new ComponentConnectionData(
         portToConnectToServers, socketConnectionData
       );
+
       COMPONENTS_CONNECTION_DATA.put(component, connectionData);
     }
 
