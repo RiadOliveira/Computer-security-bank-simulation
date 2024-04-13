@@ -52,7 +52,7 @@ public class ConnectionUtils {
   }
 
   public static Future<Socket> asynchronouslyConnectToSocketServerWithRetry(
-    String serverIp, int serverPort, int clientPort
+    String serverAddress, int serverPort, int thisClientPort
   ) {
     ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -60,42 +60,75 @@ public class ConnectionUtils {
       @Override
       public Socket call() throws Exception {
         return connectToSocketServerWithRetry(
-          serverIp, serverPort, clientPort
+          serverAddress, serverPort, thisClientPort
         );
       }
     });
   }
 
   public static Socket connectToSocketServerWithRetry(
-    String serverIp, int serverPort, int thisClientPort
+    String serverAddress, int serverPort, int thisClientPort
   ) {
-    String serverAddress = serverIp + ":" + serverPort;
+    String serverIp = serverAddress + ":" + serverPort;
     ConsolePrinter.println(
-      "Tentando conectar-se ao servidor socket: " + serverAddress
+      "Tentando conectar-se ao servidor socket: " + serverIp
     );
 
-    Socket socket = null;
-    while (socket == null) {
-      try {
-        socket = new Socket();
-        socket.bind(new InetSocketAddress(thisClientPort));
-        socket.connect(new InetSocketAddress(serverIp, serverPort));
-      } catch (Exception exception) {
-        socket = null;
-        waitToReconnect();
-      }
-    }
+    Socket socket = new Socket();
+    bindPortToSocket(socket, thisClientPort);
+    connectSocketToServer(socket, serverAddress, serverPort);
 
     ConsolePrinter.println(
-      "Servidor socket " + serverAddress +
-      " conectado com sucesso!\n"
+      "Servidor socket " + serverIp + " conectado com sucesso!\n"
     );
     return socket;
   }
 
-  private static void waitToReconnect() {
-    ConsolePrinter.println(
-      "Falha ao conectar-se ao servidor socket, tentando novamente em " +
+  private static void bindPortToSocket(Socket socket, int thisClientPort) {
+    var thisClientInetSocketAddress = new InetSocketAddress(
+      thisClientPort
+    );
+    
+    boolean bound = false;
+    while(!bound) {
+      try {
+        socket.bind(thisClientInetSocketAddress);
+        bound = true;
+      } catch(Exception exception) {
+        ConsolePrinter.println("");
+        ConsolePrinter.printlnError(
+          "Falha ao executar bind da porta cliente!"
+        );
+        waitToTryAgain();
+      }
+    }
+  }
+
+  private static void connectSocketToServer(
+    Socket socket, String serverAddress, int serverPort
+  ) {
+    var serverInetSocketAddress = new InetSocketAddress(
+      serverAddress, serverPort
+    );
+
+    boolean connected = false;
+    while (!connected) {
+      try {
+        socket.connect(serverInetSocketAddress);
+        connected = true;
+      } catch (Exception exception) {
+        ConsolePrinter.println("");
+        ConsolePrinter.printlnError(
+          "Falha ao conectar-se ao servidor socket."
+        );
+        waitToTryAgain();
+      }
+    }
+  }
+
+  private static void waitToTryAgain() {
+    ConsolePrinter.printlnError(
+      "Tentando efetuar operação novamente em " +
       WAIT_TIME_TO_TRY_RECONNECTION + " segundos..."
     );
 

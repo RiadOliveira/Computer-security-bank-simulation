@@ -51,6 +51,10 @@ public class SocketServer extends SocketProcess {
 
   private void handleClientConnection(Socket clientSocket) throws Exception {
     String clientAddress = clientSocket.getInetAddress().getHostAddress();
+    ConsolePrinter.println(
+      "Servidor socket conectou-se com sucesso ao cliente socket " +
+      clientAddress
+    );
 
     if(!validClientConnection(clientSocket)) {
       ConsolePrinter.printlnError(
@@ -66,10 +70,6 @@ public class SocketServer extends SocketProcess {
       )
     );
     
-    ConsolePrinter.println(
-      "Servidor socket conectou-se com sucesso ao cliente socket " +
-      clientAddress
-    );
     serverThread.start();
   }
   
