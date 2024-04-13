@@ -2,7 +2,7 @@ package security;
 
 import javax.crypto.SecretKey;
 
-import error.SecurityException;
+import errors.SecurityException;
 import security.crypto.AsymmetricKey;
 import security.crypto.ComponentSymmetricKeys;
 import security.crypto.CryptoProcessor;

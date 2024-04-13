@@ -3,8 +3,8 @@ package components.gateway;
 import java.util.List;
 import java.util.Map;
 
-import socket.components.SocketComponent;
-import socket.data.SocketData;
+import connections.components.SocketComponent;
+import connections.data.SocketData;
 
 public class Gateway extends BaseGateway {
   public Gateway(

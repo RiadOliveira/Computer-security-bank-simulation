@@ -1,6 +1,6 @@
 package utils;
 
-import error.AppException;
+import errors.AppException;
 
 public class ObjectConverter {
   @SuppressWarnings("unchecked")

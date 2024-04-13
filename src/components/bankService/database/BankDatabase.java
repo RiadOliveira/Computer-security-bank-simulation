@@ -1,17 +1,24 @@
-package components.gateway;
+package components.bankService.database;
 
 import java.util.List;
 import java.util.Map;
 
-import connections.SocketThread;
 import connections.components.SocketComponent;
 import connections.data.SocketData;
 
-public abstract class BaseGateway extends SocketThread {
-  public BaseGateway(
+public class BankDatabase extends BaseBankDatabase {
+  public BankDatabase(
     Map<SocketComponent, List<SocketData>> connectedSockets,
     SocketComponent socketClientComponent
   ) {
     super(connectedSockets, socketClientComponent);
+  }
+
+  @Override
+  protected void execute() throws Exception {
+  }
+
+  @Override
+  protected void handleExecutionException(Exception exception) {
   }
 }
