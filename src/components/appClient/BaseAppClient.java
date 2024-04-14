@@ -8,15 +8,19 @@ import java.util.Scanner;
 import connections.SocketThread;
 import connections.components.SocketComponent;
 import connections.data.SocketData;
-import dtos.AppCommand;
+import dtos.RemoteOperation;
 import dtos.DTO;
+import dtos.auth.AuthResponse;
+import dtos.auth.AuthenticatedDTO;
 import interfaces.ThrowingRunnable;
 
 public abstract class BaseAppClient extends SocketThread {
   protected static final Scanner scanner = new Scanner(System.in);
   protected final Map<
-    AppCommand, ThrowingRunnable<DTO, Exception>
-  > commandHandlers = new HashMap<>();
+    RemoteOperation, ThrowingRunnable<DTO, Exception>
+  > operationHandlers = new HashMap<>();
+
+  private String token = null;
 
   public BaseAppClient(
     Map<SocketComponent, List<SocketData>> connectedSockets,
@@ -24,35 +28,38 @@ public abstract class BaseAppClient extends SocketThread {
   ) {
     super(connectedSockets, socketClientComponent);
 
-    commandHandlers.put(
-      AppCommand.CREATE_ACCOUNT, this::handleCreateAccount
+    operationHandlers.put(
+      RemoteOperation.CREATE_ACCOUNT, this::handleCreateAccount
     );
-    commandHandlers.put(
-      AppCommand.AUTHENTICATE, this::handleAuthenticate
+    operationHandlers.put(
+      RemoteOperation.AUTHENTICATE, this::handleAuthenticate
     );
-    commandHandlers.put(
-      AppCommand.GET_ACCOUNT_DATA, this::handleGetAccountData
+    operationHandlers.put(
+      RemoteOperation.GET_ACCOUNT_DATA, this::handleGetAccountData
     );
-    commandHandlers.put(
-      AppCommand.WITHDRAW, this::handleWithdraw
+    operationHandlers.put(
+      RemoteOperation.WITHDRAW, this::handleWithdraw
     );
-    commandHandlers.put(
-      AppCommand.DEPOSIT, this::handleDeposit
+    operationHandlers.put(
+      RemoteOperation.DEPOSIT, this::handleDeposit
     );
-    commandHandlers.put(
-      AppCommand.WIRE_TRANSFER, this::handleWireTransfer
+    operationHandlers.put(
+      RemoteOperation.WIRE_TRANSFER, this::handleWireTransfer
     );
-    commandHandlers.put(
-      AppCommand.GET_BALANCE, this::handleGetBalance
+    operationHandlers.put(
+      RemoteOperation.GET_BALANCE, this::handleGetBalance
     );
-    commandHandlers.put(
-      AppCommand.GET_SAVINGS_PROJECTIONS, this::handleGetSavingsProjections
+    operationHandlers.put(
+      RemoteOperation.GET_SAVINGS_PROJECTIONS, this::handleGetSavingsProjections
     );
-    commandHandlers.put(
-      AppCommand.GET_FIXED_INCOME_PROJECTIONS, this::handleGetFixedIncomeProjections
+    operationHandlers.put(
+      RemoteOperation.GET_FIXED_INCOME_PROJECTIONS, this::handleGetFixedIncomeProjections
     );
-    commandHandlers.put(
-      AppCommand.UPDATE_FIXED_INCOME, this::handleUpdateFixedIncome
+    operationHandlers.put(
+      RemoteOperation.UPDATE_FIXED_INCOME, this::handleUpdateFixedIncome
+    );
+    operationHandlers.put(
+      RemoteOperation.LOGOUT, this::handleLogout
     );
   }
 
@@ -66,4 +73,18 @@ public abstract class BaseAppClient extends SocketThread {
   protected abstract DTO handleGetSavingsProjections() throws Exception;
   protected abstract DTO handleGetFixedIncomeProjections() throws Exception;
   protected abstract DTO handleUpdateFixedIncome() throws Exception;
+  protected abstract DTO handleLogout() throws Exception;
+
+  protected DTO parseDTOToSend(DTO dtoToSend) {
+    if(token == null) return dtoToSend;
+    return new AuthenticatedDTO(token, dtoToSend);
+  }
+
+  protected void handleAuthResponse(AuthResponse authResponse) {
+    token = authResponse.getToken();
+  }
+
+  protected void handleLogoutResponse() {
+    token = null;
+  }
 }

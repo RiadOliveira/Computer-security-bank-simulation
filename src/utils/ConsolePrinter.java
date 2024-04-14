@@ -9,15 +9,15 @@ public class ConsolePrinter {
   private static final String MOVE_TO_PREVIOUS_LINE = "\033[1A";
   private static final String CLEAR_CURRENT_LINE = "\033[2K";
 
-  private static final String CLIENT_COMMAND_PANEL =
+  private static final String CLIENT_OPERATION_PANEL =
     "Escolha um dos comandos abaixo:\n" +
     "  1. Criar conta\n" + "  2. Autenticar-se\n" +
     "  3. Obter dados da conta\n" + "  4. Sacar\n" +
     "  5. Depositar\n" + "  6. Transferência bancária\n" +
     "  7. Obter saldo\n" + "  8. Obter projeções da poupança\n" +
     "  9. Obter projeções da renda fixa\n" +
-    "  10. Atualizar renda fixa\n" +
-    "  11. Limpar console\n";
+    "  10. Atualizar renda fixa\n" + "  11. Deslogar\n" +
+    "  12. Limpar console\n" + "  13. Sair\n";
 
   private static final String PRESS_ENTER_TO_CONTINUE_MESSAGE = 
     "Pressione Enter para continuar...";
@@ -41,8 +41,8 @@ public class ConsolePrinter {
     System.out.flush();
   }
 
-  public static synchronized void printClientCommandPanel() {
-    println(CLIENT_COMMAND_PANEL);
+  public static synchronized void printClientOperationPanel() {
+    println(CLIENT_OPERATION_PANEL);
     print("Insira o comando desejado: ");
   }
 

@@ -3,15 +3,15 @@ package dtos;
 import java.io.Serializable;
 
 public abstract class DTO implements Serializable {
-  protected AppCommand command = null;
+  protected RemoteOperation operation = null;
 
   public abstract void print();
 
-  public AppCommand getCommand() {
-    return command;
+  public RemoteOperation getOperation() {
+    return operation;
   }
 
-  public void setCommand(AppCommand command) {
-    this.command = command;
+  public void setOperation(RemoteOperation operation) {
+    this.operation = operation;
   }
 }

@@ -7,13 +7,16 @@ import java.util.UUID;
 import connections.SocketThread;
 import connections.components.SocketComponent;
 import connections.data.SocketData;
+import dtos.RemoteOperation;
+import dtos.DTO;
 import dtos.auth.AuthResponse;
 import dtos.auth.AuthenticatedDTO;
+import dtos.generic.OperationDTO;
 import security.crypto.CryptoProcessor;
 import utils.TokenProcessor;
 
 public abstract class BaseFirewall extends SocketThread {
-  private final String TOKEN_SECRET_KEY;
+  private String TOKEN_SECRET_KEY = null;
   private UUID connectedClientId = null;
 
   public BaseFirewall(
@@ -21,11 +24,6 @@ public abstract class BaseFirewall extends SocketThread {
     SocketComponent socketClientComponent
   ) {
     super(connectedSockets, socketClientComponent);
-
-    byte[] gatewayEncodedKey = getComponentHashKey(
-      SocketComponent.GATEWAY
-    ).getEncoded();
-    TOKEN_SECRET_KEY = CryptoProcessor.encodeBase64(gatewayEncodedKey);
   }
 
   protected boolean userIsLogged() {
@@ -33,7 +31,8 @@ public abstract class BaseFirewall extends SocketThread {
   }
 
   protected void handleAuthResponse(AuthResponse authResponse) {
-    this.connectedClientId = authResponse.getUserId();
+    initializeTokenSecretKey();
+    connectedClientId = authResponse.getUserId();
 
     String generatedToken = TokenProcessor.generate(
       TOKEN_SECRET_KEY, connectedClientId
@@ -46,9 +45,26 @@ public abstract class BaseFirewall extends SocketThread {
   ) {
     if(connectedClientId == null) return false;
 
+    initializeTokenSecretKey();
     return TokenProcessor.isValid(
       authenticatedDTO.getToken(), TOKEN_SECRET_KEY,
       connectedClientId
     );
+  }
+
+  protected void handleLogout() throws Exception {
+    connectedClientId = null;
+
+    DTO logoutDTO = new OperationDTO(RemoteOperation.LOGOUT);
+    sendSecureDTO(SocketComponent.CLIENT, logoutDTO);
+  }
+
+  private void initializeTokenSecretKey() {
+    if(TOKEN_SECRET_KEY != null) return;
+
+    byte[] gatewayEncodedKey = getComponentHashKey(
+      SocketComponent.GATEWAY
+    ).getEncoded();
+    TOKEN_SECRET_KEY = CryptoProcessor.encodeBase64(gatewayEncodedKey);
   }
 }

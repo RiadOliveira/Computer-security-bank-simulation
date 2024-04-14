@@ -5,7 +5,7 @@ import connections.components.SocketClient;
 import connections.components.SocketComponent;
 import utils.ConnectionUtils;
 
-public class ClientSimulator {
+public class AppClientSimulator {
   public static void main(String[] args) {
     var firewallConnectionData = ConnectionUtils.getComponentSocketConnectionData(
       SocketComponent.FIREWALL

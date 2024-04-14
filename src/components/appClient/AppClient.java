@@ -5,10 +5,11 @@ import java.util.Map;
 
 import connections.components.SocketComponent;
 import connections.data.SocketData;
-import dtos.AppCommand;
+import dtos.RemoteOperation;
 import dtos.DTO;
 import dtos.auth.AuthRequest;
-import dtos.generic.CommandDTO;
+import dtos.auth.AuthResponse;
+import dtos.generic.OperationDTO;
 import dtos.generic.ValueDTO;
 import dtos.operation.WireTransferDTO;
 import dtos.user.UserData;
@@ -25,15 +26,19 @@ public class AppClient extends BaseAppClient {
 
   @Override
   public void execute() throws Exception {
-    ConsolePrinter.printClientCommandPanel();
-    int commandIndex = Integer.parseInt(scanner.nextLine()) - 1;
+    ConsolePrinter.printClientOperationPanel();
+    int operationIndex = Integer.parseInt(scanner.nextLine()) - 1;
     ConsolePrinter.println("");
 
-    AppCommand[] allCommands = AppCommand.values();
-    boolean clearConsoleCommand = commandIndex == allCommands.length;
+    if(operationIndex < 0) {
+      throw new AppException("Operação escolhida inválida!");
+    }
 
-    if(clearConsoleCommand) ConsolePrinter.clearConsole();
-    else handleAppCommandInput(allCommands[commandIndex]);
+    RemoteOperation[] allOperations = RemoteOperation.values();
+    int localOperationIndex = operationIndex - allOperations.length;
+
+    if(localOperationIndex >= 0) handleLocalOperation(localOperationIndex);
+    else handleRemoteOperationInput(allOperations[operationIndex]);
   }
 
   protected void handleExecutionException(Exception exception) {
@@ -41,19 +46,68 @@ public class AppClient extends BaseAppClient {
 
     if(!isAppException) ConsolePrinter.println("");
     ConsolePrinter.printlnError(
-      isAppException ? exception.getMessage() : "Comando inserido inválido!"
+      isAppException ? exception.getMessage() :
+      "Erro interno do cliente!"
     );
+
     ConsolePrinter.println("");
     ConsolePrinter.displayAndWaitForEnterPressing(scanner);
   }
 
-  private void handleAppCommandInput(AppCommand command) throws Exception {
-    DTO dtoToSend = commandHandlers.get(command).run();
-    sendSecureDTO(SocketComponent.GATEWAY, dtoToSend);
+  private void handleLocalOperation(
+    int operationIndex
+  ) throws Exception {
+    ClientLocalOperation[] allLocalOperations = 
+      ClientLocalOperation.values();
+    if(operationIndex >= allLocalOperations.length) {
+      throw new AppException("Operação escolhida inválida!");
+    }
 
-    receiveSecureDTO(SocketComponent.GATEWAY);
+    ClientLocalOperation operation = allLocalOperations[
+      operationIndex
+    ];
+    switch(operation) {
+      case CLEAR_CONSOLE: {
+        ConsolePrinter.clearConsole();
+        break;
+      }
+      case EXIT: {
+        System.exit(0);
+        break;
+      }
+      default: break;
+    }
+  }
+
+  private void handleRemoteOperationInput(
+    RemoteOperation operation
+  ) throws Exception {
+    DTO dtoToSend = parseDTOToSend(operationHandlers.get(operation).run());
+    sendSecureDTO(SocketComponent.FIREWALL, dtoToSend);
+    
+    DTO receivedDTO = receiveSecureDTO(SocketComponent.FIREWALL);
+    handleResponse(receivedDTO);
+
     ConsolePrinter.displayAndWaitForEnterPressing(scanner);
     ConsolePrinter.println("");
+  }
+
+  private void handleResponse(DTO receivedDTO) {
+    boolean authenticationResponse = AuthResponse.class.isInstance(
+      receivedDTO
+    );
+    if(authenticationResponse) {
+      handleAuthResponse((AuthResponse) receivedDTO);
+      return;
+    }
+
+    boolean logoutResponse = receivedDTO.getOperation().equals(
+      RemoteOperation.LOGOUT
+    );
+    if(logoutResponse) {
+      handleLogoutResponse();
+      return;
+    }
   }
 
   @Override
@@ -68,7 +122,7 @@ public class AppClient extends BaseAppClient {
       inputsReceived[2], inputsReceived[3],
       inputsReceived[4]
     );
-    clientData.setCommand(AppCommand.CREATE_ACCOUNT);
+    clientData.setOperation(RemoteOperation.CREATE_ACCOUNT);
     return clientData;
   }
 
@@ -82,13 +136,13 @@ public class AppClient extends BaseAppClient {
     AuthRequest authData = new AuthRequest(
       inputsReceived[0], inputsReceived[1], inputsReceived[2]
     );
-    authData.setCommand(AppCommand.AUTHENTICATE);
+    authData.setOperation(RemoteOperation.AUTHENTICATE);
     return authData;
   }
 
   @Override
   protected DTO handleGetAccountData() throws Exception {
-    return new CommandDTO(AppCommand.GET_ACCOUNT_DATA);
+    return new OperationDTO(RemoteOperation.GET_ACCOUNT_DATA);
   }
 
   @Override
@@ -99,7 +153,7 @@ public class AppClient extends BaseAppClient {
 
     double withdrawValue = Double.parseDouble(inputsReceived[0]);
     ValueDTO withdrawData = new ValueDTO(withdrawValue);
-    withdrawData.setCommand(AppCommand.WITHDRAW);
+    withdrawData.setOperation(RemoteOperation.WITHDRAW);
 
     return withdrawData;
   }
@@ -112,7 +166,7 @@ public class AppClient extends BaseAppClient {
 
     double depositValue = Double.parseDouble(inputsReceived[0]);
     ValueDTO depositData = new ValueDTO(depositValue);
-    depositData.setCommand(AppCommand.DEPOSIT);
+    depositData.setOperation(RemoteOperation.DEPOSIT);
 
     return depositData;
   }
@@ -130,24 +184,24 @@ public class AppClient extends BaseAppClient {
     WireTransferDTO wireTransferData = new WireTransferDTO(
       transferValue, inputsReceived[0], inputsReceived[1]
     );
-    wireTransferData.setCommand(AppCommand.WIRE_TRANSFER);
+    wireTransferData.setOperation(RemoteOperation.WIRE_TRANSFER);
 
     return wireTransferData;
   }
 
   @Override
   protected DTO handleGetBalance() throws Exception {
-    return new CommandDTO(AppCommand.GET_BALANCE);
+    return new OperationDTO(RemoteOperation.GET_BALANCE);
   }
 
   @Override
   protected DTO handleGetSavingsProjections() throws Exception {
-    return new CommandDTO(AppCommand.GET_SAVINGS_PROJECTIONS);
+    return new OperationDTO(RemoteOperation.GET_SAVINGS_PROJECTIONS);
   }
 
   @Override
   protected DTO handleGetFixedIncomeProjections() throws Exception {
-    return new CommandDTO(AppCommand.GET_FIXED_INCOME_PROJECTIONS);
+    return new OperationDTO(RemoteOperation.GET_FIXED_INCOME_PROJECTIONS);
   }
 
   @Override
@@ -159,8 +213,13 @@ public class AppClient extends BaseAppClient {
 
     double fixedIncomeUpdateValue = Double.parseDouble(inputsReceived[0]);
     ValueDTO fixedIncomeUpdateData = new ValueDTO(fixedIncomeUpdateValue);
-    fixedIncomeUpdateData.setCommand(AppCommand.UPDATE_FIXED_INCOME);
+    fixedIncomeUpdateData.setOperation(RemoteOperation.UPDATE_FIXED_INCOME);
 
     return fixedIncomeUpdateData;
+  }
+
+  @Override
+  protected DTO handleLogout() throws Exception {
+    return new OperationDTO(RemoteOperation.LOGOUT);
   }
 }

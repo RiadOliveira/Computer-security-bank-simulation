@@ -5,7 +5,7 @@ import java.util.Map;
 
 import connections.components.SocketComponent;
 import connections.data.SocketData;
-import dtos.AppCommand;
+import dtos.RemoteOperation;
 import dtos.DTO;
 import dtos.auth.AuthResponse;
 import dtos.auth.AuthenticatedDTO;
@@ -24,10 +24,19 @@ public class Firewall extends BaseFirewall {
   @Override
   protected void execute() throws Exception {
     DTO receivedDTO = receiveSecureDTO(SocketComponent.CLIENT);
+
+    boolean isLogout = receivedDTO.getOperation().equals(
+      RemoteOperation.LOGOUT
+    );
+    if(isLogout) {
+      handleLogout();
+      return;
+    }
+
     boolean isAuthenticatedDTO = AuthenticatedDTO.class.isInstance(
       receivedDTO
     );
-    throwsExceptionIfInvalidCommandRequested(
+    throwsExceptionIfInvalidOperationRequested(
       receivedDTO, isAuthenticatedDTO
     );
 
@@ -49,11 +58,11 @@ public class Firewall extends BaseFirewall {
     }
   }
 
-  private void throwsExceptionIfInvalidCommandRequested(
+  private void throwsExceptionIfInvalidOperationRequested(
     DTO receivedDTO, boolean isAuthenticatedDTO
   ) throws Exception {
-    AppCommand command = receivedDTO.getCommand();
-    boolean requiresAuthentication = commandRequiresAuth(command);
+    RemoteOperation operation = receivedDTO.getOperation();
+    boolean requiresAuthentication = operationRequiresAuth(operation);
     if(!requiresAuthentication) return;
 
     if(!userIsLogged()) {
@@ -71,9 +80,9 @@ public class Firewall extends BaseFirewall {
     }
   }
 
-  private boolean commandRequiresAuth(AppCommand command) {
-    boolean isCreateAccount = command.equals(AppCommand.CREATE_ACCOUNT);
-    boolean isAuthenticate = command.equals(AppCommand.AUTHENTICATE);
+  private boolean operationRequiresAuth(RemoteOperation operation) {
+    boolean isCreateAccount = operation.equals(RemoteOperation.CREATE_ACCOUNT);
+    boolean isAuthenticate = operation.equals(RemoteOperation.AUTHENTICATE);
 
     return !isCreateAccount && !isAuthenticate;
   }

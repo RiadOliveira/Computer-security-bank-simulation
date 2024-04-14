@@ -24,6 +24,7 @@ public class AuthResponse extends DTO {
   @Override
   public void print() {
     ConsolePrinter.println("Id: " + userId);
+    ConsolePrinter.println("Token: " + token);
     ConsolePrinter.println("Dados do usuário:");
     userData.print(2);
   }
