@@ -8,20 +8,20 @@ import java.util.Map;
 
 import connections.SocketProcess;
 import connections.SocketThread;
-import connections.data.SocketClientData;
+import connections.data.SocketConnectionData;
 import connections.data.SocketData;
 import utils.ConnectionUtils;
 import utils.ConsolePrinter;
 
 public class SocketClient extends SocketProcess {
-  private final SocketClientData data;
+  private final SocketConnectionData serverToConnect;
 
   public SocketClient(
     Class<? extends SocketThread> socketThreadClass,
-    SocketClientData data
+    SocketConnectionData serverToConnect
   ) {
     super(socketThreadClass);
-    this.data = data;
+    this.serverToConnect = serverToConnect;
   }
 
   @Override
@@ -29,10 +29,8 @@ public class SocketClient extends SocketProcess {
     ConsolePrinter.println("Cliente iniciado!\n");
 
     try {
-      var serverToConnect = data.getServerToConnect();
       Socket serverSocket = ConnectionUtils.connectToSocketServerWithRetry(
-        serverToConnect.getAddress(), serverToConnect.getPort(),
-        data.getPortToConnectToServer()
+        serverToConnect.getAddress(), serverToConnect.getPort()
       );
       
       handleConnection(serverSocket);
@@ -54,7 +52,7 @@ public class SocketClient extends SocketProcess {
   ) throws Exception {
     Map<SocketComponent, List<SocketData>> connectedSockets = new HashMap<>();
     connectedSockets.put(
-      data.getServerToConnect().getComponent(),
+      serverToConnect.getComponent(),
       new ArrayList<>(List.of(new SocketData(serverSocket)))
     );
 

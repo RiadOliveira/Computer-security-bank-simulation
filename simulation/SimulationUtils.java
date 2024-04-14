@@ -12,11 +12,28 @@ public class SimulationUtils {
     SocketComponent component, SocketComponent clientComponent,
     SocketConnectionData[] serversToConnect
   ) {
+    return generateSocketServerData(
+      component, 0, clientComponent, serversToConnect
+    );
+  }
+
+  public static SocketServerData generateSocketServerData(
+    SocketComponent component, int replicaIndex, SocketComponent clientComponent,
+    SocketConnectionData[] serversToConnect
+  ) {
     return new SocketServerData(
-      ConnectionUtils.getComponentServerPort(component),
-      ConnectionUtils.getComponentClientPort(component),
+      ConnectionUtils.getComponentPort(component, replicaIndex),
       clientComponent, ConnectionUtils.getComponentAddress(clientComponent),
       serversToConnect
+    );
+  }
+
+  public static SocketConnectionData generateSocketConnectionData(
+    SocketComponent component, int replicaIndex
+  ) {
+    return new SocketConnectionData(
+      component, ConnectionUtils.getComponentAddress(component),
+      ConnectionUtils.getComponentPort(component, replicaIndex)
     );
   }
 }

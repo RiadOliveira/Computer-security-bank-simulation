@@ -97,7 +97,7 @@ public class SocketServer extends SocketProcess {
 
     for(SocketConnectionData server : serversToConnect) {
       Future<Socket> request = ConnectionUtils.asynchronouslyConnectToSocketServerWithRetry(
-        server.getAddress(), server.getPort(), data.getPortToConnectToOtherServers()
+        server.getAddress(), server.getPort()
       );
       socketRequests.add(request);
     }
