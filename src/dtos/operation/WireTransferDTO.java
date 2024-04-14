@@ -4,8 +4,8 @@ import dtos.generic.ValueDTO;
 import utils.ConsolePrinter;
 
 public class WireTransferDTO extends ValueDTO {
-  protected final String targetAgency;
-  protected final String targetAccountNumber;
+  private final String targetAgency;
+  private final String targetAccountNumber;
 
   public WireTransferDTO(
     double value, String targetAgency,

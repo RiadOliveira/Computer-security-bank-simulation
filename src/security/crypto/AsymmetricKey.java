@@ -13,8 +13,7 @@ public class AsymmetricKey implements Serializable {
 
   @Override
   public String toString() {
-    return "Exponent: " + exponent +
-      "\nModulus: " + modulus;
+    return "Exponent: " + exponent + "\nModulus: " + modulus;
   }
 
   public BigInteger getExponent() {

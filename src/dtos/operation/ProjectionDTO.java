@@ -5,7 +5,7 @@ import utils.ConsolePrinter;
 import utils.ValueFormatter;
 
 public class ProjectionDTO extends ValueDTO {
-  protected final int months;
+  private final int months;
 
   public ProjectionDTO(double value, int months) {
     super(value);

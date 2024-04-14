@@ -1,16 +1,16 @@
-package dtos.account;
+package dtos.user;
 
 import dtos.DTO;
 import utils.ConsolePrinter;
 
-public class ClientData extends DTO {
-  protected final String name;
-  protected final String cpf;
-  protected final String address;
-  protected final String phoneNumber;
-  protected String password;
+public class UserData extends DTO {
+  private final String name;
+  private final String cpf;
+  private final String address;
+  private final String phoneNumber;
+  private String password;
 
-  public ClientData(
+  public UserData(
     String name, String cpf,
     String address, String phoneNumber,
     String password

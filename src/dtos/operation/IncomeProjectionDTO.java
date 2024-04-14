@@ -5,8 +5,8 @@ import utils.ConsolePrinter;
 import utils.ValueFormatter;
 
 public class IncomeProjectionDTO extends ValueDTO {
-  protected final double yieldPercentage;
-  protected final ProjectionDTO[] projections;
+  private final double yieldPercentage;
+  private final ProjectionDTO[] projections;
 
   public IncomeProjectionDTO(
     double value, double yieldPercentage,

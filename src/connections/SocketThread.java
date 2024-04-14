@@ -6,6 +6,8 @@ import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.Map;
 
+import javax.crypto.SecretKey;
+
 import connections.components.SocketComponent;
 import connections.data.SocketData;
 import dtos.DTO;
@@ -63,12 +65,12 @@ public abstract class SocketThread implements Runnable {
   }
 
   protected void sendSecureDTO(
-    SocketComponent component, int socketIndex, DTO dto
+    SocketComponent component, int replicaIndex, DTO dto
   ) throws Exception {
     ObjectOutputStream outputStream = getSocketData(
-      component, socketIndex
+      component, replicaIndex
     ).getOutputStream();
-    var socketData = getConnectedSocketData(component, socketIndex);
+    var socketData = getConnectedSocketData(component, replicaIndex);
 
     String packedDTO = ObjectPacker.packObject(
       dto, socketData.getSymmetricKeys(),
@@ -86,12 +88,12 @@ public abstract class SocketThread implements Runnable {
   }
 
   protected DTO receiveSecureDTO(
-    SocketComponent component, int socketIndex
+    SocketComponent component, int replicaIndex
   ) throws Exception {
     ObjectInputStream inputStream = getSocketData(
-      component, socketIndex
+      component, replicaIndex
     ).getInputStream();
-    var socketData = getConnectedSocketData(component, socketIndex);
+    var socketData = getConnectedSocketData(component, replicaIndex);
 
     String packedDTO = (String) inputStream.readObject();
     DTO dto = ObjectPacker.unpackObject(
@@ -103,13 +105,25 @@ public abstract class SocketThread implements Runnable {
     return dto;
   }
 
+  protected SecretKey getComponentHashKey(SocketComponent component) {
+    return getComponentHashKey(component, 0);
+  }
+
+  protected SecretKey getComponentHashKey(
+    SocketComponent component, int replicaIndex
+  ) {
+    return connectedSockets.get(component).get(
+      replicaIndex
+    ).getSymmetricKeys().getHashKey();
+  }
+
   private SocketData getSocketData(
-    SocketComponent component, int socketIndex
+    SocketComponent component, int replicaIndex
   ) {
     var socketsData = connectedSockets.get(component);
     if(socketsData == null) return null;
 
-    return socketsData.get(socketIndex);
+    return socketsData.get(replicaIndex);
   }
 
   private void printTransmissionDTO(
@@ -124,11 +138,11 @@ public abstract class SocketThread implements Runnable {
   }
 
   private SocketData getConnectedSocketData(
-    SocketComponent component, int socketIndex
+    SocketComponent component, int replicaIndex
   ) {
     var componentSockets = connectedSockets.get(component);
     if(componentSockets == null) return null;
 
-    return componentSockets.get(socketIndex);
+    return componentSockets.get(replicaIndex);
   }
 }

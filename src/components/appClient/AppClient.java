@@ -7,11 +7,11 @@ import connections.components.SocketComponent;
 import connections.data.SocketData;
 import dtos.AppCommand;
 import dtos.DTO;
-import dtos.account.AuthData;
-import dtos.account.ClientData;
+import dtos.auth.AuthRequest;
 import dtos.generic.CommandDTO;
 import dtos.generic.ValueDTO;
 import dtos.operation.WireTransferDTO;
+import dtos.user.UserData;
 import errors.AppException;
 import utils.ConsolePrinter;
 
@@ -63,7 +63,7 @@ public class AppClient extends BaseAppClient {
       scanner
     );
 
-    ClientData clientData = new ClientData(
+    UserData clientData = new UserData(
       inputsReceived[0], inputsReceived[1],
       inputsReceived[2], inputsReceived[3],
       inputsReceived[4]
@@ -79,7 +79,7 @@ public class AppClient extends BaseAppClient {
       scanner
     );
 
-    AuthData authData = new AuthData(
+    AuthRequest authData = new AuthRequest(
       inputsReceived[0], inputsReceived[1], inputsReceived[2]
     );
     authData.setCommand(AppCommand.AUTHENTICATE);

@@ -4,7 +4,7 @@ import java.security.MessageDigest;
 
 import security.crypto.CryptoProcessor;
 
-public class PasswordHasher {
+public class Hasher {
   private static final String SHA3_INSTANCE_NAME = "SHA3-256";
   private static MessageDigest messageDigest;
 
@@ -18,14 +18,12 @@ public class PasswordHasher {
     }
   }
 
-  public static String hashAndEncode(String password) {
-    byte[] hashedBytes = messageDigest.digest(password.getBytes());
-    return CryptoProcessor.encodeBase64(hashedBytes);
+  public static boolean compare(String hashedContent, String content) {
+    return hashedContent.equals(hashAndEncode(content));
   }
 
-  public static boolean passwordsAreEqual(
-    String hashedFirstPassword, String secondPassword
-  ) {
-    return hashedFirstPassword.equals(hashAndEncode(secondPassword));
+  public static String hashAndEncode(String content) {
+    byte[] hashedBytes = messageDigest.digest(content.getBytes());
+    return CryptoProcessor.encodeBase64(hashedBytes);
   }
 }

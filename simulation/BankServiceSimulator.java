@@ -35,7 +35,7 @@ public class BankServiceSimulator {
     } catch(Exception exception) {
       System.out.println(
         "Forneça um index de réplica válido (entre 0 e " +
-        SimulationUtils.BANK_SERVICE_INSTANCES_QUANTITY +
+        (SimulationUtils.BANK_SERVICE_INSTANCES_QUANTITY - 1) +
         ")!"
       );
     } 
