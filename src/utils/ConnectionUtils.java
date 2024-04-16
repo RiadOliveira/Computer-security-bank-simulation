@@ -14,7 +14,7 @@ import connections.data.SocketConnectionData;
 
 public class ConnectionUtils {
   public static final String ANY_IP_ADDRESS = "0.0.0.0";
-  private static final String LOCAL_HOST = "192.168.137.222";
+  private static final String LOCAL_HOST = "127.0.0.1";
 
   private static final int WAIT_TIME_TO_TRY_RECONNECTION = 3;
 
