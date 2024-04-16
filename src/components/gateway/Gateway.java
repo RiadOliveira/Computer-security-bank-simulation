@@ -7,36 +7,53 @@ import connections.components.SocketComponent;
 import connections.data.SocketData;
 import dtos.DTO;
 import dtos.RemoteOperation;
+import dtos.generic.MessageDTO;
 
 public class Gateway extends BaseGateway {
   public Gateway(
-      Map<SocketComponent, List<SocketData>> connectedSockets,
-      SocketComponent socketClientComponent) {
+    Map<SocketComponent, List<SocketData>> connectedSockets,
+    SocketComponent socketClientComponent
+  ) {
     super(connectedSockets, socketClientComponent);
   }
 
   @Override
   protected void execute() throws Exception {
     DTO receivedDTO = receiveSecureDTO(SocketComponent.FIREWALL);
-    handleReceivedDTO(receivedDTO);
-  }
-
-  private void handleReceivedDTO(DTO receivedDTO) throws Exception{
     RemoteOperation operation = receivedDTO.getOperation();
 
-    if(operationRequiresAuth(operation)){
-      
+    SocketComponent componentToRedirect = getComponentToRedirect(operation);
+    int replicasQuantity = getComponentReplicasQuantity(componentToRedirect);
+    
+    for(int ind=0 ; ind<replicasQuantity ; ind++) {
+      sendSecureDTO(componentToRedirect, ind, receivedDTO);
     }
-  }
 
-  private boolean operationRequiresAuth(RemoteOperation operation) {
-    boolean isCreateAccount = operation.equals(RemoteOperation.CREATE_ACCOUNT);
-    boolean isAuthenticate = operation.equals(RemoteOperation.AUTHENTICATE);
+    //Needs to be handled
+    for(int ind=0 ; ind<replicasQuantity ; ind++) {
+      DTO replicaResponse = receiveSecureDTO(componentToRedirect, ind);
+    }
 
-    return !isCreateAccount && !isAuthenticate;
+    sendSecureDTO(
+      SocketComponent.FIREWALL,
+      new MessageDTO("Insert response instead of this DTO")
+    );
   }
 
   @Override
   protected void handleExecutionException(Exception exception) {
+    executeDefaultExceptionHandling(exception);
+  }
+
+  private SocketComponent getComponentToRedirect(RemoteOperation operation) {
+    if(isForAuthenticationService(operation)) return SocketComponent.AUTHENTICATION_SERVICE;
+    return SocketComponent.BANK_SERVICE;
+  }
+
+  private boolean isForAuthenticationService(RemoteOperation operation) {
+    boolean isCreateAccount = operation.equals(RemoteOperation.CREATE_ACCOUNT);
+    boolean isAuthenticate = operation.equals(RemoteOperation.AUTHENTICATE);
+
+    return isCreateAccount || isAuthenticate;
   }
 }

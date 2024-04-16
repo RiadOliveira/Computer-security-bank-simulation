@@ -164,6 +164,10 @@ public abstract class SocketThread implements Runnable {
     ).getSymmetricKeys().getHashKey();
   }
 
+  protected int getComponentReplicasQuantity(SocketComponent component) {
+    return connectedSockets.get(component).size();
+  }
+
   private void printTransmissionDTO(
     DTO dto, boolean isBeingSent
   ) {
