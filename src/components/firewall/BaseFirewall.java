@@ -52,6 +52,12 @@ public abstract class BaseFirewall extends SocketThread {
     );
   }
 
+  protected void parseAuthenticatedDTO(
+    AuthenticatedDTO authenticatedDTO
+  ) {
+    authenticatedDTO.setUserId(connectedClientId);
+  }
+
   protected void handleLogout() throws Exception {
     connectedClientId = null;
 

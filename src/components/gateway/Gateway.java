@@ -17,7 +17,7 @@ public class Gateway extends BaseGateway {
 
   @Override
   protected void execute() throws Exception {
-    DTO receivedDTO = receiveDTO(SocketComponent.FIREWALL);
+    DTO receivedDTO = receiveSecureDTO(SocketComponent.FIREWALL);
     handleReceivedDTO(receivedDTO);
   }
 
