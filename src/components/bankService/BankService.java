@@ -5,11 +5,8 @@ import java.util.Map;
 
 import connections.components.SocketComponent;
 import connections.data.SocketData;
-import dtos.user.BankAccount;
 
 public class BankService extends BaseBankService {
-  private BankAccount loggedAccount = null;
-  
   public BankService(
     Map<SocketComponent, List<SocketData>> connectedSockets,
     SocketComponent socketClientComponent

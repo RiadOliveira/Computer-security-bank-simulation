@@ -32,7 +32,7 @@ public abstract class BaseFirewall extends SocketThread {
 
   protected void handleAuthResponse(AuthResponse authResponse) {
     initializeTokenSecretKey();
-    connectedClientId = authResponse.getUserId();
+    connectedClientId = authResponse.getUserData().getId();
 
     String generatedToken = TokenProcessor.generate(
       TOKEN_SECRET_KEY, connectedClientId

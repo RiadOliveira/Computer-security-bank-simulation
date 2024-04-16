@@ -29,51 +29,51 @@ public abstract class BaseAppClient extends SocketThread {
     super(connectedSockets, socketClientComponent);
 
     operationHandlers.put(
-      RemoteOperation.CREATE_ACCOUNT, this::handleCreateAccount
+      RemoteOperation.CREATE_ACCOUNT, this::createAccount
     );
     operationHandlers.put(
-      RemoteOperation.AUTHENTICATE, this::handleAuthenticate
+      RemoteOperation.AUTHENTICATE, this::authenticate
     );
     operationHandlers.put(
-      RemoteOperation.GET_ACCOUNT_DATA, this::handleGetAccountData
+      RemoteOperation.GET_ACCOUNT_DATA, this::getAccountData
     );
     operationHandlers.put(
-      RemoteOperation.WITHDRAW, this::handleWithdraw
+      RemoteOperation.WITHDRAW, this::withdraw
     );
     operationHandlers.put(
-      RemoteOperation.DEPOSIT, this::handleDeposit
+      RemoteOperation.DEPOSIT, this::deposit
     );
     operationHandlers.put(
-      RemoteOperation.WIRE_TRANSFER, this::handleWireTransfer
+      RemoteOperation.WIRE_TRANSFER, this::wireTransfer
     );
     operationHandlers.put(
-      RemoteOperation.GET_BALANCE, this::handleGetBalance
+      RemoteOperation.GET_BALANCE, this::getBalance
     );
     operationHandlers.put(
-      RemoteOperation.GET_SAVINGS_PROJECTIONS, this::handleGetSavingsProjections
+      RemoteOperation.GET_SAVINGS_PROJECTIONS, this::getSavingsProjections
     );
     operationHandlers.put(
-      RemoteOperation.GET_FIXED_INCOME_PROJECTIONS, this::handleGetFixedIncomeProjections
+      RemoteOperation.GET_FIXED_INCOME_PROJECTIONS, this::getFixedIncomeProjections
     );
     operationHandlers.put(
-      RemoteOperation.UPDATE_FIXED_INCOME, this::handleUpdateFixedIncome
+      RemoteOperation.UPDATE_FIXED_INCOME, this::updateFixedIncome
     );
     operationHandlers.put(
-      RemoteOperation.LOGOUT, this::handleLogout
+      RemoteOperation.LOGOUT, this::logout
     );
   }
 
-  protected abstract DTO handleCreateAccount() throws Exception;
-  protected abstract DTO handleAuthenticate() throws Exception;
-  protected abstract DTO handleGetAccountData() throws Exception;
-  protected abstract DTO handleWithdraw() throws Exception;
-  protected abstract DTO handleDeposit() throws Exception;
-  protected abstract DTO handleWireTransfer() throws Exception;
-  protected abstract DTO handleGetBalance() throws Exception;
-  protected abstract DTO handleGetSavingsProjections() throws Exception;
-  protected abstract DTO handleGetFixedIncomeProjections() throws Exception;
-  protected abstract DTO handleUpdateFixedIncome() throws Exception;
-  protected abstract DTO handleLogout() throws Exception;
+  protected abstract DTO createAccount() throws Exception;
+  protected abstract DTO authenticate() throws Exception;
+  protected abstract DTO getAccountData() throws Exception;
+  protected abstract DTO withdraw() throws Exception;
+  protected abstract DTO deposit() throws Exception;
+  protected abstract DTO wireTransfer() throws Exception;
+  protected abstract DTO getBalance() throws Exception;
+  protected abstract DTO getSavingsProjections() throws Exception;
+  protected abstract DTO getFixedIncomeProjections() throws Exception;
+  protected abstract DTO updateFixedIncome() throws Exception;
+  protected abstract DTO logout() throws Exception;
 
   protected DTO parseDTOToSend(DTO dtoToSend) {
     if(token == null) return dtoToSend;

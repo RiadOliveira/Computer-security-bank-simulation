@@ -8,30 +8,28 @@ import utils.NumberStringGenerator;
 import utils.ValueFormatter;
 
 public class BankAccount extends DTO {
-  private final UserData userData;
-
-  private UUID id;
-  private String agency;
-  private String accountNumber;
+  private final UUID userId;
+  private final String agency;
+  private final String accountNumber;
 
   private double balance = 0;
   private double fixedIncome = 0;
 
   public BankAccount(
-    String agency, String accountNumber,
-    double balance, double fixedIncome,
-    UserData userData
+    UUID userId, String agency, String accountNumber,
+    double balance, double fixedIncome
   ) {
+    this.userId = userId;
     this.agency = agency;
     this.accountNumber = accountNumber;
     this.balance = balance;
     this.fixedIncome = fixedIncome;
-    this.userData = userData;
   }
 
-  public BankAccount(UserData userData) {
-    this.userData = userData;
-    generateDatabaseData();
+  public BankAccount(UUID userId) {
+    this.userId = userId;
+    this.agency = NumberStringGenerator.generate(4);
+    this.accountNumber = NumberStringGenerator.generate(8);
   }
 
   @Override
@@ -39,7 +37,7 @@ public class BankAccount extends DTO {
     String propertySpaces = "  ";
 
     ConsolePrinter.println("Dados da conta: ");
-    ConsolePrinter.println(propertySpaces + "Id: " + id);
+    ConsolePrinter.println(propertySpaces + "UserId: " + userId);
     ConsolePrinter.println(propertySpaces + "Agência: " + agency);
     ConsolePrinter.println(
       propertySpaces + "Número da conta: " + accountNumber
@@ -52,21 +50,10 @@ public class BankAccount extends DTO {
       propertySpaces + "Renda fixa: " +
       ValueFormatter.formatToBrazilianCurrency(fixedIncome)
     );
-    userData.print(2);
   }
 
-  public void generateDatabaseData() {
-    this.id = UUID.randomUUID();
-    this.agency = NumberStringGenerator.generate(4);
-    this.accountNumber = NumberStringGenerator.generate(8);
-  }
-
-  public UserData getUserData() {
-    return userData;
-  }
-
-  public UUID getId() {
-    return id;
+  public UUID getUserId() {
+    return userId;
   }
 
   public String getAgency() {

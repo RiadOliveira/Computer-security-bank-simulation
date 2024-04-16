@@ -11,6 +11,8 @@ import javax.crypto.SecretKey;
 import connections.components.SocketComponent;
 import connections.data.SocketData;
 import dtos.DTO;
+import dtos.generic.ExceptionDTO;
+import errors.AppException;
 import security.ObjectPacker;
 import utils.ConsolePrinter;
 
@@ -19,21 +21,22 @@ public abstract class SocketThread implements Runnable {
   private final SocketComponent socketClientComponent;
 
   public SocketThread(
-      Map<SocketComponent, List<SocketData>> connectedSockets,
-      SocketComponent socketClientComponent) {
+    Map<SocketComponent, List<SocketData>> connectedSockets,
+    SocketComponent socketClientComponent
+  ) {
     this.connectedSockets = connectedSockets;
     this.socketClientComponent = socketClientComponent;
   }
 
   protected abstract void execute() throws Exception;
-
   protected abstract void handleExecutionException(Exception exception);
 
   @Override
   public void run() {
     try {
       SocketsInitializer.initializeConnectedSockets(
-          connectedSockets, socketClientComponent);
+        connectedSockets, socketClientComponent
+      );
       handleExecution();
     } catch (Exception exception) {
       ConsolePrinter.println("Erro interno da thread!");
@@ -49,58 +52,80 @@ public abstract class SocketThread implements Runnable {
       } catch (Exception exception) {
         socketDisconnected = exception instanceof EOFException;
 
-        if (!socketDisconnected)
-          handleExecutionException(exception);
-        else
-          ConsolePrinter.printlnError(
-              "Conexão com o socket perdida, finalizando thread...\n");
+        if (!socketDisconnected) handleExecutionException(exception);
+        else ConsolePrinter.printlnError(
+          "Conexão com o socket perdida, finalizando thread...\n"
+        );
       }
     }
   }
 
+  protected void executeDefaultExceptionHandling(
+    Exception exception
+  ) {
+    try {
+      String errorMessage = exception instanceof AppException ?
+        exception.getMessage() : "Falha ao realizar operação!";
+
+      ExceptionDTO exceptionDTO = new ExceptionDTO(errorMessage);
+      sendSecureDTO(socketClientComponent, exceptionDTO);
+    } catch (Exception e) {
+      ConsolePrinter.printlnError("Falha ao se comunicar com o componente!");
+    }
+  }
+
   // protected void sendSecureDTO(
-  //     SocketComponent component, DTO dto) throws Exception {
+  //   SocketComponent component, DTO dto
+  // ) throws Exception {
   //   sendSecureDTO(component, 0, dto);
   // }
 
   // protected void sendSecureDTO(
-  //     SocketComponent component, int replicaIndex, DTO dto) throws Exception {
+  //   SocketComponent component, int replicaIndex, DTO dto
+  // ) throws Exception {
   //   var socketData = getConnectedSocketData(component, replicaIndex);
   //   ObjectOutputStream outputStream = socketData.getOutputStream();
 
   //   String packedDTO = ObjectPacker.packObject(
-  //       dto, socketData.getSymmetricKeys(),
-  //       SocketProcess.getPrivateKey());
+  //     dto, socketData.getSymmetricKeys(),
+  //     SocketProcess.getPrivateKey()
+  //   );
   //   outputStream.writeObject(packedDTO);
 
   //   printTransmissionDTO(dto, true);
   // }
 
   // protected DTO receiveSecureDTO(
-  //     SocketComponent component) throws Exception {
+  //   SocketComponent component
+  // ) throws Exception {
   //   return receiveSecureDTO(component, 0);
   // }
 
   // protected DTO receiveSecureDTO(
-  //     SocketComponent component, int replicaIndex) throws Exception {
+  //   SocketComponent component, int replicaIndex
+  // ) throws Exception {
   //   var socketData = getConnectedSocketData(component, replicaIndex);
   //   ObjectInputStream inputStream = socketData.getInputStream();
 
   //   String packedDTO = (String) inputStream.readObject();
   //   DTO dto = ObjectPacker.unpackObject(
-  //       packedDTO, socketData.getSymmetricKeys(),
-  //       socketData.getPublicKey());
+  //     packedDTO, socketData.getSymmetricKeys(),
+  //     socketData.getPublicKey()
+  //   );
 
   //   printTransmissionDTO(dto, false);
   //   return dto;
   // }
 
-  protected void sendSecureDTO(SocketComponent component, DTO dto) throws Exception {
+  protected void sendSecureDTO(
+    SocketComponent component, DTO dto
+  ) throws Exception {
     sendSecureDTO(component, 0, dto);
   }
 
   protected void sendSecureDTO(
-      SocketComponent component, int replicaIndex, DTO dto) throws Exception {
+    SocketComponent component, int replicaIndex, DTO dto
+  ) throws Exception {
     var socketData = getConnectedSocketData(component, replicaIndex);
     ObjectOutputStream outputStream = socketData.getOutputStream();
 
@@ -115,7 +140,8 @@ public abstract class SocketThread implements Runnable {
   }
 
   protected DTO receiveSecureDTO(
-      SocketComponent component, int replicaIndex) throws Exception {
+    SocketComponent component, int replicaIndex
+  ) throws Exception {
     var socketData = getConnectedSocketData(component, replicaIndex);
     ObjectInputStream inputStream = socketData.getInputStream();
 
@@ -131,25 +157,28 @@ public abstract class SocketThread implements Runnable {
   }
 
   protected SecretKey getComponentHashKey(
-      SocketComponent component, int replicaIndex) {
+    SocketComponent component, int replicaIndex
+  ) {
     return connectedSockets.get(component).get(
-        replicaIndex).getSymmetricKeys().getHashKey();
+      replicaIndex
+    ).getSymmetricKeys().getHashKey();
   }
 
   private void printTransmissionDTO(
-      DTO dto, boolean isBeingSent) {
+    DTO dto, boolean isBeingSent
+  ) {
     ConsolePrinter.println(
-        "Dados " +
-            (isBeingSent ? "enviados" : "recebidos") + ":");
+      "Dados " + (isBeingSent ? "enviados" : "recebidos") + ":"
+    );
     dto.print();
     ConsolePrinter.println("");
   }
 
   private SocketData getConnectedSocketData(
-      SocketComponent component, int replicaIndex) {
+    SocketComponent component, int replicaIndex
+  ) {
     var componentSockets = connectedSockets.get(component);
-    if (componentSockets == null)
-      return null;
+    if(componentSockets == null) return null;
 
     return componentSockets.get(replicaIndex);
   }

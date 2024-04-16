@@ -9,9 +9,6 @@ import dtos.RemoteOperation;
 import dtos.DTO;
 import dtos.auth.AuthResponse;
 import dtos.auth.AuthenticatedDTO;
-import dtos.generic.ExceptionDTO;
-import errors.AppException;
-import utils.ConsolePrinter;
 
 public class Firewall extends BaseFirewall {
   public Firewall(
@@ -44,15 +41,7 @@ public class Firewall extends BaseFirewall {
 
   @Override
   protected void handleExecutionException(Exception exception) {
-    try {
-      String errorMessage = exception instanceof AppException ?
-        exception.getMessage() : "Falha ao realizar operação!";
-
-      ExceptionDTO exceptionDTO = new ExceptionDTO(errorMessage);
-      sendSecureDTO(SocketComponent.CLIENT, exceptionDTO);
-    } catch (Exception e) {
-      ConsolePrinter.printlnError("Falha ao se comunicar com o cliente!");
-    }
+    executeDefaultExceptionHandling(exception);
   }
 
   private void throwsExceptionIfInvalidOperationRequested(

@@ -37,8 +37,8 @@ public class AppClient extends BaseAppClient {
     RemoteOperation[] allOperations = RemoteOperation.values();
     int localOperationIndex = operationIndex - allOperations.length;
 
-    if (localOperationIndex >= 0) handleLocalOperation(localOperationIndex);
-    else handleRemoteOperationInput(allOperations[operationIndex]);
+    if (localOperationIndex >= 0) LocalOperation(localOperationIndex);
+    else RemoteOperationInput(allOperations[operationIndex]);
   }
 
   protected void handleExecutionException(Exception exception) {
@@ -53,7 +53,7 @@ public class AppClient extends BaseAppClient {
     ConsolePrinter.displayAndWaitForEnterPressing(scanner);
   }
 
-  private void handleLocalOperation(int operationIndex) throws Exception {
+  private void LocalOperation(int operationIndex) throws Exception {
     ClientLocalOperation[] allLocalOperations = ClientLocalOperation.values();
     if (operationIndex >= allLocalOperations.length) {
       throw new AppException("Operação escolhida inválida!");
@@ -73,20 +73,20 @@ public class AppClient extends BaseAppClient {
     }
   }
 
-  private void handleRemoteOperationInput(
+  private void RemoteOperationInput(
     RemoteOperation operation
   ) throws Exception {
     DTO dtoToSend = parseDTOToSend(operationHandlers.get(operation).run());
     sendSecureDTO(SocketComponent.FIREWALL, dtoToSend);
 
     DTO receivedDTO = receiveSecureDTO(SocketComponent.FIREWALL);
-    handleResponse(receivedDTO);
+    Response(receivedDTO);
 
     ConsolePrinter.displayAndWaitForEnterPressing(scanner);
     ConsolePrinter.println("");
   }
 
-  private void handleResponse(DTO receivedDTO) {
+  private void Response(DTO receivedDTO) {
     boolean authenticationResponse = AuthResponse.class.isInstance(
       receivedDTO
     );
@@ -105,7 +105,7 @@ public class AppClient extends BaseAppClient {
   }
 
   @Override
-  protected DTO handleCreateAccount() throws Exception {
+  protected DTO createAccount() throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
       new String[]{"Nome", "CPF", "Endereço", "Telefone", "Senha"},
       scanner
@@ -121,26 +121,26 @@ public class AppClient extends BaseAppClient {
   }
 
   @Override
-  protected DTO handleAuthenticate() throws Exception {
+  protected DTO authenticate() throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
-      new String[]{"Agência", "Número da conta", "Senha"},
+      new String[]{"CPF", "Senha"},
       scanner
     );
 
     AuthRequest authData = new AuthRequest(
-      inputsReceived[0], inputsReceived[1], inputsReceived[2]
+      inputsReceived[0], inputsReceived[1]
     );
     authData.setOperation(RemoteOperation.AUTHENTICATE);
     return authData;
   }
 
   @Override
-  protected DTO handleGetAccountData() throws Exception {
+  protected DTO getAccountData() throws Exception {
     return new OperationDTO(RemoteOperation.GET_ACCOUNT_DATA);
   }
 
   @Override
-  protected DTO handleWithdraw() throws Exception {
+  protected DTO withdraw() throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
       new String[]{"Valor de saque"}, scanner
     );
@@ -153,7 +153,7 @@ public class AppClient extends BaseAppClient {
   }
 
   @Override
-  protected DTO handleDeposit() throws Exception {
+  protected DTO deposit() throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
       new String[]{"Valor de depósito"}, scanner
     );
@@ -166,7 +166,7 @@ public class AppClient extends BaseAppClient {
   }
 
   @Override
-  protected DTO handleWireTransfer() throws Exception {
+  protected DTO wireTransfer() throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
       new String[] {
         "Agência alvo", "Número da conta alvo",
@@ -184,22 +184,22 @@ public class AppClient extends BaseAppClient {
   }
 
   @Override
-  protected DTO handleGetBalance() throws Exception {
+  protected DTO getBalance() throws Exception {
     return new OperationDTO(RemoteOperation.GET_BALANCE);
   }
 
   @Override
-  protected DTO handleGetSavingsProjections() throws Exception {
+  protected DTO getSavingsProjections() throws Exception {
     return new OperationDTO(RemoteOperation.GET_SAVINGS_PROJECTIONS);
   }
 
   @Override
-  protected DTO handleGetFixedIncomeProjections() throws Exception {
+  protected DTO getFixedIncomeProjections() throws Exception {
     return new OperationDTO(RemoteOperation.GET_FIXED_INCOME_PROJECTIONS);
   }
 
   @Override
-  protected DTO handleUpdateFixedIncome() throws Exception {
+  protected DTO updateFixedIncome() throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
       new String[] {"Valor de atualização da renda fixa"},
       scanner
@@ -213,7 +213,7 @@ public class AppClient extends BaseAppClient {
   }
 
   @Override
-  protected DTO handleLogout() throws Exception {
+  protected DTO logout() throws Exception {
     return new OperationDTO(RemoteOperation.LOGOUT);
   }
 }

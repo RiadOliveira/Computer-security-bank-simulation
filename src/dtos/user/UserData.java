@@ -1,9 +1,12 @@
 package dtos.user;
 
+import java.util.UUID;
+
 import dtos.DTO;
 import utils.ConsolePrinter;
 
 public class UserData extends DTO {
+  private UUID id;
   private final String name;
   private final String cpf;
   private final String address;
@@ -32,11 +35,20 @@ public class UserData extends DTO {
     String propertySpace = spaces + "  ";
 
     ConsolePrinter.println(spaces + "Dados do cliente: ");
+    ConsolePrinter.println(propertySpace + "Id: " + id);
     ConsolePrinter.println(propertySpace + "Nome: " + name);
     ConsolePrinter.println(propertySpace + "CPF: " + cpf);
     ConsolePrinter.println(propertySpace + "Endereço: " + address);
     ConsolePrinter.println(propertySpace + "Telefone: " + phoneNumber);
     ConsolePrinter.println(propertySpace + "Senha: " + password);
+  }
+
+  public UUID getId() {
+    return id;
+  }
+
+  public void generateAndSetId() {
+    this.id = UUID.randomUUID();
   }
 
   public String getName() {

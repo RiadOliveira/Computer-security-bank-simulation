@@ -4,16 +4,11 @@ import dtos.DTO;
 import utils.ConsolePrinter;
 
 public class AuthRequest extends DTO {
-  private final String agency;
-  private final String accountNumber;
+  private final String cpf;
   private final String password;
 
-  public AuthRequest(
-    String agency, String accountNumber,
-    String password
-  ) {
-    this.agency = agency;
-    this.accountNumber = accountNumber;
+  public AuthRequest(String cpf, String password) {
+    this.cpf = cpf;
     this.password = password;
   }
 
@@ -22,19 +17,12 @@ public class AuthRequest extends DTO {
     String propertySpaces = "  ";
 
     ConsolePrinter.println("Dados de autenticação: ");
-    ConsolePrinter.println(propertySpaces + "Agência: " + agency);
-    ConsolePrinter.println(
-      propertySpaces + "Número da conta: " + accountNumber
-    );
+    ConsolePrinter.println(propertySpaces + "CPF: " + cpf);
     ConsolePrinter.println(propertySpaces + "Senha: " + password);
   }
 
-  public String getAgency() {
-    return agency;
-  }
-
-  public String getAccountNumber() {
-    return accountNumber;
+  public String getCpf() {
+    return cpf;
   }
 
   public String getPassword() {
