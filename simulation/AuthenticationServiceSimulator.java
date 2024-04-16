@@ -9,7 +9,7 @@ public class AuthenticationServiceSimulator {
   public static void main(String[] args) {
     var serversToConnect = new SocketConnectionData[]{};
     var authServiceData = SimulationUtils.generateSocketServerData(
-      SocketComponent.AUTHENTICATION_SERVICE, SocketComponent.FIREWALL,
+      SocketComponent.AUTHENTICATION_SERVICE, SocketComponent.GATEWAY,
       serversToConnect
     );
     

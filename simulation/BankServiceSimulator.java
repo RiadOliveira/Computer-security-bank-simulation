@@ -11,33 +11,27 @@ public class BankServiceSimulator {
     try {
       int replicaIndex = Integer.valueOf(args[0]);
       var bankDatabaseConnectionData = SimulationUtils.generateSocketConnectionData(
-        SocketComponent.BANK_DATABASE, replicaIndex
-      );
+          SocketComponent.BANK_DATABASE, replicaIndex);
 
       var bankDatabaseData = SimulationUtils.generateSocketServerData(
-        SocketComponent.BANK_DATABASE, replicaIndex,
-        SocketComponent.BANK_SERVICE, new SocketConnectionData[]{}
-      );
+          SocketComponent.BANK_DATABASE, replicaIndex,
+          SocketComponent.BANK_SERVICE, new SocketConnectionData[] {});
       var bankServiceData = SimulationUtils.generateSocketServerData(
-        SocketComponent.BANK_SERVICE, replicaIndex, SocketComponent.FIREWALL,
-        new SocketConnectionData[]{bankDatabaseConnectionData}
-      );
+          SocketComponent.BANK_SERVICE, replicaIndex, SocketComponent.GATEWAY,
+          new SocketConnectionData[] { bankDatabaseConnectionData });
 
       var bankDatabaseProcessThread = new Thread(
-        new SocketServer(BankDatabase.class, bankDatabaseData)
-      );
+          new SocketServer(BankDatabase.class, bankDatabaseData));
       var bankServiceProcessThread = new Thread(
-        new SocketServer(BankService.class, bankServiceData)
-      );
+          new SocketServer(BankService.class, bankServiceData));
 
       bankDatabaseProcessThread.start();
       bankServiceProcessThread.start();
-    } catch(Exception exception) {
+    } catch (Exception exception) {
       System.out.println(
-        "Forneça um index de réplica válido (entre 0 e " +
-        (SimulationUtils.BANK_SERVICE_INSTANCES_QUANTITY - 1) +
-        ")!"
-      );
-    } 
+          "Forneça um index de réplica válido (entre 0 e " +
+              (SimulationUtils.BANK_SERVICE_INSTANCES_QUANTITY - 1) +
+              ")!");
+    }
   }
 }

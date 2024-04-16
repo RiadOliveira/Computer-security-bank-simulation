@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import dtos.DTO;
 import utils.ConsolePrinter;
+import utils.Hasher;
 
 public class UserData extends DTO {
   private UUID id;
@@ -11,18 +12,17 @@ public class UserData extends DTO {
   private final String cpf;
   private final String address;
   private final String phoneNumber;
-  private String password;
+  private final String password;
 
   public UserData(
-    String name, String cpf,
-    String address, String phoneNumber,
-    String password
-  ) {
+      String name, String cpf,
+      String address, String phoneNumber,
+      String password) {
     this.name = name;
     this.cpf = cpf;
     this.address = address;
     this.phoneNumber = phoneNumber;
-    this.password = password;
+    this.password = Hasher.hashAndEncode(password);
   }
 
   @Override
@@ -69,9 +69,5 @@ public class UserData extends DTO {
 
   public String getPassword() {
     return password;
-  }
-
-  public void setPassword(String password) {
-    this.password = password;
   }
 }
