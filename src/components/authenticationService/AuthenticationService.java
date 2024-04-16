@@ -51,9 +51,6 @@ public class AuthenticationService extends BaseAuthenticationService {
     }
 
     parsedDTO.generateAndSetId();
-    parsedDTO.setPassword(
-      Hasher.hashAndEncode(parsedDTO.getPassword())
-    );
     userDatabase.add(parsedDTO);
 
     return parsedDTO;
