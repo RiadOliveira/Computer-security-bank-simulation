@@ -125,6 +125,7 @@ public class ObjectPacker {
       return handleObjectUnpacking(
         packedObject, symmetricKeys, publicKey
       );
+      
     } catch (Exception exception) {
       if(exception instanceof SecurityException) {
         throw (SecurityException) exception;

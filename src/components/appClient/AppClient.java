@@ -18,9 +18,8 @@ import utils.ConsolePrinter;
 
 public class AppClient extends BaseAppClient {
   public AppClient(
-    Map<SocketComponent, List<SocketData>> connectedSockets,
-    SocketComponent socketClientComponent
-  ) {
+      Map<SocketComponent, List<SocketData>> connectedSockets,
+      SocketComponent socketClientComponent) {
     super(connectedSockets, socketClientComponent);
   }
 
@@ -30,43 +29,40 @@ public class AppClient extends BaseAppClient {
     int operationIndex = Integer.parseInt(scanner.nextLine()) - 1;
     ConsolePrinter.println("");
 
-    if(operationIndex < 0) {
+    if (operationIndex < 0) {
       throw new AppException("Operação escolhida inválida!");
     }
 
     RemoteOperation[] allOperations = RemoteOperation.values();
     int localOperationIndex = operationIndex - allOperations.length;
 
-    if(localOperationIndex >= 0) handleLocalOperation(localOperationIndex);
-    else handleRemoteOperationInput(allOperations[operationIndex]);
+    if (localOperationIndex >= 0)
+      handleLocalOperation(localOperationIndex);
+    else
+      handleRemoteOperationInput(allOperations[operationIndex]);
   }
 
   protected void handleExecutionException(Exception exception) {
     boolean isAppException = exception instanceof AppException;
 
-    if(!isAppException) ConsolePrinter.println("");
+    if (!isAppException)
+      ConsolePrinter.println("");
     ConsolePrinter.printlnError(
-      isAppException ? exception.getMessage() :
-      "Erro interno do cliente!"
-    );
+        isAppException ? exception.getMessage() : "Erro interno do cliente!");
 
     ConsolePrinter.println("");
     ConsolePrinter.displayAndWaitForEnterPressing(scanner);
   }
 
   private void handleLocalOperation(
-    int operationIndex
-  ) throws Exception {
-    ClientLocalOperation[] allLocalOperations = 
-      ClientLocalOperation.values();
-    if(operationIndex >= allLocalOperations.length) {
+      int operationIndex) throws Exception {
+    ClientLocalOperation[] allLocalOperations = ClientLocalOperation.values();
+    if (operationIndex >= allLocalOperations.length) {
       throw new AppException("Operação escolhida inválida!");
     }
 
-    ClientLocalOperation operation = allLocalOperations[
-      operationIndex
-    ];
-    switch(operation) {
+    ClientLocalOperation operation = allLocalOperations[operationIndex];
+    switch (operation) {
       case CLEAR_CONSOLE: {
         ConsolePrinter.clearConsole();
         break;
@@ -75,17 +71,17 @@ public class AppClient extends BaseAppClient {
         System.exit(0);
         break;
       }
-      default: break;
+      default:
+        break;
     }
   }
 
   private void handleRemoteOperationInput(
-    RemoteOperation operation
-  ) throws Exception {
+      RemoteOperation operation) throws Exception {
     DTO dtoToSend = parseDTOToSend(operationHandlers.get(operation).run());
-    sendSecureDTO(SocketComponent.FIREWALL, dtoToSend);
-    
-    DTO receivedDTO = receiveSecureDTO(SocketComponent.FIREWALL);
+    sendDTO(SocketComponent.FIREWALL, dtoToSend);
+
+    DTO receivedDTO = receiveDTO(SocketComponent.FIREWALL);
     handleResponse(receivedDTO);
 
     ConsolePrinter.displayAndWaitForEnterPressing(scanner);
@@ -94,17 +90,15 @@ public class AppClient extends BaseAppClient {
 
   private void handleResponse(DTO receivedDTO) {
     boolean authenticationResponse = AuthResponse.class.isInstance(
-      receivedDTO
-    );
-    if(authenticationResponse) {
+        receivedDTO);
+    if (authenticationResponse) {
       handleAuthResponse((AuthResponse) receivedDTO);
       return;
     }
 
     boolean logoutResponse = receivedDTO.getOperation().equals(
-      RemoteOperation.LOGOUT
-    );
-    if(logoutResponse) {
+        RemoteOperation.LOGOUT);
+    if (logoutResponse) {
       handleLogoutResponse();
       return;
     }
@@ -113,15 +107,13 @@ public class AppClient extends BaseAppClient {
   @Override
   protected DTO handleCreateAccount() throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
-      new String[]{"Nome", "CPF", "Endereço", "Telefone", "Senha"},
-      scanner
-    );
+        new String[] { "Nome", "CPF", "Endereço", "Telefone", "Senha" },
+        scanner);
 
     UserData clientData = new UserData(
-      inputsReceived[0], inputsReceived[1],
-      inputsReceived[2], inputsReceived[3],
-      inputsReceived[4]
-    );
+        inputsReceived[0], inputsReceived[1],
+        inputsReceived[2], inputsReceived[3],
+        inputsReceived[4]);
     clientData.setOperation(RemoteOperation.CREATE_ACCOUNT);
     return clientData;
   }
@@ -129,13 +121,11 @@ public class AppClient extends BaseAppClient {
   @Override
   protected DTO handleAuthenticate() throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
-      new String[]{"Agência", "Número da conta", "Senha"},
-      scanner
-    );
+        new String[] { "Agência", "Número da conta", "Senha" },
+        scanner);
 
     AuthRequest authData = new AuthRequest(
-      inputsReceived[0], inputsReceived[1], inputsReceived[2]
-    );
+        inputsReceived[0], inputsReceived[1], inputsReceived[2]);
     authData.setOperation(RemoteOperation.AUTHENTICATE);
     return authData;
   }
@@ -148,8 +138,7 @@ public class AppClient extends BaseAppClient {
   @Override
   protected DTO handleWithdraw() throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
-      new String[]{"Valor de saque"}, scanner
-    );
+        new String[] { "Valor de saque" }, scanner);
 
     double withdrawValue = Double.parseDouble(inputsReceived[0]);
     ValueDTO withdrawData = new ValueDTO(withdrawValue);
@@ -161,8 +150,7 @@ public class AppClient extends BaseAppClient {
   @Override
   protected DTO handleDeposit() throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
-      new String[]{"Valor de depósito"}, scanner
-    );
+        new String[] { "Valor de depósito" }, scanner);
 
     double depositValue = Double.parseDouble(inputsReceived[0]);
     ValueDTO depositData = new ValueDTO(depositValue);
@@ -174,16 +162,14 @@ public class AppClient extends BaseAppClient {
   @Override
   protected DTO handleWireTransfer() throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
-      new String[]{
-        "Agência alvo", "Número da conta alvo",
-        "Valor da transferência"
-      }, scanner
-    );
+        new String[] {
+            "Agência alvo", "Número da conta alvo",
+            "Valor da transferência"
+        }, scanner);
 
     double transferValue = Double.parseDouble(inputsReceived[2]);
     WireTransferDTO wireTransferData = new WireTransferDTO(
-      transferValue, inputsReceived[0], inputsReceived[1]
-    );
+        transferValue, inputsReceived[0], inputsReceived[1]);
     wireTransferData.setOperation(RemoteOperation.WIRE_TRANSFER);
 
     return wireTransferData;
@@ -207,9 +193,8 @@ public class AppClient extends BaseAppClient {
   @Override
   protected DTO handleUpdateFixedIncome() throws Exception {
     String[] inputsReceived = ConsolePrinter.printInputNameAndScan(
-      new String[]{"Valor de atualização da renda fixa"},
-      scanner
-    );
+        new String[] { "Valor de atualização da renda fixa" },
+        scanner);
 
     double fixedIncomeUpdateValue = Double.parseDouble(inputsReceived[0]);
     ValueDTO fixedIncomeUpdateData = new ValueDTO(fixedIncomeUpdateValue);

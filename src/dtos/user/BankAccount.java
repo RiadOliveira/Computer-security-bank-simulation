@@ -31,6 +31,7 @@ public class BankAccount extends DTO {
 
   public BankAccount(UserData userData) {
     this.userData = userData;
+    generateDatabaseData();
   }
 
   @Override
