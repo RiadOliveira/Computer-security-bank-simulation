@@ -78,7 +78,7 @@ public class SocketServer extends SocketProcess {
     if(whitelistAddress == null) return true;
 
     String clientIp = clientSocket.getInetAddress().getHostAddress();
-    boolean acceptsAnyAddress = whitelistAddress.equals(ConnectionUtils.ANY_IP_ADDRESS);
+    boolean acceptsAnyAddress = ConnectionUtils.ANY_IP_ADDRESS.equals(whitelistAddress);
 
     return acceptsAnyAddress || whitelistAddress.equals(clientIp);
   }

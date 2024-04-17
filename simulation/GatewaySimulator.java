@@ -19,19 +19,24 @@ public class GatewaySimulator {
   }
 
   private static SocketConnectionData[] getServersToConnect() {
+    int authServiceInstances = SimulationUtils.AUTH_SERVICE_INSTANCES_QUANTITY;
     int bankServiceInstances = SimulationUtils.BANK_SERVICE_INSTANCES_QUANTITY;
     SocketConnectionData[] serversToConnect = new SocketConnectionData[
-      1// + bankServiceInstances
+      authServiceInstances + bankServiceInstances
     ];
+
+    for(int ind=0 ; ind<authServiceInstances ; ind++) {
+      serversToConnect[ind] = ConnectionUtils.getComponentSocketConnectionData(
+        SocketComponent.AUTHENTICATION_SERVICE
+      );
+    }
     
-    serversToConnect[0] = ConnectionUtils.getComponentSocketConnectionData(
-      SocketComponent.AUTHENTICATION_SERVICE
-    );
-    // for(int ind=0 ; ind<bankServiceInstances ; ind++) {
-    //   serversToConnect[ind+1] = SimulationUtils.generateSocketConnectionData(
-    //     SocketComponent.BANK_SERVICE, ind
-    //   );
-    // }
+    for(int ind=0 ; ind<bankServiceInstances ; ind++) {
+      int serverInd = ind+authServiceInstances;
+      serversToConnect[serverInd] = SimulationUtils.generateSocketConnectionData(
+        SocketComponent.BANK_SERVICE, ind
+      );
+    }
 
     return serversToConnect;
   }

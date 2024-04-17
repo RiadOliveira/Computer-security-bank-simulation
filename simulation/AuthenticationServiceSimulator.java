@@ -7,15 +7,23 @@ import connections.data.SocketConnectionData;
 
 public class AuthenticationServiceSimulator {
   public static void main(String[] args) {
-    var serversToConnect = new SocketConnectionData[]{};
-    var authServiceData = SimulationUtils.generateSocketServerData(
-      SocketComponent.AUTHENTICATION_SERVICE, SocketComponent.GATEWAY,
-      serversToConnect
-    );
-    
-    var authenticationServiceProcess = new SocketServer(
-      AuthenticationService.class, authServiceData
-    );
-    authenticationServiceProcess.run();
+    try {
+      int replicaIndex = Integer.valueOf(args[0]);
+      var authServiceData = SimulationUtils.generateSocketServerData(
+        SocketComponent.AUTHENTICATION_SERVICE, replicaIndex,
+        SocketComponent.GATEWAY, new SocketConnectionData[]{}
+      );
+
+      var authenticationServiceProcess = new SocketServer(
+        AuthenticationService.class, authServiceData
+      );
+      authenticationServiceProcess.run();
+    } catch (Exception exception) {
+      System.out.println(
+        "Forneça um index de réplica válido (entre 0 e " +
+        (SimulationUtils.AUTH_SERVICE_INSTANCES_QUANTITY - 1) +
+        ")!"
+      );
+    }
   }
 }

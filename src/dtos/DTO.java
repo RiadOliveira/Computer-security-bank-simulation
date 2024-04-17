@@ -11,7 +11,8 @@ public abstract class DTO implements Serializable {
     return operation;
   }
 
-  public void setOperation(RemoteOperation operation) {
+  public DTO setOperation(RemoteOperation operation) {
     this.operation = operation;
+    return this;
   }
 }

@@ -10,7 +10,6 @@ import dtos.RemoteOperation;
 import dtos.auth.AuthenticatedDTO;
 import dtos.generic.ExceptionDTO;
 import dtos.user.UserData;
-import errors.AppException;
 import utils.ObjectConverter;
 import utils.RandomNumberGenerator;
 
@@ -65,8 +64,8 @@ public class Gateway extends BaseGateway {
       );
     }
 
-    boolean isCreateAccount = dtoToRedirect.getOperation().equals(
-      RemoteOperation.CREATE_ACCOUNT
+    boolean isCreateAccount = RemoteOperation.CREATE_ACCOUNT.equals(
+      dtoToRedirect.getOperation()
     );
     if(!isCreateAccount) return replicasResponse;
     return handleCreateAccountAdditionalCommunications(replicasResponse);
@@ -80,9 +79,9 @@ public class Gateway extends BaseGateway {
     );
     DTO createAccountDTO = new AuthenticatedDTO(
       parsedResponse.getId()
-    );
-    var bankServiceComponent = SocketComponent.BANK_SERVICE;
+    ).setOperation(RemoteOperation.CREATE_ACCOUNT);
 
+    var bankServiceComponent = SocketComponent.BANK_SERVICE;
     synchronized(Gateway.class) {
       return communicateWithAllReplicas(
         createAccountDTO, bankServiceComponent,
@@ -114,12 +113,7 @@ public class Gateway extends BaseGateway {
       boolean exceptionReplicaResponse = ExceptionDTO.class.isInstance(
         replicaResponse
       );
-      if(exceptionReplicaResponse) {
-        String exceptionMessage = ((ExceptionDTO) replicaResponse).getMessage();
-        throw new AppException(
-          "Falha na réplica " + ind + ": " + exceptionMessage
-        );
-      }
+      if(exceptionReplicaResponse) break;
     }
 
     return replicaResponse;
@@ -133,8 +127,8 @@ public class Gateway extends BaseGateway {
   }
 
   private boolean isForAuthenticationService(RemoteOperation operation) {
-    boolean isCreateAccount = operation.equals(RemoteOperation.CREATE_ACCOUNT);
-    boolean isAuthenticate = operation.equals(RemoteOperation.AUTHENTICATE);
+    boolean isCreateAccount = RemoteOperation.CREATE_ACCOUNT.equals(operation);
+    boolean isAuthenticate = RemoteOperation.AUTHENTICATE.equals(operation);
 
     return isCreateAccount || isAuthenticate;
   }
@@ -142,8 +136,8 @@ public class Gateway extends BaseGateway {
   private boolean isReadOperationForComponent(
     RemoteOperation operation, SocketComponent component
   ) {
-    if(component.equals(SocketComponent.AUTHENTICATION_SERVICE)) {
-      return !operation.equals(RemoteOperation.CREATE_ACCOUNT);
+    if(SocketComponent.AUTHENTICATION_SERVICE.equals(component)) {
+      return !RemoteOperation.CREATE_ACCOUNT.equals(operation);
     }
 
     switch(operation) {

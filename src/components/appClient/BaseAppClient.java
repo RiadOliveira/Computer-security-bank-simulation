@@ -77,7 +77,10 @@ public abstract class BaseAppClient extends SocketThread {
 
   protected DTO parseDTOToSend(DTO dtoToSend) {
     if(token == null) return dtoToSend;
-    return new AuthenticatedDTO(token, dtoToSend);
+    
+    return new AuthenticatedDTO(token, dtoToSend).setOperation(
+      dtoToSend.getOperation()
+    );
   }
 
   protected void handleAuthResponse(AuthResponse authResponse) {

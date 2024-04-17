@@ -7,11 +7,16 @@ import utils.ConsolePrinter;
 
 public class AuthenticatedDTO extends DTO {
   private String token;
-  private DTO dto;
   private UUID userId;
+  private DTO dto;
   
   public AuthenticatedDTO(String token, DTO dto) {
     this.token = token;
+    this.dto = dto;
+  }
+
+  public AuthenticatedDTO(UUID userId, DTO dto) {
+    this.userId = userId;
     this.dto = dto;
   }
 
@@ -22,16 +27,16 @@ public class AuthenticatedDTO extends DTO {
   @Override
   public void print() {
     ConsolePrinter.println("Token: " + token);
-    ConsolePrinter.println("Dados do DTO:");
-    dto.print();
+    ConsolePrinter.println("UserId: " + userId);
+
+    if(dto != null) {
+      ConsolePrinter.println("Dados do DTO:");
+      dto.print();
+    }
   }
 
   public String getToken() {
     return token;
-  }
-
-  public DTO getDTO() {
-    return dto;
   }
 
   public UUID getUserId() {
@@ -40,5 +45,9 @@ public class AuthenticatedDTO extends DTO {
 
   public void setUserId(UUID userId) {
     this.userId = userId;
+  }
+
+  public DTO getDTO() {
+    return dto;
   }
 }

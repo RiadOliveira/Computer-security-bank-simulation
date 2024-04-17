@@ -92,7 +92,7 @@ public abstract class SocketThread implements Runnable {
   //   );
   //   outputStream.writeObject(packedDTO);
 
-  //   printTransmissionDTO(dto, true);
+  //   printTransmissionDTO(dto, component, replicaIndex, true);
   // }
 
   // protected DTO receiveSecureDTO(
@@ -113,7 +113,7 @@ public abstract class SocketThread implements Runnable {
   //     socketData.getPublicKey()
   //   );
 
-  //   printTransmissionDTO(dto, false);
+  //   printTransmissionDTO(dto, component, replicaIndex, false);
   //   return dto;
   // }
 
@@ -132,7 +132,7 @@ public abstract class SocketThread implements Runnable {
     String encodedDTO = ObjectPacker.encodeObject(dto);
     outputStream.writeObject(encodedDTO);
 
-    printTransmissionDTO(dto, true);
+    printTransmissionDTO(dto, component, replicaIndex, true);
   }
 
   protected DTO receiveSecureDTO(SocketComponent component) throws Exception {
@@ -148,7 +148,7 @@ public abstract class SocketThread implements Runnable {
     String encodedDTO = (String) inputStream.readObject();
     DTO dto = ObjectPacker.decodeObject(encodedDTO);
 
-    printTransmissionDTO(dto, false);
+    printTransmissionDTO(dto, component, replicaIndex, false);
     return dto;
   }
 
@@ -168,11 +168,13 @@ public abstract class SocketThread implements Runnable {
     return connectedSockets.get(component).size();
   }
 
-  private void printTransmissionDTO(
-    DTO dto, boolean isBeingSent
+  private synchronized void printTransmissionDTO(
+    DTO dto, SocketComponent component,
+    int replicaIndex, boolean isBeingSent
   ) {
     ConsolePrinter.println(
-      "Dados " + (isBeingSent ? "enviados" : "recebidos") + ":"
+      "Dados " + (isBeingSent ? "enviados para " : "recebidos do ") +
+      component + " (Réplica " + replicaIndex + "):"
     );
     dto.print();
     ConsolePrinter.println("");

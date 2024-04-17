@@ -1,4 +1,4 @@
-package dtos.operation;
+package dtos.bankOperation;
 
 import dtos.generic.ValueDTO;
 import utils.ConsolePrinter;

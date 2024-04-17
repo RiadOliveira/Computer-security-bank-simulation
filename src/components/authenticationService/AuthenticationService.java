@@ -63,19 +63,19 @@ public class AuthenticationService extends BaseAuthenticationService {
       return new ExceptionDTO("Instância de DTO inválida!");
     }
 
-    UserData findedAccount = findByCpf(parsedDTO.getCpf());
-    if(findedAccount == null) {
+    UserData accountFound = findByCpf(parsedDTO.getCpf());
+    if(accountFound == null) {
       return new ExceptionDTO("Conta especificada não encontrada!");
     }
 
     boolean correctPassword = Hasher.compare(
-      findedAccount.getPassword(), parsedDTO.getPassword()
+      accountFound.getPassword(), parsedDTO.getPassword()
     );
     if(!correctPassword) {
       return new ExceptionDTO("Dados de autenticação inválidos");
     }
 
-    return new AuthResponse(findedAccount);
+    return new AuthResponse(accountFound);
   }
 
   private UserData findByCpf(String cpf) {

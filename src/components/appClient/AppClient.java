@@ -9,9 +9,9 @@ import dtos.RemoteOperation;
 import dtos.DTO;
 import dtos.auth.AuthRequest;
 import dtos.auth.AuthResponse;
+import dtos.bankOperation.WireTransferDTO;
 import dtos.generic.OperationDTO;
 import dtos.generic.ValueDTO;
-import dtos.operation.WireTransferDTO;
 import dtos.user.UserData;
 import errors.AppException;
 import utils.ConsolePrinter;
@@ -80,13 +80,13 @@ public class AppClient extends BaseAppClient {
     sendSecureDTO(SocketComponent.FIREWALL, dtoToSend);
 
     DTO receivedDTO = receiveSecureDTO(SocketComponent.FIREWALL);
-    Response(receivedDTO);
+    handleResponse(receivedDTO);
 
     ConsolePrinter.displayAndWaitForEnterPressing(scanner);
     ConsolePrinter.println("");
   }
 
-  private void Response(DTO receivedDTO) {
+  private void handleResponse(DTO receivedDTO) {
     boolean authenticationResponse = AuthResponse.class.isInstance(
       receivedDTO
     );
@@ -95,8 +95,8 @@ public class AppClient extends BaseAppClient {
       return;
     }
 
-    boolean logoutResponse = receivedDTO.getOperation().equals(
-      RemoteOperation.LOGOUT
+    boolean logoutResponse = RemoteOperation.LOGOUT.equals(
+      receivedDTO.getOperation()
     );
     if (logoutResponse) {
       handleLogoutResponse();
@@ -111,13 +111,11 @@ public class AppClient extends BaseAppClient {
       scanner
     );
 
-    UserData clientData = new UserData(
+    return new UserData(
       inputsReceived[0], inputsReceived[1],
       inputsReceived[2], inputsReceived[3],
       inputsReceived[4]
-    );
-    clientData.setOperation(RemoteOperation.CREATE_ACCOUNT);
-    return clientData;
+    ).setOperation(RemoteOperation.CREATE_ACCOUNT);
   }
 
   @Override
@@ -127,11 +125,9 @@ public class AppClient extends BaseAppClient {
       scanner
     );
 
-    AuthRequest authData = new AuthRequest(
+    return new AuthRequest(
       inputsReceived[0], inputsReceived[1]
-    );
-    authData.setOperation(RemoteOperation.AUTHENTICATE);
-    return authData;
+    ).setOperation(RemoteOperation.AUTHENTICATE);
   }
 
   @Override
@@ -146,10 +142,7 @@ public class AppClient extends BaseAppClient {
     );
 
     double withdrawValue = Double.parseDouble(inputsReceived[0]);
-    ValueDTO withdrawData = new ValueDTO(withdrawValue);
-    withdrawData.setOperation(RemoteOperation.WITHDRAW);
-
-    return withdrawData;
+    return new ValueDTO(withdrawValue).setOperation(RemoteOperation.WITHDRAW);
   }
 
   @Override
@@ -159,10 +152,7 @@ public class AppClient extends BaseAppClient {
     );
 
     double depositValue = Double.parseDouble(inputsReceived[0]);
-    ValueDTO depositData = new ValueDTO(depositValue);
-    depositData.setOperation(RemoteOperation.DEPOSIT);
-
-    return depositData;
+    return new ValueDTO(depositValue).setOperation(RemoteOperation.DEPOSIT);
   }
 
   @Override
@@ -175,12 +165,9 @@ public class AppClient extends BaseAppClient {
     );
 
     double transferValue = Double.parseDouble(inputsReceived[2]);
-    WireTransferDTO wireTransferData = new WireTransferDTO(
+    return new WireTransferDTO(
       transferValue, inputsReceived[0], inputsReceived[1]
-    );
-    wireTransferData.setOperation(RemoteOperation.WIRE_TRANSFER);
-
-    return wireTransferData;
+    ).setOperation(RemoteOperation.WIRE_TRANSFER);
   }
 
   @Override
@@ -206,10 +193,9 @@ public class AppClient extends BaseAppClient {
     );
 
     double fixedIncomeUpdateValue = Double.parseDouble(inputsReceived[0]);
-    ValueDTO fixedIncomeUpdateData = new ValueDTO(fixedIncomeUpdateValue);
-    fixedIncomeUpdateData.setOperation(RemoteOperation.UPDATE_FIXED_INCOME);
-
-    return fixedIncomeUpdateData;
+    return new ValueDTO(fixedIncomeUpdateValue).setOperation(
+      RemoteOperation.UPDATE_FIXED_INCOME
+    );
   }
 
   @Override

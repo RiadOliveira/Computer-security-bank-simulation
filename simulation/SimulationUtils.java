@@ -6,7 +6,8 @@ import connections.data.SocketServerData;
 import utils.ConnectionUtils;
 
 public class SimulationUtils {
-  public static final int BANK_SERVICE_INSTANCES_QUANTITY = 3;
+  public static final int AUTH_SERVICE_INSTANCES_QUANTITY = 1;
+  public static final int BANK_SERVICE_INSTANCES_QUANTITY = 1;
 
   public static SocketServerData generateSocketServerData(
     SocketComponent component, SocketComponent clientComponent,

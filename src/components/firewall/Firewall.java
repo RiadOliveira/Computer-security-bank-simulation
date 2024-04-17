@@ -22,8 +22,8 @@ public class Firewall extends BaseFirewall {
   protected void execute() throws Exception {
     DTO receivedDTO = receiveSecureDTO(SocketComponent.CLIENT);
 
-    boolean isLogout = receivedDTO.getOperation().equals(
-      RemoteOperation.LOGOUT
+    boolean isLogout = RemoteOperation.LOGOUT.equals(
+      receivedDTO.getOperation()
     );
     if(isLogout) {
       handleLogout();
@@ -67,8 +67,8 @@ public class Firewall extends BaseFirewall {
   }
 
   private boolean operationRequiresAuth(RemoteOperation operation) {
-    boolean isCreateAccount = operation.equals(RemoteOperation.CREATE_ACCOUNT);
-    boolean isAuthenticate = operation.equals(RemoteOperation.AUTHENTICATE);
+    boolean isCreateAccount = RemoteOperation.CREATE_ACCOUNT.equals(operation);
+    boolean isAuthenticate = RemoteOperation.AUTHENTICATE.equals(operation);
 
     return !isCreateAccount && !isAuthenticate;
   }
