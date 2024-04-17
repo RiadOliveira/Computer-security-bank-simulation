@@ -15,7 +15,7 @@ public class ConsolePrinter {
       "  5. Depositar\n" + "  6. Transferência bancária\n" +
       "  7. Obter saldo\n" + "  8. Obter projeções da poupança\n" +
       "  9. Obter projeções da renda fixa\n" +
-      "  10. Atualizar renda fixa\n" + "  11. Deslogar\n" + "  12. Acessar backdoor\n" +
+      "  10. Atualizar renda fixa\n" + "  11. Deslogar\n" +
       "  13. Limpar console\n" + "  14. Sair\n";
 
   private static final String PRESS_ENTER_TO_CONTINUE_MESSAGE = "Pressione Enter para continuar...";

