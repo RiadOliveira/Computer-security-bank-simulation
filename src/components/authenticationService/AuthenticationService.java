@@ -17,9 +17,8 @@ import utils.ObjectConverter;
 
 public class AuthenticationService extends BaseAuthenticationService {
   public AuthenticationService(
-    Map<SocketComponent, List<SocketData>> connectedSockets,
-    SocketComponent socketClientComponent
-  ) {
+      Map<SocketComponent, List<SocketData>> connectedSockets,
+      SocketComponent socketClientComponent) {
     super(connectedSockets, socketClientComponent);
   }
 
@@ -29,8 +28,7 @@ public class AuthenticationService extends BaseAuthenticationService {
     RemoteOperation operation = receivedDTO.getOperation();
 
     DTO responseDTO = operationHandlers.get(operation).run(
-      receivedDTO
-    );
+        receivedDTO);
     sendSecureDTO(SocketComponent.GATEWAY, responseDTO);
   }
 
@@ -65,17 +63,16 @@ public class AuthenticationService extends BaseAuthenticationService {
     }
 
     UserData accountFound = findByCpf(parsedDTO.getCpf());
-    if(accountFound == null) {
+    if (accountFound == null) {
       throw new AppException("Conta especificada não encontrada!");
     }
 
     boolean correctPassword = Hasher.compare(
-      accountFound.getPassword(), parsedDTO.getPassword()
-    );
-    if(!correctPassword) {
+        accountFound.getPassword(), parsedDTO.getPassword());
+        
+    if (!correctPassword) {
       throw new SecurityViolationException(
-        "Dados de autenticação inválidos"
-      );
+          "Dados de autenticação inválidos");
     }
 
     return new AuthResponse(accountFound);

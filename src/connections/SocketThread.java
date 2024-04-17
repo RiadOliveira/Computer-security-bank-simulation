@@ -74,49 +74,6 @@ public abstract class SocketThread implements Runnable {
     }
   }
 
-  protected void sendSecureDTO(
-    SocketComponent component, DTO dto
-  ) throws Exception {
-    sendSecureDTO(component, 0, dto);
-  }
-
-  protected void sendSecureDTO(
-    SocketComponent component, int replicaIndex, DTO dto
-  ) throws Exception {
-    var socketData = getConnectedSocketData(component, replicaIndex);
-    ObjectOutputStream outputStream = socketData.getOutputStream();
-
-    String packedDTO = ObjectPacker.packObject(
-      dto, socketData.getSymmetricKeys(),
-      SocketProcess.getPrivateKey()
-    );
-    outputStream.writeObject(packedDTO);
-
-    printTransmissionDTO(dto, component, replicaIndex, true);
-  }
-
-  protected DTO receiveSecureDTO(
-    SocketComponent component
-  ) throws Exception {
-    return receiveSecureDTO(component, 0);
-  }
-
-  protected DTO receiveSecureDTO(
-    SocketComponent component, int replicaIndex
-  ) throws Exception {
-    var socketData = getConnectedSocketData(component, replicaIndex);
-    ObjectInputStream inputStream = socketData.getInputStream();
-
-    String packedDTO = (String) inputStream.readObject();
-    DTO dto = ObjectPacker.unpackObject(
-      packedDTO, socketData.getSymmetricKeys(),
-      socketData.getPublicKey()
-    );
-
-    printTransmissionDTO(dto, component, replicaIndex, false);
-    return dto;
-  }
-
   // protected void sendSecureDTO(
   //   SocketComponent component, DTO dto
   // ) throws Exception {
@@ -129,13 +86,18 @@ public abstract class SocketThread implements Runnable {
   //   var socketData = getConnectedSocketData(component, replicaIndex);
   //   ObjectOutputStream outputStream = socketData.getOutputStream();
 
-  //   String encodedDTO = ObjectPacker.encodeObject(dto);
-  //   outputStream.writeObject(encodedDTO);
+  //   String packedDTO = ObjectPacker.packObject(
+  //     dto, socketData.getSymmetricKeys(),
+  //     SocketProcess.getPrivateKey()
+  //   );
+  //   outputStream.writeObject(packedDTO);
 
   //   printTransmissionDTO(dto, component, replicaIndex, true);
   // }
 
-  // protected DTO receiveSecureDTO(SocketComponent component) throws Exception {
+  // protected DTO receiveSecureDTO(
+  //   SocketComponent component
+  // ) throws Exception {
   //   return receiveSecureDTO(component, 0);
   // }
 
@@ -145,12 +107,50 @@ public abstract class SocketThread implements Runnable {
   //   var socketData = getConnectedSocketData(component, replicaIndex);
   //   ObjectInputStream inputStream = socketData.getInputStream();
 
-  //   String encodedDTO = (String) inputStream.readObject();
-  //   DTO dto = ObjectPacker.decodeObject(encodedDTO);
+  //   String packedDTO = (String) inputStream.readObject();
+  //   DTO dto = ObjectPacker.unpackObject(
+  //     packedDTO, socketData.getSymmetricKeys(),
+  //     socketData.getPublicKey()
+  //   );
 
   //   printTransmissionDTO(dto, component, replicaIndex, false);
   //   return dto;
   // }
+
+  protected void sendSecureDTO(
+    SocketComponent component, DTO dto
+  ) throws Exception {
+    sendSecureDTO(component, 0, dto);
+  }
+
+  protected void sendSecureDTO(
+    SocketComponent component, int replicaIndex, DTO dto
+  ) throws Exception {
+    var socketData = getConnectedSocketData(component, replicaIndex);
+    ObjectOutputStream outputStream = socketData.getOutputStream();
+
+    String encodedDTO = ObjectPacker.encodeObject(dto);
+    outputStream.writeObject(encodedDTO);
+
+    printTransmissionDTO(dto, component, replicaIndex, true);
+  }
+
+  protected DTO receiveSecureDTO(SocketComponent component) throws Exception {
+    return receiveSecureDTO(component, 0);
+  }
+
+  protected DTO receiveSecureDTO(
+    SocketComponent component, int replicaIndex
+  ) throws Exception {
+    var socketData = getConnectedSocketData(component, replicaIndex);
+    ObjectInputStream inputStream = socketData.getInputStream();
+
+    String encodedDTO = (String) inputStream.readObject();
+    DTO dto = ObjectPacker.decodeObject(encodedDTO);
+
+    printTransmissionDTO(dto, component, replicaIndex, false);
+    return dto;
+  }
 
   protected SecretKey getComponentHashKey(SocketComponent component) {
     return getComponentHashKey(component, 0);

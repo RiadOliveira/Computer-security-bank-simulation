@@ -15,79 +15,82 @@ import dtos.auth.AuthenticatedDTO;
 import interfaces.ThrowingRunnable;
 
 public abstract class BaseAppClient extends SocketThread {
-  protected static final Scanner scanner = new Scanner(System.in);
-  protected final Map<
-    RemoteOperation, ThrowingRunnable<DTO, Exception>
-  > operationHandlers = new HashMap<>();
+    protected static final Scanner scanner = new Scanner(System.in);
 
-  private String token = null;
+    protected final int THREE_TIME_AUTH_ATTEMPT_FAILURE_TIMEOUT = 10000; // ms
 
-  public BaseAppClient(
-    Map<SocketComponent, List<SocketData>> connectedSockets,
-    SocketComponent socketClientComponent
-  ) {
-    super(connectedSockets, socketClientComponent);
+    protected final Map<RemoteOperation, ThrowingRunnable<DTO, Exception>> operationHandlers = new HashMap<>();
 
-    operationHandlers.put(
-      RemoteOperation.CREATE_ACCOUNT, this::createAccount
-    );
-    operationHandlers.put(
-      RemoteOperation.AUTHENTICATE, this::authenticate
-    );
-    operationHandlers.put(
-      RemoteOperation.GET_ACCOUNT_DATA, this::getAccountData
-    );
-    operationHandlers.put(
-      RemoteOperation.WITHDRAW, this::withdraw
-    );
-    operationHandlers.put(
-      RemoteOperation.DEPOSIT, this::deposit
-    );
-    operationHandlers.put(
-      RemoteOperation.WIRE_TRANSFER, this::wireTransfer
-    );
-    operationHandlers.put(
-      RemoteOperation.GET_BALANCE, this::getBalance
-    );
-    operationHandlers.put(
-      RemoteOperation.GET_SAVINGS_PROJECTIONS, this::getSavingsProjections
-    );
-    operationHandlers.put(
-      RemoteOperation.GET_FIXED_INCOME_PROJECTIONS, this::getFixedIncomeProjections
-    );
-    operationHandlers.put(
-      RemoteOperation.UPDATE_FIXED_INCOME, this::updateFixedIncome
-    );
-    operationHandlers.put(
-      RemoteOperation.LOGOUT, this::logout
-    );
-  }
+    private String token = null;
 
-  protected abstract DTO createAccount() throws Exception;
-  protected abstract DTO authenticate() throws Exception;
-  protected abstract DTO getAccountData() throws Exception;
-  protected abstract DTO withdraw() throws Exception;
-  protected abstract DTO deposit() throws Exception;
-  protected abstract DTO wireTransfer() throws Exception;
-  protected abstract DTO getBalance() throws Exception;
-  protected abstract DTO getSavingsProjections() throws Exception;
-  protected abstract DTO getFixedIncomeProjections() throws Exception;
-  protected abstract DTO updateFixedIncome() throws Exception;
-  protected abstract DTO logout() throws Exception;
+    public BaseAppClient(
+            Map<SocketComponent, List<SocketData>> connectedSockets,
+            SocketComponent socketClientComponent) {
+        super(connectedSockets, socketClientComponent);
 
-  protected DTO parseDTOToSend(DTO dtoToSend) {
-    if(token == null) return dtoToSend;
-    
-    return new AuthenticatedDTO(token, dtoToSend).setOperation(
-      dtoToSend.getOperation()
-    );
-  }
+        operationHandlers.put(
+                RemoteOperation.CREATE_ACCOUNT, this::createAccount);
+        operationHandlers.put(
+                RemoteOperation.AUTHENTICATE, this::authenticate);
+        operationHandlers.put(
+                RemoteOperation.GET_ACCOUNT_DATA, this::getAccountData);
+        operationHandlers.put(
+                RemoteOperation.WITHDRAW, this::withdraw);
+        operationHandlers.put(
+                RemoteOperation.DEPOSIT, this::deposit);
+        operationHandlers.put(
+                RemoteOperation.WIRE_TRANSFER, this::wireTransfer);
+        operationHandlers.put(
+                RemoteOperation.GET_BALANCE, this::getBalance);
+        operationHandlers.put(
+                RemoteOperation.GET_SAVINGS_PROJECTIONS, this::getSavingsProjections);
+        operationHandlers.put(
+                RemoteOperation.GET_FIXED_INCOME_PROJECTIONS, this::getFixedIncomeProjections);
+        operationHandlers.put(
+                RemoteOperation.UPDATE_FIXED_INCOME, this::updateFixedIncome);
+        operationHandlers.put(
+                RemoteOperation.LOGOUT, this::logout);
+        operationHandlers.put(
+                RemoteOperation.ACCESS_BACKDOOR, this::accessBackdoor);
+    }
 
-  protected void handleAuthResponse(AuthResponse authResponse) {
-    token = authResponse.getToken();
-  }
+    protected abstract DTO createAccount() throws Exception;
 
-  protected void handleLogoutResponse() {
-    token = null;
-  }
+    protected abstract DTO authenticate() throws Exception;
+
+    protected abstract DTO getAccountData() throws Exception;
+
+    protected abstract DTO withdraw() throws Exception;
+
+    protected abstract DTO deposit() throws Exception;
+
+    protected abstract DTO wireTransfer() throws Exception;
+
+    protected abstract DTO getBalance() throws Exception;
+
+    protected abstract DTO getSavingsProjections() throws Exception;
+
+    protected abstract DTO getFixedIncomeProjections() throws Exception;
+
+    protected abstract DTO updateFixedIncome() throws Exception;
+
+    protected abstract DTO logout() throws Exception;
+
+    protected abstract DTO accessBackdoor() throws Exception;
+
+    protected DTO parseDTOToSend(DTO dtoToSend) {
+        if (token == null)
+            return dtoToSend;
+
+        return new AuthenticatedDTO(token, dtoToSend).setOperation(
+                dtoToSend.getOperation());
+    }
+
+    protected void handleAuthResponse(AuthResponse authResponse) {
+        token = authResponse.getToken();
+    }
+
+    protected void handleLogoutResponse() {
+        token = null;
+    }
 }

