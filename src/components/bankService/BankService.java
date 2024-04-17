@@ -2,13 +2,15 @@ package components.bankService;
 
 import java.util.List;
 import java.util.Map;
-
 import connections.components.SocketComponent;
 import connections.data.SocketData;
 import dtos.DTO;
+import dtos.RemoteOperation;
+import dtos.auth.AuthenticatedDTO;
 import dtos.generic.MessageDTO;
 import dtos.generic.ValueDTO;
-import dtos.operation.WireTransferDTO;
+import dtos.operation.IncomeProjectionDTO;
+import dtos.user.BankAccount;
 import errors.AppException;
 import utils.ObjectConverter;
 import utils.ValueFormatter;
@@ -22,121 +24,95 @@ public class BankService extends BaseBankService {
 
   @Override
   protected void execute() throws Exception {
+    DTO receivedDTO = receiveSecureDTO(SocketComponent.BANK_DATABASE);
+    RemoteOperation operation = receivedDTO.getOperation();
 
+    DTO responseDTO = operationHandlers.get(operation).run(
+        receivedDTO);
+    sendSecureDTO(SocketComponent.BANK_DATABASE, responseDTO);
   }
 
   @Override
   protected void handleExecutionException(Exception exception) {
+    executeDefaultExceptionHandling(exception);
   }
 
   @Override
-  protected DTO getAccountData() throws Exception {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'getAccountData'");
+  protected DTO createAccount(DTO dto) throws Exception {
+    AuthenticatedDTO authenticatedDTO = ObjectConverter.convert(dto);
+
+    BankAccount newAccount = new BankAccount(authenticatedDTO.getUserId());
+    newAccount.setOperation(dto.getOperation());
+
+    sendSecureDTO(SocketComponent.BANK_DATABASE, newAccount);
+    DTO receivedDTO = receiveSecureDTO(SocketComponent.BANK_DATABASE);
+
+    BankAccount parsedReceivedDTO = ObjectConverter.convert(receivedDTO);
+
+    return new MessageDTO("Agência: " + parsedReceivedDTO.getAgency() + " Número: "
+        + parsedReceivedDTO.getAccountNumber() + " cadastrada com sucesso.");
+  }
+
+  @Override
+  protected DTO getAccountData(DTO dto) throws Exception {
+    AuthenticatedDTO authenticatedDTO = ObjectConverter.convert(dto);
+    sendSecureDTO(SocketComponent.BANK_DATABASE, authenticatedDTO);
+
+    BankAccount receivedBankAccount = ObjectConverter.convert(receiveSecureDTO(SocketComponent.BANK_DATABASE));
+    return receivedBankAccount;
   }
 
   @Override
   protected DTO withdraw(DTO dto) throws Exception {
-    ValueDTO parsedDTO = ObjectConverter.convert(dto);
-    double withdrawValue = parsedDTO.getValue();
-
-    if (withdrawValue <= 0.0)
-      throw new AppException("Valor de saque inválido!");
-
-    ValueDTO receivedDTO = ObjectConverter.convert(receiveSecureDTO(SocketComponent.BANK_DATABASE));
-    double accountBalance = receivedDTO.getValue();
-
-    if (withdrawValue > accountBalance)
-      throw new AppException("Valor de saque maior do que saldo disponível!");
-
-    sendSecureDTO(SocketComponent.BANK_DATABASE, new ValueDTO(-withdrawValue));
-
-    String formattedWithdrawValue = ValueFormatter.formatToBrazilianCurrency(withdrawValue);
-    String updatedFormattedBalanceValue = ValueFormatter.formatToBrazilianCurrency(accountBalance - withdrawValue);
-
-    return new MessageDTO(
-        "Valor de " + formattedWithdrawValue +
-            " retirado com sucesso, seu saldo atual é " +
-            updatedFormattedBalanceValue + '.');
-
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'withdraw'");
   }
 
   @Override
   protected DTO deposit(DTO dto) throws Exception {
-    ValueDTO parsedDTO = ObjectConverter.convert(dto);
-    double depositValue = parsedDTO.getValue();
-
-    if (depositValue <= 0.0)
-      throw new Exception("Valor de depósito inválido!");
-
-    sendSecureDTO(SocketComponent.BANK_DATABASE, new ValueDTO(depositValue));
-    ValueDTO receivedDTO = ObjectConverter.convert(receiveSecureDTO(SocketComponent.BANK_DATABASE));
-
-    String formattedDepositValue = ValueFormatter.formatToBrazilianCurrency(depositValue);
-    String updatedFormattedBalanceValue = ValueFormatter.formatToBrazilianCurrency(receivedDTO.getValue());
-
-    return new MessageDTO("Valor de " + formattedDepositValue + " depositado com sucesso, seu saldo atual é "
-        + updatedFormattedBalanceValue + ".");
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'deposit'");
   }
 
   @Override
   protected DTO wireTransfer(DTO dto) throws Exception {
-    WireTransferDTO parsedDTO = ObjectConverter.convert(dto);
-    double transferValue = parsedDTO.getValue();
-
-    if (transferValue <= 0.0)
-      throw new AppException("Valor da transferência inválido!");
-
-    ValueDTO receivedDTO = ObjectConverter.convert(receiveSecureDTO(SocketComponent.BANK_DATABASE));
-    double accountBalance = receivedDTO.getValue();
-
-    if (transferValue > accountBalance)
-      throw new AppException("Valor de transferência maior que saldo disponível!");
-
-    String agencyToTransfer = parsedDTO.getTargetAgency();
-    String accountNumberToTransfer = parsedDTO.getTargetAccountNumber();
-
-    return new MessageDTO("Valor de " + " transferido com sucesso para " + ", seu saldo atual é " + '.');
-  }
-
-  @Override
-  protected DTO getBalance() throws Exception {
-    ValueDTO receivedDTO = ObjectConverter.convert(receiveSecureDTO(SocketComponent.BANK_DATABASE));
-    String formattedBalanceValue = ValueFormatter.formatToBrazilianCurrency(receivedDTO.getValue());
-
-    return new MessageDTO("Seu saldo atual é " + formattedBalanceValue + ".");
-  }
-
-  @Override
-  protected DTO getSavingsProjections() throws Exception {
     // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'getSavingsProjections'");
+    throw new UnsupportedOperationException("Unimplemented method 'wireTransfer'");
   }
 
   @Override
-  protected DTO getFixedIncomeProjections() throws Exception {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'getFixedIncomeProjections'");
+  protected DTO getBalance(DTO dto) throws Exception {
+    AuthenticatedDTO authenticatedDTO = ObjectConverter.convert(dto);
+    sendSecureDTO(SocketComponent.BANK_DATABASE, authenticatedDTO);
+
+    ValueDTO receivedBalance = ObjectConverter.convert(receiveSecureDTO(SocketComponent.BANK_DATABASE));
+    String formattedBalanceValue = ValueFormatter.formatToBrazilianCurrency(receivedBalance.getValue());
+
+    return new MessageDTO("Seu saldo atual é de " + formattedBalanceValue + ".");
   }
 
   @Override
-  protected DTO createAccount() throws Exception {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'createAccount'");
+  protected DTO getSavingsProjections(DTO dto) throws Exception {
+    AuthenticatedDTO authenticatedDTO = ObjectConverter.convert(dto);
+    sendSecureDTO(SocketComponent.BANK_DATABASE, authenticatedDTO);
+
+    IncomeProjectionDTO receivedIncomeProjection = ObjectConverter.convert(receiveSecureDTO(SocketComponent.BANK_DATABASE));
+    return receivedIncomeProjection;
+  }
+
+  @Override
+  protected DTO getFixedIncomeProjections(DTO dto) throws Exception {
+    AuthenticatedDTO authenticatedDTO = ObjectConverter.convert(dto);
+    sendSecureDTO(SocketComponent.BANK_DATABASE, authenticatedDTO);
+
+    IncomeProjectionDTO receivedIncomeProjection = ObjectConverter.convert(receiveSecureDTO(SocketComponent.BANK_DATABASE));
+    return receivedIncomeProjection;
   }
 
   @Override
   protected DTO updateFixedIncome(DTO dto) throws Exception {
-    ValueDTO parsedDTO = ObjectConverter.convert(dto);
-    double fixedIncomeUpdateValue = parsedDTO.getValue();
-
-    if (fixedIncomeUpdateValue == 0.0)
-      throw new AppException(
-          "Valor de atualização de renda fixa inválido!");
-
-    return new MessageDTO(
-        "A renda fixa foi atualizada com o valor de " + ", sua renda fixa atual é " + ", e seu saldo atual é " +
-            '.');
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'updateFixedIncome'");
   }
 
 }

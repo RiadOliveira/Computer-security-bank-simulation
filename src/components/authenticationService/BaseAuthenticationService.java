@@ -12,7 +12,6 @@ import dtos.DTO;
 import dtos.RemoteOperation;
 import dtos.user.UserData;
 import interfaces.ThrowingConsumer;
-import utils.Hasher;
 
 public abstract class BaseAuthenticationService extends SocketThread {
   protected final List<UserData> userDatabase = getInitialUserDatabase();
