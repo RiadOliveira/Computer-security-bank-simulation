@@ -13,11 +13,7 @@ public class Serializer {
           bytesOutputStream);
 
       objectOutputStream.writeObject(object);
-
-      var byteArray = bytesOutputStream.toByteArray();
-      for (int i = 0; i < byteArray.length; i++) {
-        System.out.println(byteArray[i]);
-      }
+      
       return bytesOutputStream.toByteArray();
     } catch (Exception exception) {
       ConsolePrinter.println("Falha ao serializar objeto!");
