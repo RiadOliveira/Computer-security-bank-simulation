@@ -6,14 +6,17 @@ import dtos.DTO;
 import utils.ConsolePrinter;
 
 public class AuthenticatedDTO extends DTO {
-  private final String token;
-  private final DTO dto;
-  
-  private UUID userId = null;
+  private String token;
+  private DTO dto;
+  private UUID userId;
   
   public AuthenticatedDTO(String token, DTO dto) {
     this.token = token;
     this.dto = dto;
+  }
+
+  public AuthenticatedDTO(UUID userId) {
+    this.userId = userId;
   }
 
   @Override

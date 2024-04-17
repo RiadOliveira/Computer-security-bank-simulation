@@ -37,8 +37,8 @@ public class AppClient extends BaseAppClient {
     RemoteOperation[] allOperations = RemoteOperation.values();
     int localOperationIndex = operationIndex - allOperations.length;
 
-    if (localOperationIndex >= 0) LocalOperation(localOperationIndex);
-    else RemoteOperationInput(allOperations[operationIndex]);
+    if (localOperationIndex >= 0) handleLocalOperation(localOperationIndex);
+    else handleRemoteOperationInput(allOperations[operationIndex]);
   }
 
   protected void handleExecutionException(Exception exception) {
@@ -53,7 +53,7 @@ public class AppClient extends BaseAppClient {
     ConsolePrinter.displayAndWaitForEnterPressing(scanner);
   }
 
-  private void LocalOperation(int operationIndex) throws Exception {
+  private void handleLocalOperation(int operationIndex) throws Exception {
     ClientLocalOperation[] allLocalOperations = ClientLocalOperation.values();
     if (operationIndex >= allLocalOperations.length) {
       throw new AppException("Operação escolhida inválida!");
@@ -73,7 +73,7 @@ public class AppClient extends BaseAppClient {
     }
   }
 
-  private void RemoteOperationInput(
+  private void handleRemoteOperationInput(
     RemoteOperation operation
   ) throws Exception {
     DTO dtoToSend = parseDTOToSend(operationHandlers.get(operation).run());

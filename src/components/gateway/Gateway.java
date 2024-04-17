@@ -7,12 +7,18 @@ import connections.components.SocketComponent;
 import connections.data.SocketData;
 import dtos.DTO;
 import dtos.RemoteOperation;
-import dtos.generic.MessageDTO;
+import dtos.auth.AuthenticatedDTO;
+import dtos.generic.ExceptionDTO;
+import dtos.user.UserData;
+import errors.AppException;
+import utils.ObjectConverter;
+import utils.RandomNumberGenerator;
 
 public class Gateway extends BaseGateway {
   public Gateway(
-      Map<SocketComponent, List<SocketData>> connectedSockets,
-      SocketComponent socketClientComponent) {
+    Map<SocketComponent, List<SocketData>> connectedSockets,
+    SocketComponent socketClientComponent
+  ) {
     super(connectedSockets, socketClientComponent);
   }
 
@@ -22,20 +28,16 @@ public class Gateway extends BaseGateway {
     RemoteOperation operation = receivedDTO.getOperation();
 
     SocketComponent componentToRedirect = getComponentToRedirect(operation);
+    boolean isReadOperation = isReadOperationForComponent(
+      operation, componentToRedirect
+    );
     int replicasQuantity = getComponentReplicasQuantity(componentToRedirect);
-
-    for (int ind = 0; ind < replicasQuantity; ind++) {
-      sendSecureDTO(componentToRedirect, ind, receivedDTO);
-    }
-
-    // Needs to be handled
-    for (int ind = 0; ind < replicasQuantity; ind++) {
-      DTO replicaResponse = receiveSecureDTO(componentToRedirect, ind);
-    }
-
-    sendSecureDTO(
-        SocketComponent.FIREWALL,
-        new MessageDTO("Insert response instead of this DTO"));
+    
+    DTO componentResponse = getComponentResponse(
+      receivedDTO, componentToRedirect,
+      isReadOperation, replicasQuantity
+    );
+    sendSecureDTO(SocketComponent.FIREWALL, componentResponse);
   }
 
   @Override
@@ -43,9 +45,90 @@ public class Gateway extends BaseGateway {
     executeDefaultExceptionHandling(exception);
   }
 
+  private DTO getComponentResponse(
+    DTO dtoToRedirect, SocketComponent component,
+    boolean isReadOperation, int replicasQuantity
+  ) throws Exception {
+    if(isReadOperation) {
+      int replicaIndex = RandomNumberGenerator.generateFromZeroTo(
+        replicasQuantity
+      );
+      return communicateWithOneReplica(
+        dtoToRedirect, component, replicaIndex
+      );
+    }
+
+    DTO replicasResponse;
+    synchronized(Gateway.class) {
+      replicasResponse = communicateWithAllReplicas(
+        dtoToRedirect, component, replicasQuantity
+      );
+    }
+
+    boolean isCreateAccount = dtoToRedirect.getOperation().equals(
+      RemoteOperation.CREATE_ACCOUNT
+    );
+    if(!isCreateAccount) return replicasResponse;
+    return handleCreateAccountAdditionalCommunications(replicasResponse);
+  }
+
+  private DTO handleCreateAccountAdditionalCommunications(
+    DTO replicasResponse
+  ) throws Exception {
+    UserData parsedResponse = ObjectConverter.convert(
+      replicasResponse
+    );
+    DTO createAccountDTO = new AuthenticatedDTO(
+      parsedResponse.getId()
+    );
+    var bankServiceComponent = SocketComponent.BANK_SERVICE;
+
+    synchronized(Gateway.class) {
+      return communicateWithAllReplicas(
+        createAccountDTO, bankServiceComponent,
+        getComponentReplicasQuantity(bankServiceComponent)
+      );
+    }
+  }
+
+  private DTO communicateWithOneReplica(
+    DTO dtoToRedirect, SocketComponent component,
+    int replicaIndex
+  ) throws Exception {
+    sendSecureDTO(component, replicaIndex, dtoToRedirect);
+    return receiveSecureDTO(component, replicaIndex);
+  }
+
+  private DTO communicateWithAllReplicas(
+    DTO dtoToRedirect, SocketComponent component,
+    int replicasQuantity
+  ) throws Exception {
+    for (int ind = 0; ind < replicasQuantity; ind++) {
+      sendSecureDTO(component, ind, dtoToRedirect);
+    }
+
+    DTO replicaResponse = null;
+    for (int ind = 0; ind < replicasQuantity; ind++) {
+      replicaResponse = receiveSecureDTO(component, ind);
+
+      boolean exceptionReplicaResponse = ExceptionDTO.class.isInstance(
+        replicaResponse
+      );
+      if(exceptionReplicaResponse) {
+        String exceptionMessage = ((ExceptionDTO) replicaResponse).getMessage();
+        throw new AppException(
+          "Falha na réplica " + ind + ": " + exceptionMessage
+        );
+      }
+    }
+
+    return replicaResponse;
+  }
+
   private SocketComponent getComponentToRedirect(RemoteOperation operation) {
-    if (isForAuthenticationService(operation))
+    if (isForAuthenticationService(operation)) {
       return SocketComponent.AUTHENTICATION_SERVICE;
+    }
     return SocketComponent.BANK_SERVICE;
   }
 
@@ -54,5 +137,21 @@ public class Gateway extends BaseGateway {
     boolean isAuthenticate = operation.equals(RemoteOperation.AUTHENTICATE);
 
     return isCreateAccount || isAuthenticate;
+  }
+
+  private boolean isReadOperationForComponent(
+    RemoteOperation operation, SocketComponent component
+  ) {
+    if(component.equals(SocketComponent.AUTHENTICATION_SERVICE)) {
+      return !operation.equals(RemoteOperation.CREATE_ACCOUNT);
+    }
+
+    switch(operation) {
+      case DEPOSIT: return false;
+      case UPDATE_FIXED_INCOME: return false;
+      case WIRE_TRANSFER: return false;
+      case WITHDRAW: return false;
+      default: return true;
+    }
   }
 }
