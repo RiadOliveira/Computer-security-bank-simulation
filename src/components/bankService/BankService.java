@@ -46,7 +46,7 @@ public class BankService extends BaseBankService {
     DTO dtoToRedirect
   ) throws Exception {
     sendSecureDTO(SocketComponent.BANK_DATABASE, dtoToRedirect);
-    Thread.sleep(10);
+    Thread.sleep(100);
     return receiveSecureDTO(SocketComponent.BANK_DATABASE);
   }
 
