@@ -10,10 +10,10 @@ import dtos.DTO;
 import dtos.RemoteOperation;
 import dtos.auth.AuthenticatedDTO;
 import dtos.bankOperation.WireTransferDTO;
-import dtos.generic.ExceptionDTO;
 import dtos.generic.MessageDTO;
 import dtos.generic.ValueDTO;
 import dtos.user.BankAccount;
+import errors.AppException;
 import utils.ObjectConverter;
 import utils.ValueFormatter;
 
@@ -54,6 +54,15 @@ public class BankService extends BaseBankService {
     AuthenticatedDTO authenticatedDTO
   ) throws Exception {
     UUID userId = authenticatedDTO.getUserId();
+
+    var foundAccount = (BankAccount) redirectToDatabase(
+      new AuthenticatedDTO(userId).
+      setOperation(RemoteOperation.GET_ACCOUNT_DATA)
+    );
+    if(foundAccount != null) {
+      throw new AppException("Uma conta de mesmo Id já existe!");
+    }
+
     DTO newAccount = new AuthenticatedDTO(
       userId, new BankAccount(userId)
     ).setOperation(authenticatedDTO.getOperation());
@@ -71,14 +80,14 @@ public class BankService extends BaseBankService {
 
     double withdrawValue = parsedDTO.getValue();
     if(withdrawValue <= 0.0) {
-      return new ExceptionDTO("Valor de saque inválido!");
+      throw new AppException("Valor de saque inválido!");
     }
 
     double accountBalance = getBalanceFromDatabase(
       authenticatedDTO.getUserId()
     );
     if(withdrawValue > accountBalance) {
-      return new ExceptionDTO(
+      throw new AppException(
         "Valor de saque maior que saldo disponível!"
       );
     }
@@ -108,7 +117,7 @@ public class BankService extends BaseBankService {
 
     double depositValue = parsedDTO.getValue();
     if(depositValue <= 0.0) {
-      return new ExceptionDTO("Valor de depósito inválido!");
+      throw new AppException("Valor de depósito inválido!");
     }
 
     var updatedBalanceDTO = (ValueDTO) redirectToDatabase(
@@ -136,14 +145,14 @@ public class BankService extends BaseBankService {
 
     double transferValue = parsedDTO.getValue();
     if(transferValue <= 0.0) {
-      return new ExceptionDTO("Valor de transferência inválido!");
+      throw new AppException("Valor de transferência inválido!");
     }
 
     double accountBalance = getBalanceFromDatabase(
       authenticatedDTO.getUserId()
     );
     if(transferValue > accountBalance) {
-      return new ExceptionDTO(
+      throw new AppException(
         "Valor de transferência maior que saldo disponível!"
       );
     }
@@ -159,7 +168,7 @@ public class BankService extends BaseBankService {
       userAccount.getAccountNumber()
     );
     if(equalAgency && equalAccountNumber) {
-      return new ExceptionDTO(
+      throw new AppException(
         "Não é permitido fazer uma transferência para si mesmo!"
       );
     }
@@ -201,7 +210,7 @@ public class BankService extends BaseBankService {
 
     double fixedIncomeUpdateValue = parsedDTO.getValue();
     if(fixedIncomeUpdateValue == 0.0) {
-      return new ExceptionDTO(
+      throw new AppException(
         "Valor de atualização de renda fixa inválido!"
       );
     }
@@ -213,7 +222,7 @@ public class BankService extends BaseBankService {
 
     double accountFixedIncome = userAccount.getFixedIncome();
     if(accountFixedIncome + fixedIncomeUpdateValue < 0.0) {
-      return new ExceptionDTO(
+      throw new AppException(
         "Valor de atualização de renda fixa está retirando" +
         " um valor maior que o disponível na renda fixa!"
       );
@@ -221,7 +230,7 @@ public class BankService extends BaseBankService {
 
     double accountBalance = userAccount.getBalance();
     if(accountBalance - fixedIncomeUpdateValue < 0.0) {
-      return new ExceptionDTO(
+      throw new AppException(
         "Valor de atualização de renda fixa está adicionando" +
         " um valor maior que o disponível no saldo da conta!"
       );

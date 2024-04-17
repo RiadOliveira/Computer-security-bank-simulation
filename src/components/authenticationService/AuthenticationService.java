@@ -9,8 +9,9 @@ import dtos.DTO;
 import dtos.RemoteOperation;
 import dtos.auth.AuthRequest;
 import dtos.auth.AuthResponse;
-import dtos.generic.ExceptionDTO;
 import dtos.user.UserData;
+import errors.AppException;
+import errors.SecurityViolationException;
 import utils.Hasher;
 import utils.ObjectConverter;
 
@@ -42,12 +43,12 @@ public class AuthenticationService extends BaseAuthenticationService {
   protected DTO createAccount(DTO user) throws Exception {
     UserData parsedDTO = ObjectConverter.convert(user);
     if (parsedDTO == null) {
-      return new ExceptionDTO("Instância de DTO inválida!");
+      throw new AppException("Instância de DTO inválida!");
     }
 
     boolean existsByCpf = findByCpf(parsedDTO.getCpf()) != null;
     if (existsByCpf) {
-      return new ExceptionDTO("Um usuário de mesmo cpf já existe!");
+      throw new AppException("Um usuário de mesmo CPF já existe!");
     }
 
     parsedDTO.generateAndSetId();
@@ -60,19 +61,21 @@ public class AuthenticationService extends BaseAuthenticationService {
   protected DTO authenticate(DTO authData) throws Exception {
     AuthRequest parsedDTO = ObjectConverter.convert(authData);
     if (parsedDTO == null) {
-      return new ExceptionDTO("Instância de DTO inválida!");
+      throw new AppException("Instância de DTO inválida!");
     }
 
     UserData accountFound = findByCpf(parsedDTO.getCpf());
     if(accountFound == null) {
-      return new ExceptionDTO("Conta especificada não encontrada!");
+      throw new AppException("Conta especificada não encontrada!");
     }
 
     boolean correctPassword = Hasher.compare(
       accountFound.getPassword(), parsedDTO.getPassword()
     );
     if(!correctPassword) {
-      return new ExceptionDTO("Dados de autenticação inválidos");
+      throw new SecurityViolationException(
+        "Dados de autenticação inválidos"
+      );
     }
 
     return new AuthResponse(accountFound);

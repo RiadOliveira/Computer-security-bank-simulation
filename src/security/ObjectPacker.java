@@ -2,7 +2,7 @@ package security;
 
 import javax.crypto.SecretKey;
 
-import errors.SecurityException;
+import errors.SecurityViolationException;
 import security.crypto.AsymmetricKey;
 import security.crypto.ComponentSymmetricKeys;
 import security.crypto.CryptoProcessor;
@@ -74,16 +74,16 @@ public class ObjectPacker {
   public static<T> String packObject(
     T object, ComponentSymmetricKeys symmetricKeys,
     AsymmetricKey privateKey
-  ) throws SecurityException {
+  ) throws SecurityViolationException {
     try {
       return handleObjectPacking(
         object, symmetricKeys, privateKey
       );
     } catch (Exception exception) {
-      if(exception instanceof SecurityException) {
-        throw (SecurityException) exception;
+      if(exception instanceof SecurityViolationException) {
+        throw (SecurityViolationException) exception;
       }
-      throw new SecurityException(
+      throw new SecurityViolationException(
         "Falha ao garantir segurança no empacotamento dos dados!"
       );
     }
@@ -120,17 +120,17 @@ public class ObjectPacker {
   public static<T> T unpackObject(
     String packedObject, ComponentSymmetricKeys symmetricKeys,
     AsymmetricKey publicKey
-  ) throws SecurityException {
+  ) throws SecurityViolationException {
     try {
       return handleObjectUnpacking(
         packedObject, symmetricKeys, publicKey
       );
       
     } catch (Exception exception) {
-      if(exception instanceof SecurityException) {
-        throw (SecurityException) exception;
+      if(exception instanceof SecurityViolationException) {
+        throw (SecurityViolationException) exception;
       }
-      throw new SecurityException(
+      throw new SecurityViolationException(
         "Falha ao garantir segurança no desempacotamento dos dados!"
       );
     }
@@ -191,7 +191,7 @@ public class ObjectPacker {
     );
 
     if(!hmacsAreEqual) {
-      throw new SecurityException(
+      throw new SecurityViolationException(
         "O HMAC calculado não corresponde " +
         "ao recebido, mensagem descartada!"
       );

@@ -15,7 +15,8 @@ import dtos.user.BankAccount;
 import interfaces.ThrowingConsumerTwoParameters;
 
 public abstract class BaseBankDatabase extends SocketThread {
-  protected List<BankAccount> accountsDatabase = new ArrayList<>();
+  protected static final List<BankAccount> bankAccountsDatabase = 
+    getInitialBankAccountsDatabase();
 
   protected final Map<
     RemoteOperation, ThrowingConsumerTwoParameters<DTO, DTO, BankAccount, Exception>
@@ -53,17 +54,17 @@ public abstract class BaseBankDatabase extends SocketThread {
   protected abstract DTO updateFixedIncome(DTO dto, BankAccount account) throws Exception;
 
   protected BankAccount findById(UUID userId) {
-    for (BankAccount account : accountsDatabase) {
+    for (BankAccount account : bankAccountsDatabase) {
       if(account.getUserId().equals(userId)) return account;
     }
 
     return null;
   }
 
-  public BankAccount findAccountByAgencyAndNumber(
+  protected BankAccount findAccountByAgencyAndNumber(
     String agency, String accountNumber
   ) {
-    for(BankAccount account : accountsDatabase) {
+    for(BankAccount account : bankAccountsDatabase) {
       boolean equalAgency = account.getAgency().equals(agency);
       boolean equalNumber = account.getAccountNumber().equals(accountNumber);
 
@@ -71,5 +72,29 @@ public abstract class BaseBankDatabase extends SocketThread {
     }
 
     return null;
+  }
+
+  private static List<BankAccount> getInitialBankAccountsDatabase() {
+    List<BankAccount> initialBankAccountsDatabase = new ArrayList<>();
+
+    var firstUser = new BankAccount(
+      UUID.fromString("123e4567-e89b-12d3-a456-426614174000"),
+      "1122", "11112222", 5000.0, 400.0
+    );
+    initialBankAccountsDatabase.add(firstUser);
+
+    var secondUser = new BankAccount(
+      UUID.fromString("0f14d0ab-9605-4a62-a9e4-5ed26688389b"),
+      "1234", "12345678", 9400.0, 850.0
+    );
+    initialBankAccountsDatabase.add(secondUser);
+
+    var thirdUser = new BankAccount(
+      UUID.fromString("71c6e098-c2b2-4b95-b9d3-f00f242f465f"),
+      "4321", "87654321", 2000.0, 258.0
+    );
+    initialBankAccountsDatabase.add(thirdUser);
+
+    return initialBankAccountsDatabase;
   }
 }

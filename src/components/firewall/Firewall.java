@@ -9,6 +9,7 @@ import dtos.RemoteOperation;
 import dtos.DTO;
 import dtos.auth.AuthResponse;
 import dtos.auth.AuthenticatedDTO;
+import errors.SecurityViolationException;
 
 public class Firewall extends BaseFirewall {
   public Firewall(
@@ -52,17 +53,17 @@ public class Firewall extends BaseFirewall {
     if (!requiresAuthentication) return;
 
     if (!userIsLogged()) {
-      throw new SecurityException(
+      throw new SecurityViolationException(
         "O usuário precisa estar autenticado para executar esta ação!"
       );
     }
     if (!isAuthenticatedDTO) {
-      throw new SecurityException(
+      throw new SecurityViolationException(
         "É necessário enviar um DTO autenticado para essa ação!"
       );
     }
     if (!validAuthenticatedDTO((AuthenticatedDTO) receivedDTO)) {
-      throw new SecurityException("Token de autenticação inválido!");
+      throw new SecurityViolationException("Token de autenticação inválido!");
     }
   }
 

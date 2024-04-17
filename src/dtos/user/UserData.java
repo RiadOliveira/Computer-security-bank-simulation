@@ -15,9 +15,23 @@ public class UserData extends DTO {
   private final String password;
 
   public UserData(
-      String name, String cpf,
-      String address, String phoneNumber,
-      String password) {
+    UUID id, String name, String cpf,
+    String address, String phoneNumber,
+    String password
+  ) {
+    this.id = id;
+    this.name = name;
+    this.cpf = cpf;
+    this.address = address;
+    this.phoneNumber = phoneNumber;
+    this.password = Hasher.hashAndEncode(password);
+  }
+
+  public UserData(
+    String name, String cpf,
+    String address, String phoneNumber,
+    String password
+  ) {
     this.name = name;
     this.cpf = cpf;
     this.address = address;

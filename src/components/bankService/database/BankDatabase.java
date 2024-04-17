@@ -10,9 +10,9 @@ import dtos.RemoteOperation;
 import dtos.auth.AuthenticatedDTO;
 import dtos.bankOperation.IncomeProjectionDTO;
 import dtos.bankOperation.WireTransferDTO;
-import dtos.generic.ExceptionDTO;
 import dtos.generic.ValueDTO;
 import dtos.user.BankAccount;
+import errors.AppException;
 import utils.ObjectConverter;
 
 public class BankDatabase extends BaseBankDatabase {
@@ -33,14 +33,7 @@ public class BankDatabase extends BaseBankDatabase {
     boolean isCreateAccount = RemoteOperation.CREATE_ACCOUNT.equals(operation);
     if(!isCreateAccount) {
       accountFound = findById(authenticatedDTO.getUserId());
-
-      if(accountFound == null) {
-        sendSecureDTO(
-          SocketComponent.BANK_SERVICE,
-          new ExceptionDTO("Conta não encontrada!")
-        );
-        return;
-      }
+      if(accountFound == null) throw new AppException("Conta não encontrada!");
     }
     
     DTO responseDTO = operationHandlers.get(operation).run(
@@ -57,7 +50,7 @@ public class BankDatabase extends BaseBankDatabase {
   @Override
   protected DTO createAccount(DTO dto, BankAccount _account) throws Exception {
     BankAccount newAccount = ObjectConverter.convert(dto);
-    accountsDatabase.add(newAccount);
+    bankAccountsDatabase.add(newAccount);
 
     return newAccount;
   }
@@ -97,13 +90,12 @@ public class BankDatabase extends BaseBankDatabase {
       agencyToTransfer, accountNumberToTransfer
     );
     if(accountFoundToTransfer == null) {
-      return new ExceptionDTO(
-        "Conta de transferência não encontrada!"
-      );
+      throw new AppException("Conta de transferência não encontrada!");
     }
 
     account.updateBalance(-transferValue);
     accountFoundToTransfer.updateBalance(transferValue);
+    accountFoundToTransfer.print();
 
     return new ValueDTO(account.getBalance());
   }
