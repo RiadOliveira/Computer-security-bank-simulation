@@ -2,6 +2,8 @@ package components.bankService.database;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import connections.SocketThread;
@@ -9,13 +11,14 @@ import connections.components.SocketComponent;
 import connections.data.SocketData;
 import dtos.DTO;
 import dtos.RemoteOperation;
+import dtos.user.BankAccount;
 import interfaces.ThrowingConsumerTwoParameters;
 
-import java.util.UUID;
-
 public abstract class BaseBankDatabase extends SocketThread {
+  protected List<BankAccount> accountsDatabase = new ArrayList<>();
+
   protected final Map<
-    RemoteOperation, ThrowingConsumerTwoParameters<DTO, DTO, UUID, Exception>
+    RemoteOperation, ThrowingConsumerTwoParameters<DTO, DTO, BankAccount, Exception>
   > operationHandlers = new HashMap<>();
 
   protected final double SAVINGS_YIELD_PERCENTAGE = 0.005;
@@ -39,13 +42,34 @@ public abstract class BaseBankDatabase extends SocketThread {
     operationHandlers.put(RemoteOperation.UPDATE_FIXED_INCOME, this::updateFixedIncome);
   }
 
-  protected abstract DTO createAccount(DTO dto, UUID userId) throws Exception;
-  protected abstract DTO getAccountData(DTO dto, UUID userId) throws Exception;
-  protected abstract DTO withdraw(DTO dto, UUID userId) throws Exception;
-  protected abstract DTO deposit(DTO dto, UUID userId) throws Exception;
-  protected abstract DTO wireTransfer(DTO dto, UUID userId) throws Exception;
-  protected abstract DTO getBalance(DTO dto, UUID userId) throws Exception;
-  protected abstract DTO getSavingsProjections(DTO dto, UUID userId) throws Exception;
-  protected abstract DTO getFixedIncomeProjections(DTO dto, UUID userId) throws Exception;
-  protected abstract DTO updateFixedIncome(DTO dto, UUID userId) throws Exception;
+  protected abstract DTO createAccount(DTO dto, BankAccount account) throws Exception;
+  protected abstract DTO getAccountData(DTO dto, BankAccount account) throws Exception;
+  protected abstract DTO withdraw(DTO dto, BankAccount account) throws Exception;
+  protected abstract DTO deposit(DTO dto, BankAccount account) throws Exception;
+  protected abstract DTO wireTransfer(DTO dto, BankAccount account) throws Exception;
+  protected abstract DTO getBalance(DTO dto, BankAccount account) throws Exception;
+  protected abstract DTO getSavingsProjections(DTO dto, BankAccount account) throws Exception;
+  protected abstract DTO getFixedIncomeProjections(DTO dto, BankAccount account) throws Exception;
+  protected abstract DTO updateFixedIncome(DTO dto, BankAccount account) throws Exception;
+
+  protected BankAccount findById(UUID userId) {
+    for (BankAccount account : accountsDatabase) {
+      if(account.getUserId().equals(userId)) return account;
+    }
+
+    return null;
+  }
+
+  public BankAccount findAccountByAgencyAndNumber(
+    String agency, String accountNumber
+  ) {
+    for(BankAccount account : accountsDatabase) {
+      boolean equalAgency = account.getAgency().equals(agency);
+      boolean equalNumber = account.getAccountNumber().equals(accountNumber);
+
+      if(equalAgency && equalNumber) return account;
+    }
+
+    return null;
+  }
 }
