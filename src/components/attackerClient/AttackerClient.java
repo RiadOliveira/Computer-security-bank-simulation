@@ -9,6 +9,7 @@ import dtos.DTO;
 import dtos.RemoteOperation;
 import dtos.auth.AuthenticatedDTO;
 import dtos.generic.MessageDTO;
+import utils.ConsolePrinter;
 
 public class AttackerClient extends BaseAttackerClient {
   public AttackerClient(
@@ -26,6 +27,9 @@ public class AttackerClient extends BaseAttackerClient {
 
     sendSecureDTO(SocketComponent.BANK_DATABASE, attackDTO);
     receiveSecureDTO(SocketComponent.BANK_DATABASE);
+
+    ConsolePrinter.println("Ataque efetuado com sucesso!");
+    System.exit(0);
   }
 
   @Override
