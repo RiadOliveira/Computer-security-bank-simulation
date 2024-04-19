@@ -1,5 +1,0 @@
-Componentes: Lucas Henrique de Souza Paulino, Ríad Oliveira de Morais
-
-OBS.: por padrão, o firewall bloqueia a tentativa de backdoor (comando 12 do menu [escondido]). 
-Para aceitar, comente a linha 30 e descomentar as linhas 34 e 35 do arquivo Firewall.java do pacote src/components/firewall.
-Ao rodar será gerado um arquivo .txt chamado database_log.
