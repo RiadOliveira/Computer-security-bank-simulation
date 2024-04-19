@@ -59,10 +59,8 @@ public abstract class BaseFirewall extends SocketThread {
 
   protected void handleAuthenticationAttempt(DTO response) {
     connectedUserId = null;
-    boolean validAuthResponse = AuthResponse.class.isInstance(
-      response
-    );
-
+    
+    boolean validAuthResponse = response instanceof AuthResponse;
     if(validAuthResponse) {
       handleValidAuthResponse((AuthResponse) response);
       userAuthenticationAttempts = 0;

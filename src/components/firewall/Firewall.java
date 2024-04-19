@@ -10,7 +10,7 @@ import dtos.RemoteOperation;
 import dtos.DTO;
 import dtos.auth.AuthenticatedDTO;
 import errors.SecurityViolationException;
-import utils.OperationClassifier;
+import utils.RemoteOperationClassifier;
 
 public class Firewall extends BaseFirewall {
   public Firewall(
@@ -53,7 +53,7 @@ public class Firewall extends BaseFirewall {
       throw new SecurityViolationException("Operação inválida bloqueada!");
     }
 
-    boolean operationRequiresAuth = OperationClassifier.isForBankService(operation);
+    boolean operationRequiresAuth = RemoteOperationClassifier.isForBankService(operation);
     if(isBackdoorAccessAttempt || !operationRequiresAuth) return;
 
     if(!userIsLogged()) {
@@ -62,9 +62,7 @@ public class Firewall extends BaseFirewall {
       );
     }
 
-    boolean isAuthenticatedDTO = AuthenticatedDTO.class.isInstance(
-      receivedDTO
-    );
+    boolean isAuthenticatedDTO = receivedDTO instanceof AuthenticatedDTO;
     if(!isAuthenticatedDTO) {
       throw new SecurityViolationException(
         "É necessário enviar um DTO autenticado para essa ação!"

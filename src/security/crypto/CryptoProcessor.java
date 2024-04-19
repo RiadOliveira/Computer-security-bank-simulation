@@ -29,7 +29,7 @@ public class CryptoProcessor {
       aesKeyGenerator = KeyGenerator.getInstance("AES");
 
       shaHMAC = Mac.getInstance(HMAC_INSTANCE_NAME);
-    } catch (Exception exception) {
+    } catch(Exception exception) {
       ConsolePrinter.println("Falha ao iniciar cifra simétrica!");
     }
   }

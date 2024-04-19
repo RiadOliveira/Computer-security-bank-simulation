@@ -108,7 +108,6 @@ public class BankDatabase extends BaseBankDatabase {
 
     account.updateBalance(-transferValue);
     accountFoundToTransfer.updateBalance(transferValue);
-    accountFoundToTransfer.print();
 
     return new ValueDTO(account.getBalance());
   }
@@ -161,7 +160,7 @@ public class BankDatabase extends BaseBankDatabase {
     String logFileName = "database_log.txt";
     try (BufferedWriter writer = new BufferedWriter(new FileWriter(logFileName))) {
       writer.write(logBuilder.toString());
-    } catch (IOException e) {}
+    } catch(IOException e) {}
 
     return new MessageDTO(
       "Os dados foram armazenados no arquivo " + logFileName

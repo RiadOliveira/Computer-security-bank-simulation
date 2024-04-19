@@ -79,7 +79,7 @@ public class ObjectPacker {
       return handleObjectPacking(
         object, symmetricKeys, privateKey
       );
-    } catch (Exception exception) {
+    } catch(Exception exception) {
       if(exception instanceof SecurityViolationException) {
         throw (SecurityViolationException) exception;
       }
@@ -126,7 +126,7 @@ public class ObjectPacker {
         packedObject, symmetricKeys, publicKey
       );
       
-    } catch (Exception exception) {
+    } catch(Exception exception) {
       if(exception instanceof SecurityViolationException) {
         throw (SecurityViolationException) exception;
       }

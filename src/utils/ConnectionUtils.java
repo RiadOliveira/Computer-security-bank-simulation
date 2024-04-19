@@ -70,7 +70,7 @@ public class ConnectionUtils {
     while (socket == null) {
       try {
         socket = new Socket(address, port);
-      } catch (Exception exception) {
+      } catch(Exception exception) {
         waitToReconnect();
       }
     }
@@ -90,7 +90,7 @@ public class ConnectionUtils {
 
     try {
       TimeUnit.SECONDS.sleep(WAIT_TIME_TO_TRY_RECONNECTION);
-    } catch (Exception exception) {}
+    } catch(Exception exception) {}
   }
 
   public static String getComponentAddress(SocketComponent component) {

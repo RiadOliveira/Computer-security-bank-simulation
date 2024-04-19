@@ -15,7 +15,7 @@ public class Serializer {
       objectOutputStream.writeObject(object);
       
       return bytesOutputStream.toByteArray();
-    } catch (Exception exception) {
+    } catch(Exception exception) {
       ConsolePrinter.println("Falha ao serializar objeto!");
       return null;
     }
@@ -28,7 +28,7 @@ public class Serializer {
       ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
 
       return (T) objectInputStream.readObject();
-    } catch (Exception exception) {
+    } catch(Exception exception) {
       ConsolePrinter.println("Falha ao deserializar objeto!");
       return null;
     }

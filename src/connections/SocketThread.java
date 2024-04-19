@@ -3,6 +3,7 @@ package connections;
 import java.io.EOFException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.SocketException;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +39,7 @@ public abstract class SocketThread implements Runnable {
         connectedSockets, socketClientComponent
       );
       handleExecution();
-    } catch (Exception exception) {
+    } catch(Exception exception) {
       ConsolePrinter.println("Erro interno da thread!");
     }
   }
@@ -49,8 +50,9 @@ public abstract class SocketThread implements Runnable {
     while (!socketDisconnected) {
       try {
         execute();
-      } catch (Exception exception) {
-        socketDisconnected = exception instanceof EOFException;
+      } catch(Exception exception) {
+        socketDisconnected = exception instanceof EOFException ||
+          exception instanceof SocketException;
 
         if(!socketDisconnected) handleExecutionException(exception);
         else ConsolePrinter.printlnError(
@@ -69,7 +71,7 @@ public abstract class SocketThread implements Runnable {
 
       ExceptionDTO exceptionDTO = new ExceptionDTO(errorMessage);
       sendSecureDTO(socketClientComponent, exceptionDTO);
-    } catch (Exception e) {
+    } catch(Exception e) {
       ConsolePrinter.printlnError("Falha ao se comunicar com o componente!");
     }
   }

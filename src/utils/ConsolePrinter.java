@@ -22,7 +22,7 @@ public class ConsolePrinter {
   private static final String PRESS_ENTER_TO_CONTINUE_MESSAGE = 
     "Pressione Enter para continuar...";
   private static final String OVERWRITE_PRESS_ENTER = 
-    MOVE_TO_PREVIOUS_LINE + CLEAR_CURRENT_LINE + MOVE_TO_PREVIOUS_LINE;
+    MOVE_TO_PREVIOUS_LINE + CLEAR_CURRENT_LINE;
 
   public static synchronized void print(Object content) {
     System.out.print(content);

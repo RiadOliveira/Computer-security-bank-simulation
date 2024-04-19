@@ -32,7 +32,7 @@ public class BankServiceSimulator {
 
       bankDatabaseProcessThread.start();
       bankServiceProcessThread.start();
-    } catch (Exception exception) {
+    } catch(Exception exception) {
       System.out.println(
         "Forneça um index de réplica válido (entre 0 e " +
         (SimulationUtils.BANK_SERVICE_INSTANCES_QUANTITY - 1) +

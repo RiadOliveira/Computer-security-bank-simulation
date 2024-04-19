@@ -34,7 +34,7 @@ public class SocketClient extends SocketProcess {
       );
       
       handleConnection(serverSocket);
-    } catch (Exception exception) {
+    } catch(Exception exception) {
       ConsolePrinter.printlnError("Falha interna do cliente socket!");
     }
   }

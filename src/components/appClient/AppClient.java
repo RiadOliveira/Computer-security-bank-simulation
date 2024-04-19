@@ -27,7 +27,7 @@ public class AppClient extends BaseAppClient {
   @Override
   public void execute() throws Exception {
     ConsolePrinter.printClientOperationPanel();
-    int operationIndex = Integer.parseInt(scanner.nextLine()) - 1;
+    int operationIndex = readOperationIndex();
     ConsolePrinter.println("");
 
     if(operationIndex < 0) {
@@ -41,17 +41,26 @@ public class AppClient extends BaseAppClient {
     else handleRemoteOperationInput(allOperations[operationIndex]);
   }
 
+  @Override
   protected void handleExecutionException(Exception exception) {
     boolean isAppException = exception instanceof AppException;
 
-    if(!isAppException) ConsolePrinter.println("");
+    ConsolePrinter.println("");
     ConsolePrinter.printlnError(
       isAppException ? exception.getMessage() :
       "Erro interno do cliente!"
     );
-
     ConsolePrinter.println("");
+
     ConsolePrinter.displayAndWaitForEnterPressing(scanner);
+  }
+
+  private int readOperationIndex() throws Exception {
+    try {
+      return Integer.parseInt(scanner.nextLine()) - 1;
+    } catch(Exception exception) {
+      throw new AppException("Formato de operação inválido!"); 
+    }
   }
 
   private void handleLocalOperation(int operationIndex) throws Exception {
@@ -84,14 +93,11 @@ public class AppClient extends BaseAppClient {
     handleResponse(receivedDTO);
 
     ConsolePrinter.displayAndWaitForEnterPressing(scanner);
-    ConsolePrinter.println("");
   }
 
   private void handleResponse(DTO receivedDTO) throws InterruptedException {
-    boolean authenticationResponse = AuthResponse.class.isInstance(
-      receivedDTO
-    );
-    if(authenticationResponse) {
+    boolean isAuthenticationResponse = receivedDTO instanceof AuthResponse;
+    if(isAuthenticationResponse) {
       handleAuthResponse((AuthResponse) receivedDTO);
       return;
     }

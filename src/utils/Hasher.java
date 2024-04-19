@@ -11,7 +11,7 @@ public class Hasher {
   static {
     try {
       messageDigest = MessageDigest.getInstance(SHA3_INSTANCE_NAME);
-    } catch (Exception exception) {
+    } catch(Exception exception) {
       ConsolePrinter.println(
         "Falha ao iniciar hasher SHA3-256!"
       );

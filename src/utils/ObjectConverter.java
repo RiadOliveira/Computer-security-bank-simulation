@@ -8,7 +8,7 @@ public class ObjectConverter {
     try {
       Class<T> targetClass = (Class<T>) objectToConvert.getClass();
       return targetClass.cast(objectToConvert);
-    } catch (ClassCastException e) {
+    } catch(ClassCastException e) {
       throw new AppException("Instância de objeto inválida!");
     }
   }

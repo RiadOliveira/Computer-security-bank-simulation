@@ -11,7 +11,7 @@ import dtos.auth.AuthenticatedDTO;
 import dtos.generic.ExceptionDTO;
 import dtos.user.UserData;
 import utils.ObjectConverter;
-import utils.OperationClassifier;
+import utils.RemoteOperationClassifier;
 import utils.RandomNumberGenerator;
 
 public class Gateway extends BaseGateway {
@@ -111,17 +111,16 @@ public class Gateway extends BaseGateway {
     for(int ind = 0; ind < replicasQuantity; ind++) {
       replicaResponse = receiveSecureDTO(component, ind);
 
-      boolean exceptionReplicaResponse = ExceptionDTO.class.isInstance(
-        replicaResponse
-      );
-      if(exceptionReplicaResponse) break;
+      boolean receivedExceptionResponse = 
+        replicaResponse instanceof ExceptionDTO;
+      if(receivedExceptionResponse) break;
     }
 
     return replicaResponse;
   }
 
   private SocketComponent getComponentToRedirect(RemoteOperation operation) {
-    if(OperationClassifier.isForAuthenticationService(operation)) {
+    if(RemoteOperationClassifier.isForAuthenticationService(operation)) {
       return SocketComponent.AUTHENTICATION_SERVICE;
     }
     return SocketComponent.BANK_SERVICE;

@@ -32,7 +32,7 @@ public class SocketServer extends SocketProcess {
     try (ServerSocket serverSocket = new ServerSocket(data.getPort())) {
       ConsolePrinter.println("Servidor iniciado!\n");
       acceptAndHandleConnections(serverSocket);
-    } catch (Exception exception) {
+    } catch(Exception exception) {
       ConsolePrinter.printlnError("Falha interna do servidor socket!");
     }
   }

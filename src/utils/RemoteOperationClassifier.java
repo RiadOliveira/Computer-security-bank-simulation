@@ -2,7 +2,7 @@ package utils;
 
 import dtos.RemoteOperation;
 
-public class OperationClassifier {
+public class RemoteOperationClassifier {
   public static boolean isForBankService(RemoteOperation operation) {
     return !isForAuthenticationService(operation);
   }

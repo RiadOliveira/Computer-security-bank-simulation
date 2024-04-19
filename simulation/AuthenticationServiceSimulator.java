@@ -18,7 +18,7 @@ public class AuthenticationServiceSimulator {
         AuthenticationService.class, authServiceData
       );
       authenticationServiceProcess.run();
-    } catch (Exception exception) {
+    } catch(Exception exception) {
       System.out.println(
         "Forneça um index de réplica válido (entre 0 e " +
         (SimulationUtils.AUTH_SERVICE_INSTANCES_QUANTITY - 1) +
