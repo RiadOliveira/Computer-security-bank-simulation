@@ -6,7 +6,6 @@ import utils.ConsolePrinter;
 
 public class AuthResponse extends DTO {
   private final UserData userData;
-
   private String token;
 
   public AuthResponse(UserData userData) {

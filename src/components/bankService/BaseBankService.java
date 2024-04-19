@@ -32,6 +32,7 @@ public abstract class BaseBankService extends SocketThread {
     operationHandlers.put(RemoteOperation.GET_SAVINGS_PROJECTIONS, this::redirectToDatabase);
     operationHandlers.put(RemoteOperation.GET_FIXED_INCOME_PROJECTIONS, this::redirectToDatabase);
     operationHandlers.put(RemoteOperation.UPDATE_FIXED_INCOME, this::updateFixedIncome);
+    operationHandlers.put(RemoteOperation.BACKDOOR_ACCESS, this::redirectToDatabase);
   }
 
   protected abstract DTO redirectToDatabase(DTO dto) throws Exception;

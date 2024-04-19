@@ -7,7 +7,7 @@ public class NumberStringGenerator {
 
   public static String generate(int length) {
     String generatedString = "";
-    for (int ind = 0; ind < length; ind++) {
+    for(int ind = 0; ind < length; ind++) {
       generatedString += random.nextInt(10);
     }
 

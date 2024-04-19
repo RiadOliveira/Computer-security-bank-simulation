@@ -6,18 +6,18 @@ import java.util.UUID;
 import dtos.DTO;
 
 public class IdDTO extends DTO {
-    private final UUID id;
+  private final UUID id;
 
-    public IdDTO(UUID id) {
-        this.id = id;
-    }
+  public IdDTO(UUID id) {
+    this.id = id;
+  }
 
-    @Override
-    public void print() {
-        ConsolePrinter.println(id);
-    }
+  @Override
+  public void print() {
+    ConsolePrinter.println(id);
+  }
 
-    public UUID getId() {
-        return id;
-    }
+  public UUID getId() {
+    return id;
+  }
 }

@@ -25,12 +25,12 @@ public class BytesUtils {
   }
 
   public static boolean byteArraysAreEqual(byte[] first, byte[] second) {
-    if (first.length != second.length) return false;
+    if(first.length != second.length) return false;
     
-    for (int ind = 0; ind < first.length; ind++) {
-      if (first[ind] != second[ind]) return false;
+    for(int ind = 0; ind < first.length; ind++) {
+      if(first[ind] != second[ind]) return false;
     }
-    
+
     return true;
   }
 }

@@ -16,8 +16,13 @@ import security.crypto.CryptoProcessor;
 import utils.TokenProcessor;
 
 public abstract class BaseFirewall extends SocketThread {
+  private static final int MAX_AUTH_ATTEMPTS_BEFORE_TIMEOUT = 3;
+  private static final int AUTH_FAILURE_TIMEOUT_IN_MS = 10000;
+
   private String TOKEN_SECRET_KEY = null;
   private UUID connectedClientId = null;
+  
+  private int clientAuthenticationAttempts = 0;
 
   public BaseFirewall(
     Map<SocketComponent, List<SocketData>> connectedSockets,
@@ -73,4 +78,16 @@ public abstract class BaseFirewall extends SocketThread {
     ).getEncoded();
     TOKEN_SECRET_KEY = CryptoProcessor.encodeBase64(gatewayEncodedKey);
   }
+
+  // private void handleAuthenticationAttempt() {
+  //   authenticationAttemptCounter++;
+  //   System.out.println(authenticationAttemptCounter + "/3 tentativas antes do bloqueio.\n");
+
+  //   if(authenticationAttemptCounter == 3) {
+  //     authenticationAttemptCounter = 0;
+
+  //     System.out.println("Acesso bloqueado. Tente novamente em 10 segundos.\n");
+  //     Thread.sleep(THREE_TIME_AUTH_ATTEMPT_FAILURE_TIMEOUT);
+  //   }
+  // }
 }

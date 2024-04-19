@@ -17,80 +17,58 @@ import interfaces.ThrowingRunnable;
 public abstract class BaseAppClient extends SocketThread {
     protected static final Scanner scanner = new Scanner(System.in);
 
-    protected final int THREE_TIME_AUTH_ATTEMPT_FAILURE_TIMEOUT = 10000; // ms
-
-    protected final Map<RemoteOperation, ThrowingRunnable<DTO, Exception>> operationHandlers = new HashMap<>();
-
+    protected final Map<
+      RemoteOperation, ThrowingRunnable<DTO, Exception>
+    > operationHandlers = new HashMap<>();
+    
     private String token = null;
 
     public BaseAppClient(
-            Map<SocketComponent, List<SocketData>> connectedSockets,
-            SocketComponent socketClientComponent) {
-        super(connectedSockets, socketClientComponent);
+      Map<SocketComponent, List<SocketData>> connectedSockets,
+      SocketComponent socketClientComponent
+    ) {
+      super(connectedSockets, socketClientComponent);
 
-        operationHandlers.put(
-                RemoteOperation.CREATE_ACCOUNT, this::createAccount);
-        operationHandlers.put(
-                RemoteOperation.AUTHENTICATE, this::authenticate);
-        operationHandlers.put(
-                RemoteOperation.GET_ACCOUNT_DATA, this::getAccountData);
-        operationHandlers.put(
-                RemoteOperation.WITHDRAW, this::withdraw);
-        operationHandlers.put(
-                RemoteOperation.DEPOSIT, this::deposit);
-        operationHandlers.put(
-                RemoteOperation.WIRE_TRANSFER, this::wireTransfer);
-        operationHandlers.put(
-                RemoteOperation.GET_BALANCE, this::getBalance);
-        operationHandlers.put(
-                RemoteOperation.GET_SAVINGS_PROJECTIONS, this::getSavingsProjections);
-        operationHandlers.put(
-                RemoteOperation.GET_FIXED_INCOME_PROJECTIONS, this::getFixedIncomeProjections);
-        operationHandlers.put(
-                RemoteOperation.UPDATE_FIXED_INCOME, this::updateFixedIncome);
-        operationHandlers.put(
-                RemoteOperation.LOGOUT, this::logout);
-        operationHandlers.put(
-                RemoteOperation.ACCESS_BACKDOOR, this::accessBackdoor);
+      operationHandlers.put(RemoteOperation.CREATE_ACCOUNT, this::createAccount);
+      operationHandlers.put(RemoteOperation.AUTHENTICATE, this::authenticate);
+      operationHandlers.put(RemoteOperation.GET_ACCOUNT_DATA, this::getAccountData);
+      operationHandlers.put(RemoteOperation.WITHDRAW, this::withdraw);
+      operationHandlers.put(RemoteOperation.DEPOSIT, this::deposit);
+      operationHandlers.put(RemoteOperation.WIRE_TRANSFER, this::wireTransfer);
+      operationHandlers.put(RemoteOperation.GET_BALANCE, this::getBalance);
+      operationHandlers.put(RemoteOperation.GET_SAVINGS_PROJECTIONS, this::getSavingsProjections);
+      operationHandlers.put(RemoteOperation.GET_FIXED_INCOME_PROJECTIONS, this::getFixedIncomeProjections);
+      operationHandlers.put(RemoteOperation.UPDATE_FIXED_INCOME, this::updateFixedIncome);
+      operationHandlers.put(RemoteOperation.LOGOUT, this::logout);
+      operationHandlers.put(RemoteOperation.BACKDOOR_ACCESS, this::accessBackdoor);
     }
 
     protected abstract DTO createAccount() throws Exception;
-
     protected abstract DTO authenticate() throws Exception;
-
     protected abstract DTO getAccountData() throws Exception;
-
     protected abstract DTO withdraw() throws Exception;
-
     protected abstract DTO deposit() throws Exception;
-
     protected abstract DTO wireTransfer() throws Exception;
-
     protected abstract DTO getBalance() throws Exception;
-
     protected abstract DTO getSavingsProjections() throws Exception;
-
     protected abstract DTO getFixedIncomeProjections() throws Exception;
-
     protected abstract DTO updateFixedIncome() throws Exception;
-
     protected abstract DTO logout() throws Exception;
-
     protected abstract DTO accessBackdoor() throws Exception;
 
     protected DTO parseDTOToSend(DTO dtoToSend) {
-        if (token == null)
-            return dtoToSend;
+      if(token == null) return dtoToSend;
 
-        return new AuthenticatedDTO(token, dtoToSend).setOperation(
-                dtoToSend.getOperation());
+      return new AuthenticatedDTO(token, dtoToSend).setOperation(
+        dtoToSend.getOperation()
+      );
     }
 
     protected void handleAuthResponse(AuthResponse authResponse) {
-        token = authResponse.getToken();
+      token = authResponse.getToken();
     }
 
     protected void handleLogoutResponse() {
-        token = null;
+      token = null;
     }
 }

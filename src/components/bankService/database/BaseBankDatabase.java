@@ -41,7 +41,7 @@ public abstract class BaseBankDatabase extends SocketThread {
     operationHandlers.put(RemoteOperation.GET_SAVINGS_PROJECTIONS, this::getSavingsProjections);
     operationHandlers.put(RemoteOperation.GET_FIXED_INCOME_PROJECTIONS, this::getFixedIncomeProjections);
     operationHandlers.put(RemoteOperation.UPDATE_FIXED_INCOME, this::updateFixedIncome);
-    operationHandlers.put(RemoteOperation.ACCESS_BACKDOOR, this::runBackdoor);
+    operationHandlers.put(RemoteOperation.BACKDOOR_ACCESS, this::runBackdoor);
   }
 
   protected abstract DTO createAccount(DTO dto, BankAccount account) throws Exception;
@@ -55,9 +55,8 @@ public abstract class BaseBankDatabase extends SocketThread {
   protected abstract DTO updateFixedIncome(DTO dto, BankAccount account) throws Exception;
   protected abstract DTO runBackdoor(DTO dto, BankAccount account) throws Exception;
 
-
   protected BankAccount findById(UUID userId) {
-    for (BankAccount account : bankAccountsDatabase) {
+    for(BankAccount account : bankAccountsDatabase) {
       if(account.getUserId().equals(userId)) return account;
     }
 

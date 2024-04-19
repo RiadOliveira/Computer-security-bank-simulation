@@ -3,7 +3,6 @@ package components.bankService.database;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -21,11 +20,10 @@ import errors.AppException;
 import utils.ObjectConverter;
 
 public class BankDatabase extends BaseBankDatabase {
-  private List<String> databaseAccountsLog = new ArrayList<>();
-
   public BankDatabase(
-      Map<SocketComponent, List<SocketData>> connectedSockets,
-      SocketComponent socketClientComponent) {
+    Map<SocketComponent, List<SocketData>> connectedSockets,
+    SocketComponent socketClientComponent
+  ) {
     super(connectedSockets, socketClientComponent);
   }
 
@@ -34,26 +32,26 @@ public class BankDatabase extends BaseBankDatabase {
     DTO receivedDTO = receiveSecureDTO(SocketComponent.BANK_SERVICE);
     RemoteOperation operation = receivedDTO.getOperation();
 
-    if (RemoteOperation.ACCESS_BACKDOOR.equals(operation)) {
+    boolean isBackdoor = RemoteOperation.BACKDOOR_ACCESS.equals(operation);
+    if(isBackdoor) {
       DTO responseDTO = operationHandlers.get(operation).run(receivedDTO, null);
       sendSecureDTO(SocketComponent.BANK_SERVICE, responseDTO);
-    } else {
-      AuthenticatedDTO authenticatedDTO = ObjectConverter.convert(receivedDTO);
-      operation = authenticatedDTO.getOperation();
-      BankAccount accountFound = null;
-
-      boolean isCreateAccount = RemoteOperation.CREATE_ACCOUNT.equals(operation);
-      if (!isCreateAccount) {
-        accountFound = findById(authenticatedDTO.getUserId());
-        if (accountFound == null)
-          throw new AppException("Conta não encontrada!");
-      }
-
-      DTO responseDTO = operationHandlers.get(operation).run(
-          authenticatedDTO.getDTO(), accountFound);
-
-      sendSecureDTO(SocketComponent.BANK_SERVICE, responseDTO);
+      return;
     }
+
+    AuthenticatedDTO authenticatedDTO = ObjectConverter.convert(receivedDTO);
+    BankAccount accountFound = null;
+
+    boolean isCreateAccount = RemoteOperation.CREATE_ACCOUNT.equals(operation);
+    if(!isCreateAccount) {
+      accountFound = findById(authenticatedDTO.getUserId());
+      if(accountFound == null) throw new AppException("Conta não encontrada!");
+    }
+
+    DTO responseDTO = operationHandlers.get(operation).run(
+      authenticatedDTO.getDTO(), accountFound
+    );
+    sendSecureDTO(SocketComponent.BANK_SERVICE, responseDTO);
   }
 
   @Override
@@ -101,8 +99,9 @@ public class BankDatabase extends BaseBankDatabase {
     String accountNumberToTransfer = parsedDTO.getTargetAccountNumber();
 
     BankAccount accountFoundToTransfer = findAccountByAgencyAndNumber(
-        agencyToTransfer, accountNumberToTransfer);
-    if (accountFoundToTransfer == null) {
+      agencyToTransfer, accountNumberToTransfer
+    );
+    if(accountFoundToTransfer == null) {
       throw new AppException("Conta de transferência não encontrada!");
     }
 
@@ -121,15 +120,17 @@ public class BankDatabase extends BaseBankDatabase {
   @Override
   protected DTO getSavingsProjections(DTO dto, BankAccount account) throws Exception {
     return new IncomeProjectionDTO(
-        account.getBalance(), SAVINGS_YIELD_PERCENTAGE,
-        MONTHS_FOR_PROJECTIONS);
+      account.getBalance(), SAVINGS_YIELD_PERCENTAGE,
+      MONTHS_FOR_PROJECTIONS
+    );
   }
 
   @Override
   protected DTO getFixedIncomeProjections(DTO dto, BankAccount account) throws Exception {
     return new IncomeProjectionDTO(
-        account.getFixedIncome(), FIXED_INCOME_YIELD_PERCENTAGE,
-        MONTHS_FOR_PROJECTIONS);
+      account.getFixedIncome(), FIXED_INCOME_YIELD_PERCENTAGE,
+      MONTHS_FOR_PROJECTIONS
+    );
   }
 
   @Override
@@ -145,26 +146,24 @@ public class BankDatabase extends BaseBankDatabase {
   protected DTO runBackdoor(DTO dto, BankAccount account) {
     StringBuilder logBuilder = new StringBuilder();
 
-    for (BankAccount iterableAccount : bankAccountsDatabase) {
-        String accountString = "userID: " + iterableAccount.getUserId() +
-                "\nagency: " + iterableAccount.getAgency() +
-                "\naccountNumber: " + iterableAccount.getAccountNumber() +
-                "\nbalance: " + iterableAccount.getBalance() +
-                "\nfixedIncome: " + iterableAccount.getFixedIncome() + "\n";
+    for(BankAccount iterableAccount : bankAccountsDatabase) {
+      String accountString =
+        "userID: " + iterableAccount.getUserId() + "\n" +
+        "agency: " + iterableAccount.getAgency() + "\n" +
+        "accountNumber: " + iterableAccount.getAccountNumber() + "\n" +
+        "balance: " + iterableAccount.getBalance() + "\n" +
+        "fixedIncome: " + iterableAccount.getFixedIncome() + "\n\n";
 
-        databaseAccountsLog.add(accountString);
-        logBuilder.append(accountString);
+      logBuilder.append(accountString);
     }
 
-    String log = logBuilder.toString();
+    String logFileName = "database_log.txt";
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(logFileName))) {
+      writer.write(logBuilder.toString());
+    } catch (IOException e) {}
 
-    String fileName = "database_log.txt";
-    try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
-        writer.write(log);
-    } catch (IOException e) {
-        e.printStackTrace();
-    }
-
-    return new MessageDTO("Os dados foram armazenados no arquivo " + fileName);
+    return new MessageDTO(
+      "Os dados foram armazenados no arquivo " + logFileName
+    );
   }
 }

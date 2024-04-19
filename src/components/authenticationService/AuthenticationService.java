@@ -40,12 +40,12 @@ public class AuthenticationService extends BaseAuthenticationService {
   @Override
   protected DTO createAccount(DTO user) throws Exception {
     UserData parsedDTO = ObjectConverter.convert(user);
-    if (parsedDTO == null) {
+    if(parsedDTO == null) {
       throw new AppException("Instância de DTO inválida!");
     }
 
     boolean existsByCpf = findByCpf(parsedDTO.getCpf()) != null;
-    if (existsByCpf) {
+    if(existsByCpf) {
       throw new AppException("Um usuário de mesmo CPF já existe!");
     }
 
@@ -58,19 +58,19 @@ public class AuthenticationService extends BaseAuthenticationService {
   @Override
   protected DTO authenticate(DTO authData) throws Exception {
     AuthRequest parsedDTO = ObjectConverter.convert(authData);
-    if (parsedDTO == null) {
+    if(parsedDTO == null) {
       throw new AppException("Instância de DTO inválida!");
     }
 
     UserData accountFound = findByCpf(parsedDTO.getCpf());
-    if (accountFound == null) {
+    if(accountFound == null) {
       throw new AppException("Conta especificada não encontrada!");
     }
 
     boolean correctPassword = Hasher.compare(
         accountFound.getPassword(), parsedDTO.getPassword());
         
-    if (!correctPassword) {
+    if(!correctPassword) {
       throw new SecurityViolationException(
           "Dados de autenticação inválidos");
     }
@@ -79,9 +79,9 @@ public class AuthenticationService extends BaseAuthenticationService {
   }
 
   private UserData findByCpf(String cpf) {
-    for (UserData user : userDatabase)
-      if (user.getCpf().equalsIgnoreCase(cpf))
-        return user;
+    for(UserData user : userDatabase) {
+      if(user.getCpf().equalsIgnoreCase(cpf)) return user;
+    }
 
     return null;
   }

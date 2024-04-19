@@ -18,7 +18,7 @@ public class SocketsInitializer {
     Map<SocketComponent, List<SocketData>> connectedSockets,
     SocketComponent socketClientComponent
   ) throws Exception {
-    for (var entry : connectedSockets.entrySet()) {
+    for(var entry : connectedSockets.entrySet()) {
       SocketComponent component = entry.getKey();
       List<SocketData> socketsData = entry.getValue();
       boolean isServerForThisComponent = component.equals(socketClientComponent);
@@ -31,7 +31,7 @@ public class SocketsInitializer {
     SocketComponent component, List<SocketData> socketsData,
     boolean isServerForThisComponent
   ) throws Exception {
-    for (int ind=0 ; ind<socketsData.size() ; ind++) {
+    for(int ind=0 ; ind<socketsData.size() ; ind++) {
       SocketData data = socketsData.get(ind);
 
       initObjectStreams(data, isServerForThisComponent);

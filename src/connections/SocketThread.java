@@ -52,7 +52,7 @@ public abstract class SocketThread implements Runnable {
       } catch (Exception exception) {
         socketDisconnected = exception instanceof EOFException;
 
-        if (!socketDisconnected) handleExecutionException(exception);
+        if(!socketDisconnected) handleExecutionException(exception);
         else ConsolePrinter.printlnError(
           "Conexão com o socket perdida, finalizando thread...\n"
         );

@@ -19,8 +19,8 @@ public class SimulationUtils {
   }
 
   public static SocketServerData generateSocketServerData(
-    SocketComponent component, int replicaIndex, SocketComponent clientComponent,
-    SocketConnectionData[] serversToConnect
+    SocketComponent component, int replicaIndex,
+    SocketComponent clientComponent, SocketConnectionData[] serversToConnect
   ) {
     return new SocketServerData(
       ConnectionUtils.getComponentPort(component, replicaIndex),

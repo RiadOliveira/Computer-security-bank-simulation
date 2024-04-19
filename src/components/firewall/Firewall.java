@@ -5,51 +5,34 @@ import java.util.Map;
 
 import connections.components.SocketComponent;
 import connections.data.SocketData;
+import constants.Constants;
 import dtos.RemoteOperation;
 import dtos.DTO;
 import dtos.auth.AuthResponse;
 import dtos.auth.AuthenticatedDTO;
-import errors.AppException;
 import errors.SecurityViolationException;
 
 public class Firewall extends BaseFirewall {
   public Firewall(
-      Map<SocketComponent, List<SocketData>> connectedSockets,
-      SocketComponent socketClientComponent) {
+    Map<SocketComponent, List<SocketData>> connectedSockets,
+    SocketComponent socketClientComponent
+  ) {
     super(connectedSockets, socketClientComponent);
   }
 
   @Override
   protected void execute() throws Exception {
     DTO receivedDTO = receiveSecureDTO(SocketComponent.CLIENT);
+    RemoteOperation operation = receivedDTO.getOperation();
 
-    boolean tryingToAccessBackdoor = RemoteOperation.ACCESS_BACKDOOR.equals(
-        receivedDTO.getOperation());
-
-    if (tryingToAccessBackdoor) {
-      throw new AppException("Operação inválida bloqueada.\n");
-
-      // to access backdoor uncomment both lines below
-
-      // sendSecureDTO(SocketComponent.GATEWAY, receivedDTO);
-      // handleReceivedDTO(receivedDTO);
-    } else {
-      boolean isLogout = RemoteOperation.LOGOUT.equals(
-          receivedDTO.getOperation());
-      if (isLogout) {
-        handleLogout();
-        return;
-      }
-
-      boolean isAuthenticatedDTO = AuthenticatedDTO.class.isInstance(
-          receivedDTO);
-      throwsExceptionIfInvalidOperationRequested(receivedDTO, isAuthenticatedDTO);
-
-      if (isAuthenticatedDTO)
-        parseAuthenticatedDTO(((AuthenticatedDTO) receivedDTO));
-
-      handleReceivedDTO(receivedDTO);
+    boolean isLogout = RemoteOperation.LOGOUT.equals(operation);
+    if(isLogout) {
+      handleLogout();
+      return;
     }
+
+    checkAndParseDTOWithPermissionValidation(receivedDTO);
+    handleReceivedDTO(receivedDTO);
   }
 
   @Override
@@ -57,24 +40,39 @@ public class Firewall extends BaseFirewall {
     executeDefaultExceptionHandling(exception);
   }
 
-  private void throwsExceptionIfInvalidOperationRequested(
-      DTO receivedDTO, boolean isAuthenticatedDTO) throws Exception {
+  private void checkAndParseDTOWithPermissionValidation(
+    DTO receivedDTO
+  ) throws Exception {
     RemoteOperation operation = receivedDTO.getOperation();
-    boolean requiresAuthentication = operationRequiresAuth(operation);
-    if (!requiresAuthentication)
-      return;
 
-    if (!userIsLogged()) {
-      throw new SecurityViolationException(
-          "O usuário precisa estar autenticado para executar esta ação!");
+    boolean isBackdoorAccessAttempt = RemoteOperation.BACKDOOR_ACCESS.equals(
+      operation
+    );
+    if(isBackdoorAccessAttempt && !Constants.BACKDOOR_ACCESS_ALLOWED()) {
+      throw new SecurityViolationException("Operação inválida bloqueada!");
     }
-    if (!isAuthenticatedDTO) {
+
+    if(isBackdoorAccessAttempt || !operationRequiresAuth(operation)) return;
+    if(!userIsLogged()) {
       throw new SecurityViolationException(
-          "É necessário enviar um DTO autenticado para essa ação!");
+        "O usuário precisa estar autenticado para executar esta ação!"
+      );
     }
-    if (!validAuthenticatedDTO((AuthenticatedDTO) receivedDTO)) {
+
+    boolean isAuthenticatedDTO = AuthenticatedDTO.class.isInstance(
+      receivedDTO
+    );
+    if(!isAuthenticatedDTO) {
+      throw new SecurityViolationException(
+        "É necessário enviar um DTO autenticado para essa ação!"
+      );
+    }
+
+    AuthenticatedDTO authenticatedDTO = (AuthenticatedDTO) receivedDTO;
+    if(!validAuthenticatedDTO(authenticatedDTO)) {
       throw new SecurityViolationException("Token de autenticação inválido!");
     }
+    parseAuthenticatedDTO(authenticatedDTO);
   }
 
   private boolean operationRequiresAuth(RemoteOperation operation) {
@@ -89,8 +87,7 @@ public class Firewall extends BaseFirewall {
     DTO gatewayResponse = receiveSecureDTO(SocketComponent.GATEWAY);
 
     boolean authenticationResponse = AuthResponse.class.isInstance(gatewayResponse);
-    if (authenticationResponse)
-      handleAuthResponse((AuthResponse) gatewayResponse);
+    if(authenticationResponse) handleAuthResponse((AuthResponse) gatewayResponse);
 
     sendSecureDTO(SocketComponent.CLIENT, gatewayResponse);
   }

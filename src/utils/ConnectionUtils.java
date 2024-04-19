@@ -18,18 +18,21 @@ public class ConnectionUtils {
 
   private static final int WAIT_TIME_TO_TRY_RECONNECTION = 3;
 
-  private static final Map<SocketComponent, SocketConnectionData> COMPONENTS_CONNECTION_DATA = new HashMap<>();
+  private static final Map<
+    SocketComponent, SocketConnectionData
+  > COMPONENTS_CONNECTION_DATA = new HashMap<>();
 
   static {
     final int INITIAL_PORT = 10000;
     SocketComponent allComponents[] = SocketComponent.values();
 
-    for (int ind = 0; ind < allComponents.length; ind++) {
+    for(int ind = 0; ind < allComponents.length; ind++) {
       SocketComponent component = allComponents[ind];
 
       int serverPort = (ind + 1) * INITIAL_PORT;
       var connectionData = new SocketConnectionData(
-          component, LOCAL_HOST, serverPort);
+        component, LOCAL_HOST, serverPort
+      );
 
       COMPONENTS_CONNECTION_DATA.put(component, connectionData);
     }
@@ -43,7 +46,8 @@ public class ConnectionUtils {
   }
 
   public static Future<Socket> asynchronouslyConnectToSocketServerWithRetry(
-      String address, int port) {
+    String address, int port
+  ) {
     ExecutorService executor = Executors.newSingleThreadExecutor();
 
     return executor.submit(new Callable<Socket>() {
@@ -55,10 +59,12 @@ public class ConnectionUtils {
   }
 
   public static Socket connectToSocketServerWithRetry(
-      String address, int port) {
+    String address, int port
+  ) {
     String serverIp = address + ":" + port;
     ConsolePrinter.println(
-        "Tentando conectar-se ao servidor socket " + serverIp);
+      "Tentando conectar-se ao servidor socket " + serverIp
+    );
 
     Socket socket = null;
     while (socket == null) {
@@ -70,20 +76,21 @@ public class ConnectionUtils {
     }
 
     ConsolePrinter.println(
-        "Servidor socket " + serverIp + " conectado com sucesso!\n");
+      "Servidor socket " + serverIp + " conectado com sucesso!\n"
+    );
     return socket;
   }
 
   private static void waitToReconnect() {
     ConsolePrinter.println("");
     ConsolePrinter.printlnError(
-        "Falha ao conectar-se ao servidor socket, tentando novamente em " +
-            WAIT_TIME_TO_TRY_RECONNECTION + " segundos...");
+      "Falha ao conectar-se ao servidor socket, tentando novamente em " +
+      WAIT_TIME_TO_TRY_RECONNECTION + " segundos..."
+    );
 
     try {
       TimeUnit.SECONDS.sleep(WAIT_TIME_TO_TRY_RECONNECTION);
-    } catch (Exception exception) {
-    }
+    } catch (Exception exception) {}
   }
 
   public static String getComponentAddress(SocketComponent component) {
@@ -95,19 +102,23 @@ public class ConnectionUtils {
   }
 
   public static int getComponentPort(
-      SocketComponent component, int replicaIndex) {
+    SocketComponent component, int replicaIndex
+  ) {
     int serverPort = getComponentSocketConnectionData(
-        component).getPort();
+      component
+    ).getPort();
     return serverPort + replicaIndex;
   }
 
   private static void setComponentAddress(
-      SocketComponent component, String address) {
+    SocketComponent component, String address
+  ) {
     getComponentSocketConnectionData(component).setAddress(address);
   }
 
   public static SocketConnectionData getComponentSocketConnectionData(
-      SocketComponent component) {
+    SocketComponent component
+  ) {
     return COMPONENTS_CONNECTION_DATA.get(component);
   }
 }
