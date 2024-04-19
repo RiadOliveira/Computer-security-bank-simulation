@@ -11,6 +11,7 @@ import dtos.auth.AuthenticatedDTO;
 import dtos.generic.ExceptionDTO;
 import dtos.user.UserData;
 import utils.ObjectConverter;
+import utils.OperationClassifier;
 import utils.RandomNumberGenerator;
 
 public class Gateway extends BaseGateway {
@@ -120,17 +121,10 @@ public class Gateway extends BaseGateway {
   }
 
   private SocketComponent getComponentToRedirect(RemoteOperation operation) {
-    if(isForAuthenticationService(operation)) {
+    if(OperationClassifier.isForAuthenticationService(operation)) {
       return SocketComponent.AUTHENTICATION_SERVICE;
     }
     return SocketComponent.BANK_SERVICE;
-  }
-
-  private boolean isForAuthenticationService(RemoteOperation operation) {
-    boolean isCreateAccount = RemoteOperation.CREATE_ACCOUNT.equals(operation);
-    boolean isAuthenticate = RemoteOperation.AUTHENTICATE.equals(operation);
-
-    return isCreateAccount || isAuthenticate;
   }
 
   private boolean isReadOperationForComponent(

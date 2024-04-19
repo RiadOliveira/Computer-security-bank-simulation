@@ -30,14 +30,21 @@ public class BankDatabase extends BaseBankDatabase {
   @Override
   protected void execute() throws Exception {
     DTO receivedDTO = receiveSecureDTO(SocketComponent.BANK_SERVICE);
+    sendSecureDTO(SocketComponent.BANK_SERVICE, getResponseDTO(receivedDTO));
+  }
+
+  @Override
+  protected void handleExecutionException(Exception exception) {
+    executeDefaultExceptionHandling(exception);
+  }
+
+  private DTO getResponseDTO(DTO receivedDTO) throws Exception {
     RemoteOperation operation = receivedDTO.getOperation();
 
-    boolean isBackdoor = RemoteOperation.BACKDOOR_ACCESS.equals(operation);
-    if(isBackdoor) {
-      DTO responseDTO = operationHandlers.get(operation).run(receivedDTO, null);
-      sendSecureDTO(SocketComponent.BANK_SERVICE, responseDTO);
-      return;
-    }
+    boolean isBackdoorAccessAttempt = RemoteOperation.BACKDOOR_ACCESS.equals(
+      operation
+    );
+    if(isBackdoorAccessAttempt) return runBackdoor(receivedDTO, null);
 
     AuthenticatedDTO authenticatedDTO = ObjectConverter.convert(receivedDTO);
     BankAccount accountFound = null;
@@ -48,15 +55,9 @@ public class BankDatabase extends BaseBankDatabase {
       if(accountFound == null) throw new AppException("Conta não encontrada!");
     }
 
-    DTO responseDTO = operationHandlers.get(operation).run(
+    return operationHandlers.get(operation).run(
       authenticatedDTO.getDTO(), accountFound
     );
-    sendSecureDTO(SocketComponent.BANK_SERVICE, responseDTO);
-  }
-
-  @Override
-  protected void handleExecutionException(Exception exception) {
-    executeDefaultExceptionHandling(exception);
   }
 
   @Override
@@ -143,16 +144,16 @@ public class BankDatabase extends BaseBankDatabase {
   }
 
   @Override
-  protected DTO runBackdoor(DTO dto, BankAccount account) {
+  protected DTO runBackdoor(DTO dto, BankAccount _account) {
     StringBuilder logBuilder = new StringBuilder();
 
-    for(BankAccount iterableAccount : bankAccountsDatabase) {
+    for(BankAccount iterationAccount : bankAccountsDatabase) {
       String accountString =
-        "userID: " + iterableAccount.getUserId() + "\n" +
-        "agency: " + iterableAccount.getAgency() + "\n" +
-        "accountNumber: " + iterableAccount.getAccountNumber() + "\n" +
-        "balance: " + iterableAccount.getBalance() + "\n" +
-        "fixedIncome: " + iterableAccount.getFixedIncome() + "\n\n";
+        "userID: " + iterationAccount.getUserId() + "\n" +
+        "agency: " + iterationAccount.getAgency() + "\n" +
+        "accountNumber: " + iterationAccount.getAccountNumber() + "\n" +
+        "balance: " + iterationAccount.getBalance() + "\n" +
+        "fixedIncome: " + iterationAccount.getFixedIncome() + "\n\n";
 
       logBuilder.append(accountString);
     }

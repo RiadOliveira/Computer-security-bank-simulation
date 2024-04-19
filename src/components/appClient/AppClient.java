@@ -127,7 +127,7 @@ public class AppClient extends BaseAppClient {
 
     return new AuthRequest(
       inputsReceived[0], inputsReceived[1]
-    ).setOperation(RemoteOperation.AUTHENTICATE);
+    ).setOperation(RemoteOperation.AUTHENTICATION);
   }
 
   @Override

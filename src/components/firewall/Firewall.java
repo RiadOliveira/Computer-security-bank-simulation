@@ -8,9 +8,9 @@ import connections.data.SocketData;
 import constants.Constants;
 import dtos.RemoteOperation;
 import dtos.DTO;
-import dtos.auth.AuthResponse;
 import dtos.auth.AuthenticatedDTO;
 import errors.SecurityViolationException;
+import utils.OperationClassifier;
 
 public class Firewall extends BaseFirewall {
   public Firewall(
@@ -31,6 +31,7 @@ public class Firewall extends BaseFirewall {
       return;
     }
 
+    validateUserAccessAttempt();
     checkAndParseDTOWithPermissionValidation(receivedDTO);
     handleReceivedDTO(receivedDTO);
   }
@@ -52,7 +53,9 @@ public class Firewall extends BaseFirewall {
       throw new SecurityViolationException("Operação inválida bloqueada!");
     }
 
-    if(isBackdoorAccessAttempt || !operationRequiresAuth(operation)) return;
+    boolean operationRequiresAuth = OperationClassifier.isForBankService(operation);
+    if(isBackdoorAccessAttempt || !operationRequiresAuth) return;
+
     if(!userIsLogged()) {
       throw new SecurityViolationException(
         "O usuário precisa estar autenticado para executar esta ação!"
@@ -75,19 +78,16 @@ public class Firewall extends BaseFirewall {
     parseAuthenticatedDTO(authenticatedDTO);
   }
 
-  private boolean operationRequiresAuth(RemoteOperation operation) {
-    boolean isCreateAccount = RemoteOperation.CREATE_ACCOUNT.equals(operation);
-    boolean isAuthenticate = RemoteOperation.AUTHENTICATE.equals(operation);
-
-    return !isCreateAccount && !isAuthenticate;
-  }
-
-  private void handleReceivedDTO(DTO receivedDTO) throws Exception {
+  private void handleReceivedDTO(
+    DTO receivedDTO
+  ) throws Exception {
     sendSecureDTO(SocketComponent.GATEWAY, receivedDTO);
     DTO gatewayResponse = receiveSecureDTO(SocketComponent.GATEWAY);
 
-    boolean authenticationResponse = AuthResponse.class.isInstance(gatewayResponse);
-    if(authenticationResponse) handleAuthResponse((AuthResponse) gatewayResponse);
+    boolean isAuthenticationAttempt = RemoteOperation.AUTHENTICATION.equals(
+      receivedDTO.getOperation()
+    );
+    if(isAuthenticationAttempt) handleAuthenticationAttempt(gatewayResponse);
 
     sendSecureDTO(SocketComponent.CLIENT, gatewayResponse);
   }

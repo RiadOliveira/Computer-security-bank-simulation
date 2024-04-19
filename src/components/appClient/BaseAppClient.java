@@ -30,7 +30,7 @@ public abstract class BaseAppClient extends SocketThread {
       super(connectedSockets, socketClientComponent);
 
       operationHandlers.put(RemoteOperation.CREATE_ACCOUNT, this::createAccount);
-      operationHandlers.put(RemoteOperation.AUTHENTICATE, this::authenticate);
+      operationHandlers.put(RemoteOperation.AUTHENTICATION, this::authenticate);
       operationHandlers.put(RemoteOperation.GET_ACCOUNT_DATA, this::getAccountData);
       operationHandlers.put(RemoteOperation.WITHDRAW, this::withdraw);
       operationHandlers.put(RemoteOperation.DEPOSIT, this::deposit);

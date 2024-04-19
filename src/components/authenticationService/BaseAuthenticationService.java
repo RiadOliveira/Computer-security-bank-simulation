@@ -28,7 +28,7 @@ public abstract class BaseAuthenticationService extends SocketThread {
     super(connectedSockets, socketClientComponent);
 
     operationHandlers.put(RemoteOperation.CREATE_ACCOUNT, this::createAccount);
-    operationHandlers.put(RemoteOperation.AUTHENTICATE, this::authenticate);
+    operationHandlers.put(RemoteOperation.AUTHENTICATION, this::authenticate);
   }
 
   protected abstract DTO createAccount(DTO user) throws Exception;

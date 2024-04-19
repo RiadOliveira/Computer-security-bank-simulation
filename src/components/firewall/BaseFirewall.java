@@ -1,5 +1,7 @@
 package components.firewall;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -12,17 +14,19 @@ import dtos.DTO;
 import dtos.auth.AuthResponse;
 import dtos.auth.AuthenticatedDTO;
 import dtos.generic.OperationDTO;
+import errors.SecurityViolationException;
 import security.crypto.CryptoProcessor;
 import utils.TokenProcessor;
 
 public abstract class BaseFirewall extends SocketThread {
-  private static final int MAX_AUTH_ATTEMPTS_BEFORE_TIMEOUT = 3;
-  private static final int AUTH_FAILURE_TIMEOUT_IN_MS = 10000;
+  private static final int MAX_AUTH_ATTEMPTS_BEFORE_LOCKOUT = 3;
+  private static final int AUTH_LOCKOUT_TIMEOUT_IN_SECONDS = 20;
 
   private String TOKEN_SECRET_KEY = null;
-  private UUID connectedClientId = null;
+  private UUID connectedUserId = null;
   
-  private int clientAuthenticationAttempts = 0;
+  private int userAuthenticationAttempts = 0;
+  private Instant authLockoutStart = null;
 
   public BaseFirewall(
     Map<SocketComponent, List<SocketData>> connectedSockets,
@@ -31,43 +35,85 @@ public abstract class BaseFirewall extends SocketThread {
     super(connectedSockets, socketClientComponent);
   }
 
-  protected boolean userIsLogged() {
-    return connectedClientId != null;
+  protected void validateUserAccessAttempt() throws Exception {
+    if(authLockoutStart == null) return;
+
+    Duration duration = Duration.between(
+      authLockoutStart, Instant.now()
+    );
+    long secondsPassed = duration.getSeconds();
+
+    boolean timeoutPassed = 
+      secondsPassed > AUTH_LOCKOUT_TIMEOUT_IN_SECONDS;
+    if(timeoutPassed) {
+      authLockoutStart = null;
+      return;
+    }
+
+    throw new SecurityViolationException(
+      "Acesso bloqueado. Tente novamente em " +
+      (AUTH_LOCKOUT_TIMEOUT_IN_SECONDS - secondsPassed) +
+      " segundos."
+    );
   }
 
-  protected void handleAuthResponse(AuthResponse authResponse) {
+  protected void handleAuthenticationAttempt(DTO response) {
+    connectedUserId = null;
+    boolean validAuthResponse = AuthResponse.class.isInstance(
+      response
+    );
+
+    if(validAuthResponse) {
+      handleValidAuthResponse((AuthResponse) response);
+      userAuthenticationAttempts = 0;
+    } else handleInvalidAuthResponse();
+  }
+
+  private void handleValidAuthResponse(AuthResponse authResponse) {
     initializeTokenSecretKey();
-    connectedClientId = authResponse.getUserData().getId();
+    connectedUserId = authResponse.getUserData().getId();
 
     String generatedToken = TokenProcessor.generate(
-      TOKEN_SECRET_KEY, connectedClientId
+      TOKEN_SECRET_KEY, connectedUserId
     );
     authResponse.setToken(generatedToken);
+  }
+
+  private void handleInvalidAuthResponse() {
+    userAuthenticationAttempts++;
+    boolean reachedMaxAttempts = 
+      userAuthenticationAttempts == MAX_AUTH_ATTEMPTS_BEFORE_LOCKOUT;
+
+    if(reachedMaxAttempts) authLockoutStart = Instant.now();
   }
 
   protected boolean validAuthenticatedDTO(
     AuthenticatedDTO authenticatedDTO
   ) {
-    if(connectedClientId == null) return false;
+    if(connectedUserId == null) return false;
 
     initializeTokenSecretKey();
     return TokenProcessor.isValid(
       authenticatedDTO.getToken(), TOKEN_SECRET_KEY,
-      connectedClientId
+      connectedUserId
     );
   }
 
   protected void parseAuthenticatedDTO(
     AuthenticatedDTO authenticatedDTO
   ) {
-    authenticatedDTO.setUserId(connectedClientId);
+    authenticatedDTO.setUserId(connectedUserId);
   }
 
   protected void handleLogout() throws Exception {
-    connectedClientId = null;
+    connectedUserId = null;
 
     DTO logoutDTO = new OperationDTO(RemoteOperation.LOGOUT);
     sendSecureDTO(SocketComponent.CLIENT, logoutDTO);
+  }
+
+  protected boolean userIsLogged() {
+    return connectedUserId != null;
   }
 
   private void initializeTokenSecretKey() {
@@ -78,16 +124,4 @@ public abstract class BaseFirewall extends SocketThread {
     ).getEncoded();
     TOKEN_SECRET_KEY = CryptoProcessor.encodeBase64(gatewayEncodedKey);
   }
-
-  // private void handleAuthenticationAttempt() {
-  //   authenticationAttemptCounter++;
-  //   System.out.println(authenticationAttemptCounter + "/3 tentativas antes do bloqueio.\n");
-
-  //   if(authenticationAttemptCounter == 3) {
-  //     authenticationAttemptCounter = 0;
-
-  //     System.out.println("Acesso bloqueado. Tente novamente em 10 segundos.\n");
-  //     Thread.sleep(THREE_TIME_AUTH_ATTEMPT_FAILURE_TIMEOUT);
-  //   }
-  // }
 }
