@@ -60,6 +60,7 @@ public class SocketServer extends SocketProcess {
       ConsolePrinter.printlnError(
         "Cliente socket " + clientAddress + " não está na whitelist!"
       );
+      clientSocket.close();
       return;
     }
 
